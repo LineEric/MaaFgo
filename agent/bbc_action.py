@@ -193,12 +193,12 @@ def _save_scripts_settings(settings: dict) -> None:
         json.dump(settings, f, ensure_ascii=False, indent=2)
 
 
-# ==================== Action 1: 设置BBC配置 ====================
+# ==================== Action 1: 设置 BBC 配置 ====================
 @AgentServer.custom_action("setup_bbc_config")
 class SetupBbcConfig(CustomAction):
-    """设置BBC队伍配置 - 处理 bbc_team_config"""
+    """设置 BBC 队伍配置 - 处理 bbc_team_config"""
 
-    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+    def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
         print(f"[1/6] SetupBbcConfig: custom_action_param = {repr(argv.custom_action_param)}")
         
         bbc_team_config = _parse_single_param(argv)
@@ -215,7 +215,7 @@ class SetupBbcConfig(CustomAction):
         team_config_path = os.path.join(settings_dir, bbc_team_config)
         
         if not os.path.exists(team_config_path):
-            print(f"队伍配置文件不存在: {team_config_path}")
+            print(f"队伍配置文件不存在：{team_config_path}")
             return CustomAction.RunResult(success=False)
         
         with open(team_config_path, 'r', encoding='utf-8') as f:
@@ -234,7 +234,7 @@ class SetupBbcConfig(CustomAction):
         
         _save_scripts_settings(scripts_settings)
         print(f"SetupBbcConfig: 配置已保存")
-        return True
+        return CustomAction.RunResult(success=True)
 
 
 # ==================== Action 2: 执行BBC任务（整合版）====================
@@ -242,7 +242,7 @@ class SetupBbcConfig(CustomAction):
 class ExecuteBbcTask(CustomAction):
     """执行BBC任务 - 整合运行次数、苹果类型、启动、初始化和监控"""
 
-    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+    def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
         global _bbc_hwnd, _bbc_controller
         
         # 从 Context 获取节点数据（包含 pipeline_override 合并后的值）
@@ -286,7 +286,7 @@ class ExecuteBbcTask(CustomAction):
             return CustomAction.RunResult(success=False)
         
         print("ExecuteBbcTask: 任务已完成")
-        return True
+        return CustomAction.RunResult(success=True)
     
     def _execute_bbc_battle(self, context, run_count, apple_type, support_order_mismatch=False, team_config_error=False):
         """执行BBC战斗流程 - 使用 HTTP API 和 TCP 通信"""

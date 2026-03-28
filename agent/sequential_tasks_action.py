@@ -12,7 +12,7 @@ from maa.context import Context
 class ExecuteSequentialTasks(CustomAction):
     """顺序执行多个任务"""
 
-    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+    def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
         """
         依次执行任务列表
         
