@@ -15,18 +15,6 @@
             "name": "安卓设备",
             "type": "Adb",
             "display_short_side": 720
-        },
-        {
-            "name": "Win32",
-            "label": "Win32控制器",
-            "type": "Win32",
-            "description": "标准Win32控制器",
-            "win32": {
-                "class_regex": ".*",
-                "window_regex": "BBchannel",
-                "screenshot": "PrintWindow",
-                "input": "Seize"
-            }
         }
     ],
     "resource": [
