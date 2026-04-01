@@ -1,124 +1,142 @@
 {
     "$__mpe_config_回主界面": {
         "$__mpe_code": {
-            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\回主界面.json",
-            "filename": "回主界面",
-            "isModifiedExternally": false,
-            "lastSyncTime": 1774266306841,
             "prefix": "",
+            "lastSyncTime": 1775053005405,
+            "isModifiedExternally": false,
+            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\种树.json",
+            "savedViewport": {
+                "x": -55,
+                "y": 450,
+                "zoom": 1
+            },
+            "filename": "回主界面",
             "version": "v1.2.3"
         }
     },
-    "主界面判断-二次菜单": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1448,
-                "y": 290
-            }
-        },
-        "action": {
-            "param": {},
-            "type": "Click"
-        },
-        "recognition": {
-            "param": {
-                "template": [
-                    "菜单.png"
-                ]
-            },
-            "type": "TemplateMatch"
-        }
-    },
-    "主界面判断-关闭": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1452,
-                "y": 79
-            }
-        },
-        "action": {
-            "param": {},
-            "type": "Click"
-        },
-        "recognition": {
-            "param": {
-                "template": [
-                    "菜单关闭.png"
-                ]
-            },
-            "type": "TemplateMatch"
-        }
-    },
     "主界面判断-活动报酬": {
-        "$__mpe_code": {
-            "position": {
-                "x": 755,
-                "y": 48
-            }
-        },
-        "next": [
-            "主界面判断-菜单",
-            "[JumpBack]主界面判断-返回"
-        ],
         "recognition": {
+            "type": "TemplateMatch",
             "param": {
                 "template": [
                     "活动报酬.png"
                 ]
-            },
-            "type": "TemplateMatch"
-        }
-    },
-    "主界面判断-菜单": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1080,
-                "y": 97
             }
         },
-        "action": {
-            "param": {},
-            "type": "Click"
+        "$__mpe_code": {
+            "position": {
+                "x": 793,
+                "y": -66
+            }
         },
         "next": [
-            "主界面判断-关闭",
-            "[JumpBack]主界面判断-二次菜单"
-        ],
-        "recognition": {
-            "param": {
-                "template": [
-                    "菜单.png"
-                ]
-            },
-            "type": "TemplateMatch"
-        }
+            "主界面判断-退出游戏",
+            "[JumpBack]主界面判断-返回"
+        ]
     },
-    "主界面判断-返回": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1080,
-                "y": 336
+    "主界面判断-退出游戏": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "expected": [
+                    "是否退出游戏？"
+                ]
             }
         },
+        "$__mpe_code": {
+            "position": {
+                "x": 1109,
+                "y": -61
+            }
+        },
+        "next": [
+            "主界面判断-关闭"
+        ]
+    },
+    "主界面判断-返回": {
         "action": {
+            "type": "ClickKey",
             "param": {
                 "key": [
                     111
                 ]
-            },
-            "type": "ClickKey"
+            }
+        },
+        "$__mpe_code": {
+            "position": {
+                "x": 1111,
+                "y": 332
+            }
         }
     },
     "回主界面": {
         "$__mpe_code": {
             "position": {
-                "x": 381,
-                "y": 67
+                "x": 460,
+                "y": -53
             }
         },
         "next": [
             "主界面判断-活动报酬",
             "[JumpBack]主界面判断-返回"
         ]
+    },
+    "主界面判断-关闭": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "取消.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    435,
+                    562,
+                    1,
+                    1
+                ]
+            }
+        },
+        "$__mpe_code": {
+            "position": {
+                "x": 1454,
+                "y": -84
+            }
+        },
+        "next": [
+            "二次确认-退出游戏",
+            "二次确认-关闭"
+        ]
+    },
+    "二次确认-退出游戏": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "expected": [
+                    "是否退出游戏？"
+                ]
+            }
+        },
+        "$__mpe_code": {
+            "position": {
+                "x": 1448,
+                "y": -290
+            }
+        },
+        "next": [
+            "主界面判断-关闭"
+        ]
+    },
+    "二次确认-关闭": {
+        "$__mpe_code": {
+            "position": {
+                "x": 1802,
+                "y": -63
+            }
+        }
     }
 }

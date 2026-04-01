@@ -1,16 +1,11 @@
 {
-    "$__mpe_config_新建Pipeline3": {
+    "$__mpe_config_新建Pipeline4": {
         "$__mpe_code": {
             "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\燃烧的冬木.json",
             "filename": "新建Pipeline4",
             "isModifiedExternally": false,
-            "lastSyncTime": 1774270021244,
+            "lastSyncTime": 1775052093140,
             "prefix": "",
-            "savedViewport": {
-                "x": -174,
-                "y": 493,
-                "zoom": 1
-            },
             "version": "v1.2.3"
         }
     },
@@ -101,17 +96,17 @@
         "action": {
             "param": {
                 "begin": [
-                    190,
-                    494,
-                    48,
-                    51
+                    39,
+                    478,
+                    1,
+                    1
                 ],
                 "end": [
                     [
-                        1190,
-                        21,
-                        68,
-                        52
+                        73,
+                        139,
+                        1,
+                        1
                     ]
                 ]
             },
@@ -179,8 +174,8 @@
     "冬木放大": {
         "$__mpe_code": {
             "position": {
-                "x": 1133,
-                "y": -15
+                "x": 1148,
+                "y": -31
             }
         },
         "action": {
@@ -227,9 +222,9 @@
         "next": [
             "冬木向上"
         ],
-        "post_wait_freezes": 500,
+        "post_wait_freezes": 1000,
         "repeat": 3,
-        "repeat_delay": 1000
+        "repeat_delay": 500
     },
     "宅邸残迹": {
         "$__mpe_code": {
