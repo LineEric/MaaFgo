@@ -1,5 +1,5 @@
-v1.0.11
+v1.0.22MWU
 
-Release Date: 2026-03-27
+Release Date: 2026-04-02
 
-This is the v1.0.11 release of the MaaFgo project.
+更新内容：白纸化地球
