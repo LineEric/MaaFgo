@@ -2,12 +2,12 @@
     "$__mpe_config_队伍选择": {
         "$__mpe_code": {
             "prefix": "",
-            "lastSyncTime": 1775132720194,
+            "lastSyncTime": 1775147092723,
             "isModifiedExternally": false,
             "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\队伍选择.json",
             "savedViewport": {
-                "x": -1435,
-                "y": 131,
+                "x": -1081,
+                "y": 272,
                 "zoom": 0.8
             },
             "filename": "队伍选择",
@@ -17,8 +17,8 @@
     "$__mpe_external_回主界面_队伍选择": {
         "$__mpe_code": {
             "position": {
-                "x": 3815,
-                "y": 232
+                "x": 4088,
+                "y": 352
             }
         }
     },
@@ -51,12 +51,12 @@
         "pre_wait_freezes": 1000,
         "$__mpe_code": {
             "position": {
-                "x": 1413,
-                "y": 269
+                "x": 1612,
+                "y": 267
             }
         },
         "next": [
-            "队伍编制-移动"
+            "队伍编制"
         ]
     },
     "编队": {
@@ -111,8 +111,8 @@
         "pre_wait_freezes": 1000,
         "$__mpe_code": {
             "position": {
-                "x": 1125,
-                "y": 634
+                "x": 1135,
+                "y": 601
             }
         }
     },
@@ -471,8 +471,8 @@
         "post_wait_freezes": 1000,
         "$__mpe_code": {
             "position": {
-                "x": 2761,
-                "y": -445
+                "x": 2750,
+                "y": -399
             }
         }
     },
@@ -612,10 +612,16 @@
         "post_wait_freezes": 1000,
         "$__mpe_code": {
             "position": {
-                "x": 3528,
-                "y": 401
+                "x": 3482,
+                "y": 269
             }
-        }
+        },
+        "next": [
+            "队伍确定菜单"
+        ],
+        "on_error": [
+            "队伍错误返回"
+        ]
     },
     "队伍界面决定": {
         "post_wait_freezes": 1000,
@@ -626,8 +632,7 @@
             }
         },
         "next": [
-            "队伍确定菜单",
-            "[JumpBack]队伍点击决定"
+            "队伍点击决定"
         ]
     },
     "队伍确定菜单": {
@@ -642,8 +647,8 @@
         "post_wait_freezes": 1000,
         "$__mpe_code": {
             "position": {
-                "x": 3529,
-                "y": 188
+                "x": 3773,
+                "y": 279
             }
         },
         "next": [
@@ -661,48 +666,9 @@
             "队伍1"
         ]
     },
-    "队伍编制-移动": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "roi": [
-                    0,
-                    299,
-                    37,
-                    110
-                ],
-                "template": [
-                    "左移动.png"
-                ]
-            }
-        },
-        "action": {
-            "type": "Click",
-            "param": {
-                "target": [
-                    14,
-                    359,
-                    1,
-                    1
-                ]
-            }
-        },
-        "post_wait_freezes": 1000,
-        "repeat": 2,
-        "repeat_delay": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 1714,
-                "y": 323
-            }
-        },
-        "next": [
-            "队伍编制"
-        ]
-    },
     "队伍编制1": {
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "template": [
                     "D1.png"
@@ -878,7 +844,7 @@
     },
     "队伍编制2": {
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
                     440,
@@ -914,14 +880,15 @@
                 ],
                 "template": [
                     "D3.png"
-                ]
+                ],
+                "detector": "SIFT"
             }
         },
         "post_wait_freezes": 1000,
         "$__mpe_code": {
             "position": {
-                "x": 2755,
-                "y": -694
+                "x": 2752,
+                "y": -730
             }
         },
         "next": [
@@ -1087,13 +1054,33 @@
     "队伍选择": {
         "$__mpe_code": {
             "position": {
-                "x": 792,
-                "y": 372
+                "x": 688,
+                "y": 397
             }
         },
         "next": [
             "编队",
             "[JumpBack]菜单"
+        ]
+    },
+    "队伍错误返回": {
+        "action": {
+            "type": "ClickKey",
+            "param": {
+                "key": [
+                    111
+                ]
+            }
+        },
+        "post_wait_freezes": 500,
+        "$__mpe_code": {
+            "position": {
+                "x": 3470,
+                "y": 589
+            }
+        },
+        "next": [
+            "点击队伍编制"
         ]
     }
 }

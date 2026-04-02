@@ -1,54 +1,45 @@
 {
     "$__mpe_config_回主界面": {
         "$__mpe_code": {
-            "prefix": "",
-            "lastSyncTime": 1775132065419,
-            "isModifiedExternally": false,
             "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\回主界面.json",
+            "filename": "队伍选择",
+            "isModifiedExternally": false,
+            "lastSyncTime": 1775143786621,
+            "prefix": "",
             "savedViewport": {
-                "x": -114,
-                "y": 500,
+                "x": -142,
+                "y": 517,
                 "zoom": 1
             },
-            "filename": "回主界面",
             "version": "v1.2.3"
         }
     },
     "主界面判断-关闭": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "template": [
-                    "取消.png"
-                ]
-            }
-        },
-        "action": {
-            "type": "Click",
-            "param": {}
-        },
-        "post_wait_freezes": 500,
         "$__mpe_code": {
             "position": {
                 "x": 1456,
                 "y": -62
             }
         },
+        "action": {
+            "param": {},
+            "type": "Click"
+        },
         "next": [
             "二次确认-退出游戏",
             "二次确认-关闭"
-        ]
-    },
-    "主界面判断-活动报酬": {
+        ],
+        "post_wait_freezes": 500,
         "recognition": {
-            "type": "TemplateMatch",
             "param": {
                 "template": [
-                    "活动报酬.png"
+                    "取消.png"
                 ]
-            }
-        },
-        "post_wait_freezes": 500,
+            },
+            "type": "TemplateMatch"
+        }
+    },
+    "主界面判断-活动报酬": {
         "$__mpe_code": {
             "position": {
                 "x": 793,
@@ -58,52 +49,52 @@
         "next": [
             "主界面判断-退出游戏",
             "[JumpBack]主界面判断-返回2"
-        ]
-    },
-    "主界面判断-返回": {
-        "action": {
-            "type": "ClickKey",
-            "param": {
-                "key": [
-                    111
-                ]
-            }
-        },
+        ],
         "post_wait_freezes": 500,
-        "$__mpe_code": {
-            "position": {
-                "x": 744,
-                "y": 287
-            }
+        "recognition": {
+            "param": {
+                "template": [
+                    "活动报酬.png"
+                ]
+            },
+            "type": "TemplateMatch"
         }
     },
-    "主界面判断-返回2": {
+    "主界面判断-返回": {
+        "$__mpe_code": {
+            "position": {
+                "x": 801,
+                "y": 298
+            }
+        },
         "action": {
-            "type": "ClickKey",
             "param": {
                 "key": [
                     111
                 ]
-            }
+            },
+            "type": "ClickKey"
         },
-        "post_wait_freezes": 500,
+        "post_wait_freezes": 500
+    },
+    "主界面判断-返回2": {
         "$__mpe_code": {
             "position": {
                 "x": 1110,
                 "y": 294
             }
-        }
+        },
+        "action": {
+            "param": {
+                "key": [
+                    111
+                ]
+            },
+            "type": "ClickKey"
+        },
+        "post_wait_freezes": 500
     },
     "主界面判断-退出游戏": {
-        "recognition": {
-            "type": "OCR",
-            "param": {
-                "expected": [
-                    "是否退出游戏？"
-                ]
-            }
-        },
-        "post_wait_freezes": 500,
         "$__mpe_code": {
             "position": {
                 "x": 1109,
@@ -112,7 +103,16 @@
         },
         "next": [
             "主界面判断-关闭"
-        ]
+        ],
+        "post_wait_freezes": 500,
+        "recognition": {
+            "param": {
+                "expected": [
+                    "是否退出游戏？"
+                ]
+            },
+            "type": "OCR"
+        }
     },
     "二次确认-关闭": {
         "$__mpe_code": {
@@ -123,14 +123,6 @@
         }
     },
     "二次确认-退出游戏": {
-        "recognition": {
-            "type": "OCR",
-            "param": {
-                "expected": [
-                    "是否退出游戏？"
-                ]
-            }
-        },
         "$__mpe_code": {
             "position": {
                 "x": 1453,
@@ -139,7 +131,15 @@
         },
         "next": [
             "主界面判断-关闭"
-        ]
+        ],
+        "recognition": {
+            "param": {
+                "expected": [
+                    "是否退出游戏？"
+                ]
+            },
+            "type": "OCR"
+        }
     },
     "回主界面": {
         "$__mpe_code": {

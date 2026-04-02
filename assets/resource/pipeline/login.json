@@ -2,14 +2,14 @@
     "$__mpe_config_login": {
         "$__mpe_code": {
             "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\login.json",
-            "filename": "login",
+            "filename": "队伍选择",
             "isModifiedExternally": false,
-            "lastSyncTime": 1775132340094,
+            "lastSyncTime": 1775140267601,
             "prefix": "",
             "savedViewport": {
-                "x": 1147,
-                "y": 195,
-                "zoom": 0.76
+                "x": 1115,
+                "y": 170,
+                "zoom": 0.87
             },
             "version": "v1.2.3"
         }

@@ -1,17 +1,25 @@
 {
     "$__mpe_config_章节导航": {
         "$__mpe_code": {
-            "prefix": "",
-            "lastSyncTime": 1775132988506,
-            "isModifiedExternally": false,
             "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\章节导航.json",
+            "filename": "队伍选择",
+            "isModifiedExternally": false,
+            "lastSyncTime": 1775140267604,
+            "prefix": "",
             "savedViewport": {
-                "x": 867,
-                "y": 761,
+                "x": 871,
+                "y": 684,
                 "zoom": 0.76
             },
-            "filename": "章节导航",
             "version": "v1.2.3"
+        }
+    },
+    "$__mpe_external_Ordeal Call_章节导航": {
+        "$__mpe_code": {
+            "position": {
+                "x": 793,
+                "y": 87
+            }
         }
     },
     "$__mpe_external_主线记录1导航_章节导航": {
@@ -29,6 +37,17 @@
                 "y": -285
             }
         }
+    },
+    "cOrdeal Call": {
+        "$__mpe_code": {
+            "position": {
+                "x": 401,
+                "y": 33
+            }
+        },
+        "next": [
+            "Ordeal Call"
+        ]
     },
     "c冬木": {
         "$__mpe_code": {
@@ -51,25 +70,6 @@
         },
         "next": [
             "c冬木"
-        ]
-    },
-    "$__mpe_external_Ordeal Call_章节导航": {
-        "$__mpe_code": {
-            "position": {
-                "x": 793,
-                "y": 87
-            }
-        }
-    },
-    "cOrdeal Call": {
-        "$__mpe_code": {
-            "position": {
-                "x": 401,
-                "y": 33
-            }
-        },
-        "next": [
-            "Ordeal Call"
         ]
     }
 }
