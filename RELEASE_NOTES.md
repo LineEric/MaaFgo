@@ -1,4 +1,4 @@
-v1.0.22MWU
+v1.0.24MWU
 
 Release Date: 2026-04-02
 
