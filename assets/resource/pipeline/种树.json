@@ -1,27 +1,4 @@
 {
-    "$__mpe_config_种树": {
-        "$__mpe_code": {
-            "prefix": "",
-            "lastSyncTime": 1775132202212,
-            "isModifiedExternally": false,
-            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\login.json",
-            "savedViewport": {
-                "x": 203,
-                "y": 441,
-                "zoom": 0.82
-            },
-            "filename": "种树",
-            "version": "v1.2.3"
-        }
-    },
-    "$__mpe_external_回主界面_种树": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2077,
-                "y": 333
-            }
-        }
-    },
     "主界面菜单": {
         "recognition": {
             "type": "TemplateMatch",
@@ -33,12 +10,6 @@
             }
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": -321,
-                "y": 52
-            }
-        },
         "next": [
             "商店"
         ]
@@ -57,12 +28,6 @@
             "param": {}
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 1318,
-                "y": 291
-            }
-        },
         "next": [
             "回主界面"
         ]
@@ -77,12 +42,6 @@
             }
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 878,
-                "y": 306
-            }
-        },
         "next": [
             "买不了取消"
         ]
@@ -101,12 +60,6 @@
             "param": {}
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 1492,
-                "y": 49
-            }
-        },
         "next": [
             "关闭树苗"
         ]
@@ -125,12 +78,6 @@
             "param": {}
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 263,
-                "y": 65
-            }
-        },
         "next": [
             "青铜果实"
         ]
@@ -149,12 +96,6 @@
             "param": {}
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 1789,
-                "y": 51
-            }
-        },
         "next": [
             "回主界面"
         ]
@@ -179,12 +120,6 @@
             "param": {}
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": -44,
-                "y": 39
-            }
-        },
         "next": [
             "兑换青铜树苗商店",
             "[JumpBack]寻找兑换青铜树苗"
@@ -209,21 +144,9 @@
             "type": "Click",
             "param": {}
         },
-        "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": -579,
-                "y": 347
-            }
-        }
+        "post_wait_freezes": 1000
     },
     "商店种树": {
-        "$__mpe_code": {
-            "position": {
-                "x": -876,
-                "y": 157
-            }
-        },
         "next": [
             "菜单关闭判断",
             "[JumpBack]商店-菜单"
@@ -249,13 +172,7 @@
                 ]
             }
         },
-        "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 252,
-                "y": 324
-            }
-        }
+        "post_wait_freezes": 1000
     },
     "种树": {
         "action": {
@@ -263,12 +180,6 @@
             "param": {
                 "custom_action": "ExecuteSequentialTasks",
                 "custom_action_param": "回主界面,商店种树"
-            }
-        },
-        "$__mpe_code": {
-            "position": {
-                "x": -1169,
-                "y": 143
             }
         }
     },
@@ -289,12 +200,6 @@
             }
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": -573,
-                "y": 49
-            }
-        },
         "next": [
             "主界面菜单"
         ]
@@ -314,12 +219,6 @@
         "repeat": 3,
         "repeat_delay": 300,
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 1218,
-                "y": 5
-            }
-        },
         "next": [
             "交换树苗"
         ]
@@ -338,12 +237,6 @@
             "param": {}
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 580,
-                "y": 57
-            }
-        },
         "next": [
             "青铜果实界面",
             "买不了果实"
@@ -359,12 +252,6 @@
             }
         },
         "post_wait_freezes": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 888,
-                "y": 30
-            }
-        },
         "next": [
             "购买树苗"
         ]

@@ -1,38 +1,11 @@
 {
-    "$__mpe_config_ordeal call": {
-        "$__mpe_code": {
-            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\ordeal call.json",
-            "filename": "队伍选择",
-            "isModifiedExternally": false,
-            "lastSyncTime": 1775140267617,
-            "prefix": "",
-            "savedViewport": {
-                "x": -174,
-                "y": 478,
-                "zoom": 0.76
-            },
-            "version": "v1.2.3"
-        }
-    },
     "Ordeal Call": {
-        "$__mpe_code": {
-            "position": {
-                "x": 738,
-                "y": 157
-            }
-        },
         "next": [
             "Ordeal Call-识别",
             "[JumpBack]Ordeal Call-滑动"
         ]
     },
     "Ordeal Call-滑动": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1015,
-                "y": 370
-            }
-        },
         "action": {
             "param": {
                 "begin": [
@@ -55,12 +28,6 @@
         "post_wait_freezes": 1000
     },
     "Ordeal Call-识别": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1031,
-                "y": 112
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -79,35 +46,17 @@
         }
     },
     "OrdealCall关卡导航": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1969,
-                "y": 116
-            }
-        },
         "next": [
             "残留的神话"
         ],
         "post_wait_freezes": 5000
     },
     "举世之飞将军": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2319,
-                "y": 1636
-            }
-        },
         "next": [
             "举世之飞将军-1"
         ]
     },
     "举世之飞将军-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2613,
-                "y": 1638
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -125,12 +74,6 @@
         "post_wait_freezes": 1000
     },
     "举世之飞将军-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2952,
-                "y": 1667
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -156,23 +99,11 @@
         }
     },
     "久远的微笑": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2332,
-                "y": 599
-            }
-        },
         "next": [
             "久远的微笑-1"
         ]
     },
     "久远的微笑-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2638,
-                "y": 589
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -190,12 +121,6 @@
         "post_wait_freezes": 1000
     },
     "久远的微笑-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3196,
-                "y": 611
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -221,23 +146,11 @@
         }
     },
     "于荒野萌芽的王之花": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2323,
-                "y": 1448
-            }
-        },
         "next": [
             "于荒野萌芽的王之花-1"
         ]
     },
     "于荒野萌芽的王之花-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2606,
-                "y": 1436
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -255,12 +168,6 @@
         "post_wait_freezes": 1000
     },
     "于荒野萌芽的王之花-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2944,
-                "y": 1439
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -286,12 +193,6 @@
         }
     },
     "任务开始": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3670,
-                "y": 549
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -306,23 +207,11 @@
         }
     },
     "光之丝线引导的迷宫": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2331,
-                "y": 415
-            }
-        },
         "next": [
             "光之丝线引导的迷宫-1"
         ]
     },
     "光之丝线引导的迷宫-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2628,
-                "y": 435
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -340,12 +229,6 @@
         "post_wait_freezes": 1000
     },
     "光之丝线引导的迷宫-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3198,
-                "y": 429
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -371,23 +254,11 @@
         }
     },
     "冻土的试炼": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2334,
-                "y": 224
-            }
-        },
         "next": [
             "冻土的试炼-1"
         ]
     },
     "冻土的试炼-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2635,
-                "y": 215
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -405,12 +276,6 @@
         "post_wait_freezes": 1000
     },
     "冻土的试炼-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2979,
-                "y": 225
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -436,23 +301,11 @@
         }
     },
     "噩梦的南瓜": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2319,
-                "y": 44
-            }
-        },
         "next": [
             "噩梦的南瓜-1"
         ]
     },
     "噩梦的南瓜-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2635,
-                "y": 34
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -470,12 +323,6 @@
         "post_wait_freezes": 1000
     },
     "噩梦的南瓜-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2982,
-                "y": 44
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -501,12 +348,6 @@
         }
     },
     "基准返回": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1657,
-                "y": 110
-            }
-        },
         "action": {
             "param": {
                 "key": [
@@ -521,23 +362,11 @@
         "post_wait_freezes": 5000
     },
     "复活的黄金都市": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2328,
-                "y": 764
-            }
-        },
         "next": [
             "复活的黄金都市-1"
         ]
     },
     "复活的黄金都市-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2629,
-                "y": 772
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -555,12 +384,6 @@
         "post_wait_freezes": 1000
     },
     "复活的黄金都市-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2905,
-                "y": 747
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -586,23 +409,11 @@
         }
     },
     "复苏的远古浪漫": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2319,
-                "y": 2417
-            }
-        },
         "next": [
             "复苏的远古浪漫-1"
         ]
     },
     "复苏的远古浪漫-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2589,
-                "y": 2375
-            }
-        },
         "action": {
             "param": {
                 "duration": 390,
@@ -621,12 +432,6 @@
         "post_wait_freezes": 2000
     },
     "复苏的远古浪漫-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2944,
-                "y": 2382
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -644,12 +449,6 @@
         "post_wait_freezes": 1000
     },
     "复苏的远古浪漫-3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3292,
-                "y": 2370
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -668,23 +467,11 @@
         }
     },
     "大堡礁之卵": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2283,
-                "y": 3720
-            }
-        },
         "next": [
             "大堡礁之卵-1"
         ]
     },
     "大堡礁之卵-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2601,
-                "y": 3656
-            }
-        },
         "action": {
             "param": {
                 "duration": 1000,
@@ -703,12 +490,6 @@
         "post_wait_freezes": 2000
     },
     "大堡礁之卵-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2872,
-                "y": 3712
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -726,12 +507,6 @@
         "post_wait_freezes": 1000
     },
     "大堡礁之卵-3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3284,
-                "y": 3694
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -750,12 +525,6 @@
         }
     },
     "奏1基准点": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1355,
-                "y": 106
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -774,23 +543,11 @@
         }
     },
     "寻求女神像": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2327,
-                "y": 1832
-            }
-        },
         "next": [
             "寻求女神像-1"
         ]
     },
     "寻求女神像-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2615,
-                "y": 1772
-            }
-        },
         "action": {
             "param": {
                 "duration": 390,
@@ -809,12 +566,6 @@
         "post_wait_freezes": 2000
     },
     "寻求女神像-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2954,
-                "y": 1906
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -832,12 +583,6 @@
         "post_wait_freezes": 1000
     },
     "寻求女神像-3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3304,
-                "y": 1843
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -856,23 +601,11 @@
         }
     },
     "常夏展销会场": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2300,
-                "y": 3321
-            }
-        },
         "next": [
             "常夏展销会场-1"
         ]
     },
     "常夏展销会场-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2597,
-                "y": 3255
-            }
-        },
         "action": {
             "param": {
                 "duration": 390,
@@ -891,12 +624,6 @@
         "post_wait_freezes": 2000
     },
     "常夏展销会场-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2878,
-                "y": 3337
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -914,12 +641,6 @@
         "post_wait_freezes": 1000
     },
     "常夏展销会场-3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3378,
-                "y": 3336
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -938,23 +659,11 @@
         }
     },
     "常夏的休假": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2309,
-                "y": 2991
-            }
-        },
         "next": [
             "常夏的休假-1"
         ]
     },
     "常夏的休假-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2596,
-                "y": 2924
-            }
-        },
         "action": {
             "param": {
                 "duration": 390,
@@ -973,12 +682,6 @@
         "post_wait_freezes": 2000
     },
     "常夏的休假-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2870,
-                "y": 2959
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -996,12 +699,6 @@
         "post_wait_freezes": 1000
     },
     "常夏的休假-3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3384,
-                "y": 3001
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -1020,12 +717,6 @@
         }
     },
     "归位1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2917,
-                "y": 396
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1051,12 +742,6 @@
         }
     },
     "归位2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2912,
-                "y": 589
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1082,12 +767,6 @@
         }
     },
     "归位3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2927,
-                "y": 934
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1113,12 +792,6 @@
         }
     },
     "归位4": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2928,
-                "y": 1103
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1144,12 +817,6 @@
         }
     },
     "归位5": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3134,
-                "y": 2966
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1175,12 +842,6 @@
         }
     },
     "归位6": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3126,
-                "y": 3331
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1206,23 +867,11 @@
         }
     },
     "月光矿区": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2324,
-                "y": 1099
-            }
-        },
         "next": [
             "月光矿区-1"
         ]
     },
     "月光矿区-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2618,
-                "y": 1081
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1240,12 +889,6 @@
         "post_wait_freezes": 1000
     },
     "月光矿区-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3273,
-                "y": 1130
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1271,23 +914,11 @@
         }
     },
     "残留的神话": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2321,
-                "y": -132
-            }
-        },
         "next": [
             "残留的神话-1"
         ]
     },
     "残留的神话-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2645,
-                "y": -142
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1305,12 +936,6 @@
         "post_wait_freezes": 1000
     },
     "残留的神话-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2991,
-                "y": -170
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1336,23 +961,11 @@
         }
     },
     "神秘主义者与魂之故乡": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2329,
-                "y": 1267
-            }
-        },
         "next": [
             "神秘主义者与魂之故乡-1"
         ]
     },
     "神秘主义者与魂之故乡-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2606,
-                "y": 1280
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1370,12 +983,6 @@
         "post_wait_freezes": 1000
     },
     "神秘主义者与魂之故乡-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2941,
-                "y": 1274
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1401,23 +1008,11 @@
         }
     },
     "荒野的欢乐": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2304,
-                "y": 2710
-            }
-        },
         "next": [
             "荒野的欢乐-1"
         ]
     },
     "荒野的欢乐-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2598,
-                "y": 2639
-            }
-        },
         "action": {
             "param": {
                 "duration": 390,
@@ -1436,12 +1031,6 @@
         "post_wait_freezes": 2000
     },
     "荒野的欢乐-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2942,
-                "y": 2700
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1459,12 +1048,6 @@
         "post_wait_freezes": 1000
     },
     "荒野的欢乐-3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3298,
-                "y": 2691
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -1483,23 +1066,11 @@
         }
     },
     "蛇龙的恶作剧": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2277,
-                "y": 4068
-            }
-        },
         "next": [
             "蛇龙的恶作剧-1"
         ]
     },
     "蛇龙的恶作剧-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2605,
-                "y": 4010
-            }
-        },
         "action": {
             "param": {
                 "duration": 1000,
@@ -1518,12 +1089,6 @@
         "post_wait_freezes": 2000
     },
     "蛇龙的恶作剧-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2964,
-                "y": 4041
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1541,12 +1106,6 @@
         "post_wait_freezes": 1000
     },
     "蛇龙的恶作剧-3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3297,
-                "y": 4019
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -1565,23 +1124,11 @@
         }
     },
     "赏金猎人数光年": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2325,
-                "y": 928
-            }
-        },
         "next": [
             "赏金猎人数光年-1"
         ]
     },
     "赏金猎人数光年-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2627,
-                "y": 923
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1599,12 +1146,6 @@
         "post_wait_freezes": 1000
     },
     "赏金猎人数光年-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3280,
-                "y": 913
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1630,23 +1171,11 @@
         }
     },
     "高贵的海盗": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2322,
-                "y": 2101
-            }
-        },
         "next": [
             "高贵的海盗-1"
         ]
     },
     "高贵的海盗-1": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2612,
-                "y": 2033
-            }
-        },
         "action": {
             "param": {
                 "duration": 390,
@@ -1665,12 +1194,6 @@
         "post_wait_freezes": 2000
     },
     "高贵的海盗-2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2939,
-                "y": 2126
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -1688,12 +1211,6 @@
         "post_wait_freezes": 1000
     },
     "高贵的海盗-3": {
-        "$__mpe_code": {
-            "position": {
-                "x": 3295,
-                "y": 2111
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"

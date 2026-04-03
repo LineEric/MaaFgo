@@ -1,34 +1,5 @@
 {
-    "$__mpe_config_战斗流程": {
-        "$__mpe_code": {
-            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\战斗流程.json",
-            "filename": "队伍选择",
-            "isModifiedExternally": false,
-            "lastSyncTime": 1775143786623,
-            "prefix": "",
-            "savedViewport": {
-                "x": 328,
-                "y": 60,
-                "zoom": 0.66
-            },
-            "version": "v1.2.3"
-        }
-    },
-    "$__mpe_external_回主界面_战斗流程": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2822,
-                "y": 666
-            }
-        }
-    },
     "BBC成功": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1118,
-                "y": 578
-            }
-        },
         "next": [
             "作战成功",
             "好友申请界面",
@@ -41,12 +12,6 @@
         ]
     },
     "作战成功": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2224,
-                "y": 37
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -67,12 +32,6 @@
         }
     },
     "失败2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2188,
-                "y": 762
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -93,12 +52,6 @@
         }
     },
     "好友申请界面": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2231,
-                "y": 268
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -116,12 +69,6 @@
         }
     },
     "完成": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2175,
-                "y": 1707
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -135,12 +82,6 @@
         }
     },
     "战斗失败": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2198,
-                "y": 483
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -161,12 +102,6 @@
         }
     },
     "战斗结束-主界面": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2175,
-                "y": 1201
-            }
-        },
         "next": [
             "回主界面"
         ],
@@ -186,12 +121,6 @@
         }
     },
     "战斗结束关闭": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2177,
-                "y": 1458
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -215,43 +144,33 @@
         }
     },
     "执行BBC任务": {
-        "$__mpe_code": {
-            "position": {
-                "x": 721,
-                "y": 486
-            }
-        },
         "action": {
             "param": {
                 "custom_action": "execute_bbc_task"
             },
             "type": "Custom"
         },
-        "apple_type": "铜苹果",
-        "battle_type": "continuous",
-        "bbc_team_config": "",
-        "connect": "auto",
-        "ld_index": 0,
-        "ld_path": "",
-        "manual_port": "",
-        "mumu_app_index": 0,
-        "mumu_index": 0,
-        "mumu_path": "",
-        "mumu_pkg": "com.bilibili.fatego",
+        "attach": {
+            "apple_type": "铜苹果",
+            "battle_type": "continuous",
+            "bbc_team_config": "",
+            "connect": "auto",
+            "ld_index": 0,
+            "ld_path": "",
+            "manual_port": "",
+            "mumu_app_index": 0,
+            "mumu_index": 0,
+            "mumu_path": "",
+            "mumu_pkg": "com.bilibili.fatego",
+            "run_count": 1,
+            "support_order_mismatch": false,
+            "team_config_error": false
+        },
         "next": [
             "BBC成功"
-        ],
-        "run_count": 1,
-        "support_order_mismatch": false,
-        "team_config_error": false
+        ]
     },
     "撤退": {
-        "$__mpe_code": {
-            "position": {
-                "x": 2174,
-                "y": 985
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -269,12 +188,6 @@
         }
     },
     "队伍配置": {
-        "$__mpe_code": {
-            "position": {
-                "x": 269,
-                "y": 542
-            }
-        },
         "next": [
             "执行BBC任务"
         ]

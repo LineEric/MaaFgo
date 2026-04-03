@@ -1,19 +1,4 @@
 {
-    "$__mpe_config_燃烧的冬木": {
-        "$__mpe_code": {
-            "prefix": "",
-            "lastSyncTime": 1775132932908,
-            "isModifiedExternally": false,
-            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\燃烧的冬木.json",
-            "savedViewport": {
-                "x": 146,
-                "y": 543,
-                "zoom": 0.76
-            },
-            "filename": "燃烧的冬木",
-            "version": "v1.2.3"
-        }
-    },
     "q未确认坐标X-A": {
         "recognition": {
             "type": "TemplateMatch",
@@ -40,12 +25,6 @@
                 ]
             }
         },
-        "$__mpe_code": {
-            "position": {
-                "x": 2077,
-                "y": -281
-            }
-        },
         "next": [
             "宅邸残迹"
         ]
@@ -70,23 +49,11 @@
             "type": "Click",
             "param": {}
         },
-        "$__mpe_code": {
-            "position": {
-                "x": 796,
-                "y": -12
-            }
-        },
         "next": [
             "冬木放大"
         ]
     },
     "冬木关卡选择": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1746,
-                "y": 17
-            }
-        },
         "next": [
             "q未确认坐标X-A"
         ]
@@ -114,12 +81,6 @@
         "post_wait_freezes": 500,
         "repeat": 2,
         "repeat_delay": 1000,
-        "$__mpe_code": {
-            "position": {
-                "x": 1427,
-                "y": -47
-            }
-        },
         "next": [
             "冬木关卡选择"
         ]
@@ -147,13 +108,7 @@
                 ]
             }
         },
-        "post_wait_freezes": 500,
-        "$__mpe_code": {
-            "position": {
-                "x": 780,
-                "y": 257
-            }
-        }
+        "post_wait_freezes": 500
     },
     "冬木导航": {
         "recognition": {
@@ -164,15 +119,8 @@
                 ]
             }
         },
-        "$__mpe_code": {
-            "position": {
-                "x": 386,
-                "y": -4
-            }
-        },
         "next": [
             "冬木",
-            "冬木寻找",
             "[JumpBack]冬木寻找"
         ]
     },
@@ -221,12 +169,6 @@
         "post_wait_freezes": 1000,
         "repeat": 3,
         "repeat_delay": 500,
-        "$__mpe_code": {
-            "position": {
-                "x": 1148,
-                "y": -31
-            }
-        },
         "next": [
             "冬木向上"
         ]
@@ -243,12 +185,6 @@
         "action": {
             "type": "Click",
             "param": {}
-        },
-        "$__mpe_code": {
-            "position": {
-                "x": 2387,
-                "y": -269
-            }
         }
     }
 }

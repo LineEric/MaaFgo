@@ -189,11 +189,11 @@
                     "name": "由伽·刹多罗",
                     "label": "由伽·刹多罗",
                     "option": [
-                        "quest_由伽·刹多罗"
+                        "quest_由伽刹多罗"
                     ],
                     "pipeline_override": {
                         "章节导航": {
-                            "next": "c由伽·刹多罗"
+                            "next": "c由伽刹多罗"
                         }
                     }
                 },
@@ -225,11 +225,11 @@
                     "name": "阿瓦隆·勒·菲",
                     "label": "阿瓦隆·勒·菲",
                     "option": [
-                        "quest_阿瓦隆·勒·菲"
+                        "quest_阿瓦隆勒菲"
                     ],
                     "pipeline_override": {
                         "章节导航": {
-                            "next": "c阿瓦隆·勒·菲"
+                            "next": "c阿瓦隆勒菲"
                         }
                     }
                 },
@@ -237,11 +237,11 @@
                     "name": "纳维·米克特兰",
                     "label": "纳维·米克特兰",
                     "option": [
-                        "quest_纳维·米克特兰"
+                        "quest_纳维米克特兰"
                     ],
                     "pipeline_override": {
                         "章节导航": {
-                            "next": "c纳维·米克特兰"
+                            "next": "c纳维米克特兰"
                         }
                     }
                 },

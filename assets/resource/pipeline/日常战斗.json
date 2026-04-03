@@ -1,31 +1,10 @@
 {
-    "$__mpe_config_日常战斗": {
-        "$__mpe_code": {
-            "prefix": "",
-            "lastSyncTime": 1775144678996,
-            "isModifiedExternally": false,
-            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\日常战斗.json",
-            "savedViewport": {
-                "x": 1672,
-                "y": -433,
-                "zoom": 2.3
-            },
-            "filename": "日常战斗",
-            "version": "v1.2.3"
-        }
-    },
     "日常战斗": {
         "action": {
             "type": "Custom",
             "param": {
                 "custom_action": "ExecuteSequentialTasks",
                 "custom_action_param": "回主界面,队伍选择,章节导航,队伍配置"
-            }
-        },
-        "$__mpe_code": {
-            "position": {
-                "x": -253,
-                "y": 405
             }
         }
     }

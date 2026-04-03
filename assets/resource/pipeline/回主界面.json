@@ -1,26 +1,5 @@
 {
-    "$__mpe_config_回主界面": {
-        "$__mpe_code": {
-            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\回主界面.json",
-            "filename": "队伍选择",
-            "isModifiedExternally": false,
-            "lastSyncTime": 1775143786621,
-            "prefix": "",
-            "savedViewport": {
-                "x": -142,
-                "y": 517,
-                "zoom": 1
-            },
-            "version": "v1.2.3"
-        }
-    },
     "主界面判断-关闭": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1456,
-                "y": -62
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -40,12 +19,6 @@
         }
     },
     "主界面判断-活动报酬": {
-        "$__mpe_code": {
-            "position": {
-                "x": 793,
-                "y": -66
-            }
-        },
         "next": [
             "主界面判断-退出游戏",
             "[JumpBack]主界面判断-返回2"
@@ -61,12 +34,6 @@
         }
     },
     "主界面判断-返回": {
-        "$__mpe_code": {
-            "position": {
-                "x": 801,
-                "y": 298
-            }
-        },
         "action": {
             "param": {
                 "key": [
@@ -78,12 +45,6 @@
         "post_wait_freezes": 500
     },
     "主界面判断-返回2": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1110,
-                "y": 294
-            }
-        },
         "action": {
             "param": {
                 "key": [
@@ -95,12 +56,6 @@
         "post_wait_freezes": 500
     },
     "主界面判断-退出游戏": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1109,
-                "y": -61
-            }
-        },
         "next": [
             "主界面判断-关闭"
         ],
@@ -114,21 +69,8 @@
             "type": "OCR"
         }
     },
-    "二次确认-关闭": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1835,
-                "y": -37
-            }
-        }
-    },
+    "二次确认-关闭": {},
     "二次确认-退出游戏": {
-        "$__mpe_code": {
-            "position": {
-                "x": 1453,
-                "y": -285
-            }
-        },
         "next": [
             "主界面判断-关闭"
         ],
@@ -142,12 +84,6 @@
         }
     },
     "回主界面": {
-        "$__mpe_code": {
-            "position": {
-                "x": 460,
-                "y": -53
-            }
-        },
         "next": [
             "主界面判断-活动报酬",
             "[JumpBack]主界面判断-返回"

@@ -1,34 +1,5 @@
 {
-    "$__mpe_config_login": {
-        "$__mpe_code": {
-            "filePath": "D:\\fgo\\MaaFgo\\assets\\resource\\pipeline\\login.json",
-            "filename": "队伍选择",
-            "isModifiedExternally": false,
-            "lastSyncTime": 1775140267601,
-            "prefix": "",
-            "savedViewport": {
-                "x": 1115,
-                "y": 170,
-                "zoom": 0.87
-            },
-            "version": "v1.2.3"
-        }
-    },
-    "$__mpe_external_回主界面_login": {
-        "$__mpe_code": {
-            "position": {
-                "x": 654,
-                "y": 538
-            }
-        }
-    },
     "关闭公告": {
-        "$__mpe_code": {
-            "position": {
-                "x": 312,
-                "y": 467
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -54,12 +25,6 @@
         }
     },
     "开始更新": {
-        "$__mpe_code": {
-            "position": {
-                "x": 621,
-                "y": 814
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -78,12 +43,6 @@
         }
     },
     "开始游戏": {
-        "$__mpe_code": {
-            "position": {
-                "x": 322,
-                "y": -202
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -102,12 +61,6 @@
         }
     },
     "打开游戏": {
-        "$__mpe_code": {
-            "position": {
-                "x": -506,
-                "y": 266
-            }
-        },
         "action": {
             "param": {
                 "package": "com.bilibili.fatego"
@@ -119,12 +72,6 @@
         ]
     },
     "更新": {
-        "$__mpe_code": {
-            "position": {
-                "x": 312,
-                "y": 811
-            }
-        },
         "next": [
             "开始更新"
         ],
@@ -140,12 +87,6 @@
         }
     },
     "登录": {
-        "$__mpe_code": {
-            "position": {
-                "x": 309,
-                "y": 146
-            }
-        },
         "action": {
             "param": {},
             "type": "Click"
@@ -164,32 +105,14 @@
         }
     },
     "登录识别": {
-        "$__mpe_code": {
-            "position": {
-                "x": -824,
-                "y": 279
-            }
-        },
         "next": [
             "打开游戏"
         ]
     },
     "等待登录": {
-        "$__mpe_code": {
-            "position": {
-                "x": 315,
-                "y": 1154
-            }
-        },
         "post_wait_freezes": 5000
     },
     "阶段判断循环": {
-        "$__mpe_code": {
-            "position": {
-                "x": -196,
-                "y": 275
-            }
-        },
         "next": [
             "开始游戏",
             "登录",
