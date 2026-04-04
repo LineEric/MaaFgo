@@ -1,92 +1,78 @@
 {
-    "主界面判断-关闭": {
-        "action": {
-            "param": {},
-            "type": "Click"
-        },
-        "next": [
-            "二次确认-退出游戏",
-            "二次确认-关闭"
-        ],
-        "post_wait_freezes": 500,
-        "recognition": {
-            "param": {
-                "template": [
-                    "取消.png"
-                ]
-            },
-            "type": "TemplateMatch"
-        }
-    },
     "主界面判断-活动报酬": {
         "next": [
-            "主界面判断-退出游戏",
-            "[JumpBack]主界面判断-返回2"
+            "有关闭按钮",
+            "没有关闭按钮"
         ],
         "post_wait_freezes": 500,
         "recognition": {
+            "type": "TemplateMatch",
             "param": {
                 "template": [
                     "活动报酬.png"
                 ]
-            },
-            "type": "TemplateMatch"
+            }
         }
     },
     "主界面判断-返回": {
         "action": {
+            "type": "ClickKey",
             "param": {
                 "key": [
                     111
                 ]
-            },
-            "type": "ClickKey"
+            }
         },
-        "post_wait_freezes": 500
-    },
-    "主界面判断-返回2": {
-        "action": {
-            "param": {
-                "key": [
-                    111
-                ]
-            },
-            "type": "ClickKey"
-        },
-        "post_wait_freezes": 500
-    },
-    "主界面判断-退出游戏": {
-        "next": [
-            "主界面判断-关闭"
-        ],
         "post_wait_freezes": 500,
         "recognition": {
-            "param": {
-                "expected": [
-                    "是否退出游戏？"
-                ]
-            },
-            "type": "OCR"
-        }
-    },
-    "二次确认-关闭": {},
-    "二次确认-退出游戏": {
-        "next": [
-            "主界面判断-关闭"
-        ],
-        "recognition": {
-            "param": {
-                "expected": [
-                    "是否退出游戏？"
-                ]
-            },
-            "type": "OCR"
+            "type": "DirectHit"
         }
     },
     "回主界面": {
         "next": [
             "主界面判断-活动报酬",
             "[JumpBack]主界面判断-返回"
-        ]
+        ],
+        "recognition": {
+            "type": "DirectHit"
+        }
+    },
+    "有关闭按钮": {
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "主界面判断-活动报酬"
+        ],
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    23,
+                    4,
+                    1217,
+                    694
+                ],
+                "template": [
+                    "回主界面的关闭按钮.png"
+                ],
+                "threshold": 0.5
+            }
+        }
+    },
+    "没有关闭按钮": {
+        "inverse": true,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    23,
+                    8,
+                    1192,
+                    695
+                ],
+                "template": "回主界面的关闭按钮.png"
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 {
     "关闭公告": {
         "action": {
+            "type": "Click",
             "param": {
                 "target": [
                     1214,
@@ -8,25 +9,23 @@
                     62,
                     49
                 ]
-            },
-            "type": "Click"
+            }
         },
         "next": [
             "回主界面"
         ],
         "post_wait_freezes": 2000,
         "recognition": {
+            "type": "TemplateMatch",
             "param": {
-                "method": 5,
                 "template": "gonggao.png",
-                "threshold": 0.7
-            },
-            "type": "TemplateMatch"
+                "threshold": 0.7,
+                "method": 5
+            }
         }
     },
     "开始更新": {
         "action": {
-            "param": {},
             "type": "Click"
         },
         "next": [
@@ -34,17 +33,16 @@
         ],
         "post_wait_freezes": 2000,
         "recognition": {
+            "type": "TemplateMatch",
             "param": {
                 "template": [
                     "开始更新资料.png"
                 ]
-            },
-            "type": "TemplateMatch"
+            }
         }
     },
     "开始游戏": {
         "action": {
-            "param": {},
             "type": "Click"
         },
         "next": [
@@ -52,24 +50,27 @@
         ],
         "post_wait_freezes": 2000,
         "recognition": {
+            "type": "TemplateMatch",
             "param": {
-                "method": 5,
                 "template": "login2.png",
-                "threshold": 0.7
-            },
-            "type": "TemplateMatch"
+                "threshold": 0.7,
+                "method": 5
+            }
         }
     },
     "打开游戏": {
         "action": {
+            "type": "StartApp",
             "param": {
                 "package": "com.bilibili.fatego"
-            },
-            "type": "StartApp"
+            }
         },
         "next": [
             "阶段判断循环"
-        ]
+        ],
+        "recognition": {
+            "type": "DirectHit"
+        }
     },
     "更新": {
         "next": [
@@ -77,18 +78,17 @@
         ],
         "post_wait_freezes": 2000,
         "recognition": {
+            "type": "TemplateMatch",
             "param": {
-                "green_mask": true,
                 "template": [
                     "更新.png"
-                ]
-            },
-            "type": "TemplateMatch"
+                ],
+                "green_mask": true
+            }
         }
     },
     "登录": {
         "action": {
-            "param": {},
             "type": "Click"
         },
         "next": [
@@ -96,21 +96,41 @@
         ],
         "post_wait_freezes": 2000,
         "recognition": {
+            "type": "TemplateMatch",
             "param": {
-                "method": 5,
                 "template": "login3.png",
-                "threshold": 0.7
-            },
-            "type": "TemplateMatch"
+                "threshold": 0.7,
+                "method": 5
+            }
         }
+    },
+    "登录-关闭游戏": {
+        "recognition": {
+            "type": "DirectHit"
+        },
+        "action": {
+            "type": "StopApp",
+            "param": {
+                "package": "com.bilibili.fatego"
+            }
+        },
+        "next": [
+            "登录识别"
+        ]
     },
     "登录识别": {
         "next": [
             "打开游戏"
-        ]
+        ],
+        "recognition": {
+            "type": "DirectHit"
+        }
     },
     "等待登录": {
-        "post_wait_freezes": 5000
+        "post_wait_freezes": 5000,
+        "recognition": {
+            "type": "DirectHit"
+        }
     },
     "阶段判断循环": {
         "next": [
@@ -120,6 +140,12 @@
             "更新",
             "[JumpBack]等待登录"
         ],
-        "post_wait_freezes": 2000
+        "on_error": [
+            "登录-关闭游戏"
+        ],
+        "post_wait_freezes": 2000,
+        "recognition": {
+            "type": "DirectHit"
+        }
     }
 }
