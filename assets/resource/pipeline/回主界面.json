@@ -39,39 +39,107 @@
     },
     "有关闭按钮": {
         "action": {
-            "type": "Click"
+            "type": "ClickKey",
+            "param": {
+                "key": 111
+            }
         },
         "next": [
             "主界面判断-活动报酬"
         ],
         "recognition": {
-            "type": "TemplateMatch",
+            "type": "Or",
             "param": {
-                "roi": [
-                    23,
-                    4,
-                    1217,
-                    694
-                ],
-                "template": [
-                    "回主界面的关闭按钮.png"
-                ],
-                "threshold": 0.5
+                "any_of": [
+                    {
+                        "recognition": {
+                            "type": "TemplateMatch",
+                            "param": {
+                                "roi": [
+                                    11,
+                                    8,
+                                    1240,
+                                    697
+                                ],
+                                "template": [
+                                    "回主界面的关闭按钮.png"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "recognition": {
+                            "type": "OCR",
+                            "param": {
+                                "roi": [
+                                    11,
+                                    8,
+                                    1240,
+                                    697
+                                ],
+                                "expected": "关闭",
+                                "only_rec": false
+                            }
+                        }
+                    },
+                    {
+                        "recognition": {
+                            "type": "OCR",
+                            "param": {
+                                "expected": "是否退出游戏"
+                            }
+                        }
+                    }
+                ]
             }
         }
     },
     "没有关闭按钮": {
         "inverse": true,
         "recognition": {
-            "type": "TemplateMatch",
+            "type": "Or",
             "param": {
-                "roi": [
-                    23,
-                    8,
-                    1192,
-                    695
-                ],
-                "template": "回主界面的关闭按钮.png"
+                "any_of": [
+                    {
+                        "recognition": {
+                            "type": "TemplateMatch",
+                            "param": {
+                                "roi": [
+                                    11,
+                                    8,
+                                    1240,
+                                    697
+                                ],
+                                "template": [
+                                    "回主界面的关闭按钮.png"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "recognition": {
+                            "type": "OCR",
+                            "param": {
+                                "roi": [
+                                    11,
+                                    8,
+                                    1240,
+                                    697
+                                ],
+                                "expected": "关闭",
+                                "only_rec": false
+                            }
+                        }
+                    },
+                    {
+                        "recognition": {
+                            "type": "OCR",
+                            "param": {
+                                "expected": "是否退出游戏"
+                            }
+                        }
+                    }
+                ]
             }
         }
     }
