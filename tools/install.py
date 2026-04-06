@@ -163,7 +163,7 @@ def install_agent():
     )
 
 
-def install_bbchannel():
+def install_bbcdll():
     """复制 bbcdll 目录"""
     shutil.copytree(
         working_dir / "bbcdll",
@@ -177,6 +177,6 @@ if __name__ == "__main__":
     install_resource()
     install_chores()
     install_agent()
-    install_bbchannel()
+    install_bbcdll()
 
     print(f"Install to {install_path} successfully.")
