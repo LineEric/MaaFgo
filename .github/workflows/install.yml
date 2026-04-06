@@ -386,8 +386,9 @@ jobs:
           cd release
           for f in MaaFGO-Avalonia-*; do
             if [ -d "$f" ]; then
-              clean_version=$(echo "$f" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "")
-              (cd "$f" && zip -r "../release-packed/MaaFGO-Avalonia-win-${f#*-win-}.zip" .)
+              # Extract arch from name like MaaFGO-Avalonia-win-x86_64-v1.1.13
+              arch=$(echo "$f" | sed 's/MaaFGO-Avalonia-win-//; s/-v[0-9].*//')
+              (cd "$f" && zip -r "../release-packed/MaaFGO-Avalonia-win-${arch}.zip" .)
             fi
           done
 
