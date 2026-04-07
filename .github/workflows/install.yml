@@ -283,10 +283,15 @@ jobs:
           version=$(echo "$tag" | sed 's/^v//; s/Avalonia$//; s/MWU$//')
           echo "version=$version" >> $GITHUB_OUTPUT
 
+      - name: Compress Avalonia artifact
+        shell: bash
+        run: |
+          7z a -t7z -mx=9 -mmt -ms -r MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}.7z ./install/*
+
       - uses: actions/upload-artifact@v4
         with:
           name: MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}
-          path: "install"
+          path: MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}.7z
 
   changelog:
     name: Generate changelog
