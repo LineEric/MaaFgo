@@ -2,12 +2,10 @@
   "task": [
     {
       "name": "登录",
+      "label": "登录",
       "entry": "登录识别",
       "resource": [
         "B服"
-      ],
-      "controller": [
-        "安卓设备"
       ]
     }
   ]

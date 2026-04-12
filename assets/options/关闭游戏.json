@@ -2,12 +2,10 @@
     "task": [
         {
             "name": "关闭游戏",
+            "label": "关闭游戏",
             "entry": "关闭游戏",
             "resource": [
                 "B服"
-            ],
-            "controller": [
-                "安卓设备"
             ]
         }
     ]
