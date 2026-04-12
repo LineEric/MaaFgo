@@ -3,7 +3,9 @@
         {
             "name": "关闭游戏",
             "entry": "关闭游戏",
-            "resource": "B服",
+            "resource": [
+                "B服"
+            ],
             "controller": [
                 "安卓设备"
             ]
