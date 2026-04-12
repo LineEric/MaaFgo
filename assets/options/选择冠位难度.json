@@ -1,0 +1,42 @@
+{
+  "option": {
+    "选择冠位难度": {
+      "label": "$选择冠位难度",
+      "type": "select",
+      "cases": [
+        {
+          "name": "100⭐⭐",
+          "pipeline_override": {
+            "冠位戴冠战-等级副本": {
+              "recognition": {
+                "type": "OCR",
+                "param": {
+                  "expected": [
+                    "Lv\\.100\\*\\*"
+                  ],
+                  "threshold": 0.8
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "100⭐⭐⭐",
+          "pipeline_override": {
+            "冠位戴冠战-等级副本": {
+              "recognition": {
+                "type": "OCR",
+                "param": {
+                  "expected": [
+                    "Lv\\.100\\*\\*\\*"
+                  ],
+                  "threshold": 0.7
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

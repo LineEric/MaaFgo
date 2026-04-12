@@ -1,0 +1,144 @@
+{
+  "option": {
+    "选择冠位职介": {
+      "type": "select",
+      "cases": [
+        {
+          "name": "剑",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_saber.png"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "弓",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_archer.png"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "枪",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_lancer.png"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "骑",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_rider.png"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "术",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_caster.png"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "杀",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_assassin.png"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "狂",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_berserker.png"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "EX1",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_ex1.png"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "EX2",
+          "pipeline_override": {
+            "冠位戴冠战-职介": {
+              "recognition": {
+                "type": "TemplateMatch",
+                "param": {
+                  "template": [
+                    "grand_ex2.png"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
