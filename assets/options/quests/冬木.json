@@ -1,6 +1,6 @@
 {
     "option": {
-        "quest_冬木": {
+        "冬木": {
             "type": "select",
             "label": "关卡",
             "default": "未确认坐标X-A",

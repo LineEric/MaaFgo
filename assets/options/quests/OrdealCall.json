@@ -1,6 +1,6 @@
 {
     "option": {
-        "quest_Ordeal Call": {
+        "OrdealCall": {
             "type": "select",
             "label": "关卡",
             "cases": [

@@ -1,6 +1,6 @@
 {
     "option": {
-        "quest_SIN": {
+        "七丘之城": {
             "type": "select",
             "label": "关卡",
             "cases": [

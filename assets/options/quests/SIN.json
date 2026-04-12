@@ -1,6 +1,6 @@
 {
     "option": {
-        "quest_奥尔良": {
+        "SIN": {
             "type": "select",
             "label": "关卡",
             "cases": [
