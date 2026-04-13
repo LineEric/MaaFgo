@@ -302,6 +302,9 @@ def main():
             continue
 
         for file_path in resource_path.rglob("*.json"):
+            # 跳过 MaaPipelineEditor 的配置文件
+            if file_path.suffix == ".mpe.json":
+                continue
             if is_excluded(file_path):
                 continue
             if not validate_file(file_path, pipeline_validator):
