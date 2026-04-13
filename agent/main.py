@@ -7,6 +7,7 @@ from maa.tasker import Tasker
 # 先导入自定义 Action 模块，让装饰器注册
 import bbc_action
 import sequential_tasks_action
+import general_navigation_action
 
 
 def main():
