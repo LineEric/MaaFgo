@@ -50,8 +50,23 @@ def main():
         subprocess.check_call(cmd)
         print("Dependencies downloaded successfully.")
     except subprocess.CalledProcessError as e:
-        print(f"Failed to download dependencies: {e}")
-        sys.exit(1)
+        print(f"Platform specific download failed: {e}")
+        print("Attempting fallback download without platform restriction...")
+        
+        # 回退方案：不指定平台，让 pip 自动选择
+        fallback_cmd = [
+            sys.executable, "-m", "pip", "download",
+            *packages,
+            "-d", target_dir,
+            "--only-binary=:all:"
+        ]
+        
+        try:
+            subprocess.check_call(fallback_cmd)
+            print("Fallback download successful.")
+        except subprocess.CalledProcessError as e2:
+            print(f"Fallback also failed: {e2}")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
