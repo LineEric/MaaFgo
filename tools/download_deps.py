@@ -7,8 +7,8 @@ def main():
     packages = [
         "maafw",
         "maaagentbinary",
-        "opencv-python",
-        "numpy"
+        "numpy",
+        "Pillow"
     ]
     
     # 定义下载目标目录

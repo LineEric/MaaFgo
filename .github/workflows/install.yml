@@ -166,7 +166,7 @@ jobs:
             # 2. 安装 pip
             ./build/python/python.exe build/python/get-pip.py
             # 3. 离线安装所有预下载的 Wheel 包
-            ./build/python/python.exe -m pip install --no-index --find-links deps/python_packages maafw maaagentbinary opencv-python numpy --target build/deps
+            ./build/python/python.exe -m pip install --no-index --find-links deps/python_packages maafw maaagentbinary numpy Pillow --target build/deps
           fi
 
       - name: Decompress Artifact to build
@@ -297,7 +297,7 @@ jobs:
       - name: Install Python dependencies
         shell: bash
         run: |
-          ./install/python/python.exe -m pip install --no-index --find-links deps/python_packages maafw maaagentbinary opencv-python numpy
+          ./install/python/python.exe -m pip install --no-index --find-links deps/python_packages maafw maaagentbinary numpy Pillow
 
       - name: Prepare Avalonia main.py
         shell: bash
