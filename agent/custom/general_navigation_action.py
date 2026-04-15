@@ -63,12 +63,19 @@ class GeneralNavigationAction(CustomAction):
             chapter_cn = attach_data.get("chapter", "")
             target_quest = attach_data.get("quests", "")
             
+            # 【关键修复】去除章节名的 'c' 前缀和关卡名的 'q' 前缀
+            if chapter_cn.startswith('c'):
+                chapter_cn = chapter_cn[1:]
+            if target_quest.startswith('q'):
+                target_quest = target_quest[1:]
+            
             if not chapter_cn or not target_quest:
                 return CustomAction.RunResult(success=False)
             
-            # 2. 章节名映射 (中文 -> 英文文件名)
-            map_name = CHAPTER_MAP.get(chapter_cn, chapter_cn)
-            _nav_logger.info(f"[Nav] Mapped chapter '{chapter_cn}' to file '{map_name}'")
+            # 2. 章节名映射 (中文 -> 英文文件名，用于加载大地图图片)
+            map_image_name = CHAPTER_MAP.get(chapter_cn, chapter_cn)
+            _nav_logger.info(f"[Nav] Chapter: {chapter_cn}, Image Name: {map_image_name}, Quest: {target_quest}")
+            _nav_logger.handlers[0].flush()
 
             # 3. 加载地图坐标映射 JSON
             # 脚本在 agent/custom/，往上两级是 agent/
@@ -81,14 +88,13 @@ class GeneralNavigationAction(CustomAction):
                 _nav_logger.error(f"[Nav] Map file NOT found at: {map_file}")
                 return CustomAction.RunResult(success=False)
 
-            try:
-                with open(map_file, 'r', encoding='utf-8') as f:
-                    coordinates_data = json.load(f)
-            except Exception as e:
-                _nav_logger.error(f"[Nav] Failed to load JSON: {e}")
-                return CustomAction.RunResult(success=False)
+            with open(map_file, 'r', encoding='utf-8') as f:
+                coordinates_data = json.load(f)
             
-            quest_list = coordinates_data.get("maps", {}).get(map_name, [])
+            quest_list = coordinates_data.get("maps", {}).get(chapter_cn, [])
+            _nav_logger.info(f"[Nav] Found {len(quest_list)} quests in map '{chapter_cn}'")
+            _nav_logger.handlers[0].flush()
+            
             quest_coordinates = None
             
             for item in quest_list:
@@ -96,18 +102,19 @@ class GeneralNavigationAction(CustomAction):
                     q_name, q_pos = item[0], item[1]
                     if q_name == target_quest:
                         quest_coordinates = q_pos
+                        _nav_logger.info(f"[Nav] Found coordinates for '{target_quest}': {q_pos}")
                         break
                         
             if not quest_coordinates:
+                _nav_logger.error(f"[Nav] Coordinates NOT found for quest: {target_quest}")
                 return CustomAction.RunResult(success=False)
             
             target_x, target_y = quest_coordinates
 
             # 4. 加载大地图模板
             _nav_logger.info("[Nav] Step 4: Loading map template...")
-            # resource 在根目录，即 agent 的上一级 (os.path.dirname(AGENT_DIR))
             ROOT_DIR = os.path.dirname(AGENT_DIR)
-            map_template_path = os.path.join(ROOT_DIR, "resource", "common", "image", "地图坐标导航", f"{map_name}.png")
+            map_template_path = os.path.join(ROOT_DIR, "resource", "common", "image", "map", f"{map_image_name}.png")
             _nav_logger.info(f"[Nav] Template path: {map_template_path}")
             
             map_template = cv2.imread(map_template_path)
@@ -117,14 +124,13 @@ class GeneralNavigationAction(CustomAction):
                 _nav_logger.error(f"[Nav] Error: Failed to load template image at {map_template_path}")
                 return CustomAction.RunResult(success=False)
 
-            # 5. 【核心】采用 FGO-py 方式的截图 (通过 ADB Shell)
+            # 5. 【核心】截图与预处理
             controller = context.tasker.controller
             context.run_task("UI隐藏")
             time.sleep(1)
             
-            # 执行 adb shell screencap -p 获取 PNG 二进制流
-            png_data = controller.post_command(["shell", "screencap", "-p"]).wait().get()
-            screen = cv2.imdecode(np.frombuffer(png_data, np.uint8), cv2.IMREAD_COLOR)
+            # 使用 MaaFramework 标准截图接口 (返回 BGR numpy array)
+            screen = controller.post_screencap().wait().get()
             
             if screen is None:
                 return CustomAction.RunResult(success=False)
@@ -175,9 +181,8 @@ class GeneralNavigationAction(CustomAction):
                 controller.post_swipe(int(640 + slide_dx), int(360 + slide_dy), int(640 - slide_dx), int(360 - slide_dy), 1000).wait()
                 time.sleep(1.5)
                 
-                # 重新定位 (同样使用 Shell 截图)
-                png_data = controller.post_command(["shell", "screencap", "-p"]).wait().get()
-                screen = cv2.imdecode(np.frombuffer(png_data, np.uint8), cv2.IMREAD_COLOR)
+                # 重新定位 (使用标准截图接口)
+                screen = controller.post_screencap().wait().get()
                 if screen is None: return CustomAction.RunResult(success=False)
                 
                 map_region = screen[200:520, 200:1080]
