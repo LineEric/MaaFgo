@@ -158,62 +158,16 @@ def install_chores():
 
 
 def setup_embedded_python():
-    """配置嵌入式 Python 环境并安装依赖"""
+    """M9A 模式：仅确保 Python 目录存在，依赖由 CI 工作流通过 pip install -r requirements.txt 安装"""
     py_dir = install_path / "python"
     if not py_dir.exists():
         print("Error: Python directory not found in install. Ensure CI prepares it first.")
-        return
-
-    # 1. 安装 pip
-    py_exe = py_dir / "python.exe"
-    get_pip = py_dir / "get-pip.py"
-    if not get_pip.exists():
-        print("Downloading get-pip.py...")
-        urllib.request.urlretrieve("https://bootstrap.pypa.io/get-pip.py", str(get_pip))
-    
-    print("Installing pip...")
-    subprocess.run([str(py_exe), str(get_pip)], check=True)
-
-    # 2. 离线安装依赖
-    deps_dir = working_dir / "deps" / "python_packages"
-    if deps_dir.exists():
-        packages = ["maafw", "maaagentbinary", "opencv-python"]
-        cmd = [str(py_exe), "-m", "pip", "install", "--no-index", 
-               f"--find-links={deps_dir}"] + packages
-        print(f"Installing dependencies: {', '.join(packages)}")
-        subprocess.run(cmd, check=True)
-    else:
-        print("Warning: deps/python_packages not found, skipping offline install.")
 
 
 def install_agent_deps():
-    """仅将 cv2 移动到 agent/libs/，避免与 MAAF 内置的 numpy 冲突"""
-    libs_dir = install_path / "agent" / "libs"
-    libs_dir.mkdir(parents=True, exist_ok=True)
-    site_packages = install_path / "python" / "Lib" / "site-packages"
-
-    if not site_packages.exists():
-        print("Warning: site-packages not found, skipping agent deps move.")
-        return
-
-    print(f"Moving cv2 to {libs_dir}...")
-    # 只移动 cv2
-    cv2_src = site_packages / "cv2"
-    if cv2_src.exists():
-        dest = libs_dir / "cv2"
-        if dest.exists():
-            shutil.rmtree(dest)
-        shutil.move(str(cv2_src), str(dest))
-        print(f"  Moved: cv2")
-    
-    # 清理可能误移的其他库（如 numpy, PIL）
-    for item in libs_dir.iterdir():
-        if item.name.startswith(("numpy", "PIL", "pillow")):
-            if item.is_dir():
-                shutil.rmtree(item)
-            else:
-                item.unlink()
-            print(f"  Removed unnecessary lib: {item.name}")
+    """Avalonia 依赖加载机制：优先 deps/python_packages，失败则 fallback 到 site-packages
+    因此 cv2 和 numpy 留在 site-packages 即可，不需要移动到 agent/libs"""
+    print("Agent deps will be loaded from site-packages by Avalonia fallback mechanism.")
 
 def install_agent():
     # 复制 agent 目录，但排除 MWU 版本文件

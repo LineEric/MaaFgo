@@ -136,14 +136,18 @@ jobs:
       - name: Setup & Install MWU
         shell: bash
         run: |
-          # 1. 配置嵌入式 Python
+          # 1. 配置嵌入式 Python (仅下载和解压)
           python tools/setup_embed_python.py build/python ${{ matrix.arch == 'x86_64' && 'amd64' || 'arm64' }}
           
-          # 2. 解压 MWU
+          # 2. 安装依赖 (M9A 模式：直接在 CI 环境中通过 pip 安装到嵌入式 Python)
+          ./build/python/python.exe -m pip install --upgrade pip
+          ./build/python/python.exe -m pip install -r requirements.txt
+          
+          # 3. 解压 MWU
           MWU_FILE=$(ls MWU-*.7z | head -n 1)
           7z x "$MWU_FILE" -obuild -y
           
-          # 3. 调用脚本完成依赖安装和资源组装
+          # 4. 调用脚本完成资源组装
           python tools/install-MWU.py ${{ env.tag }} ${{ matrix.platform }} ${{ matrix.arch }}
 
       - name: Get clean version
@@ -228,15 +232,19 @@ jobs:
       - name: Setup & Install Avalonia
         shell: bash
         run: |
-          # 1. 配置嵌入式 Python
+          # 1. 配置嵌入式 Python (仅下载和解压)
           python tools/setup_embed_python.py install/python ${{ matrix.arch == 'x86_64' && 'amd64' || 'arm64' }}
           
-          # 2. 准备 MFA 文件（-n 不覆盖已存在的 python 目录）
+          # 2. 安装依赖 (M9A 模式：直接在 CI 环境中通过 pip 安装到嵌入式 Python)
+          ./install/python/python.exe -m pip install --upgrade pip
+          ./install/python/python.exe -m pip install -r requirements.txt
+          
+          # 3. 准备 MFA 文件（-n 不覆盖已存在的 python 目录）
           mkdir -p install
           cp -rpvn MFA/. install/
           rm -rf install/runtimes
           
-          # 3. 调用脚本完成依赖安装和资源组装
+          # 4. 调用脚本完成资源组装
           python tools/install-Avalonia.py ${{ needs.meta.outputs.tag }} ${{ matrix.os }} ${{ matrix.arch }}
 
       - name: Get version without suffix
