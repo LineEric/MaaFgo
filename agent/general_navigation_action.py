@@ -137,7 +137,7 @@ class GeneralNavigationAction(CustomAction):
                 return CustomAction.RunResult(success=False)
 
             # 工具函数：处理一次截图 → 裁剪 → 缩放 → 保存临时文件
-            def _prepare_screencap_template(raw_screen):
+            def _prepare_screencap_template(raw_screen, iteration=0):
                 """裁剪地图区域、缩放至 30%，保存为临时 PNG，返回路径"""
                 # screencap 是 BGR(A)，必须先转为 RGB 再让 PIL 保存 PNG。
                 # 原因：PIL 以 RGB 方式写入 PNG，cv2 读回时再按 BGR 解析，
@@ -156,12 +156,19 @@ class GeneralNavigationAction(CustomAction):
                 new_h = int(region_pil.height * 0.3)
                 small_pil = region_pil.resize((new_w, new_h), Image.BICUBIC)
                 # 保存到系统临时目录（绝对路径，MaaFramework template 支持）
-                tmp = os.path.join(tempfile.gettempdir(), "maa_nav_screencap_region.png")
+                tmp = os.path.join(tempfile.gettempdir(), f"maa_nav_screencap_region_{iteration}.png")
                 small_pil.save(tmp)
+                
+                # 保存调试用截图（仅前3次迭代）
+                if iteration < 3:
+                    debug_path = os.path.join(os.path.dirname(__file__), f'debug_screenshot_iter{iteration}.png')
+                    pil_screen.save(debug_path)
+                    _nav_logger.info(f"[Nav] Saved debug screenshot for iteration {iteration}")
+                
                 return tmp, region_pil
 
             # 第一次处理截图
-            screencap_template_path, region_pil_debug = _prepare_screencap_template(screen)
+            screencap_template_path, region_pil_debug = _prepare_screencap_template(screen, iteration=0)
 
             # 保存调试用裁剪图：region_pil_debug 已是 RGB（_prepare_screencap_template 内已转换），直接保存
             region_pil_debug.save(os.path.join(os.path.dirname(__file__), 'debug_map_region.png'))
@@ -174,6 +181,12 @@ class GeneralNavigationAction(CustomAction):
 
             # 工具函数：在大地图中定位截图区域，返回 (current_x, current_y) 或 None
             def _locate_on_map(tmpl_path):
+                # 计算模板文件的哈希值，用于调试
+                import hashlib
+                with open(tmpl_path, 'rb') as f:
+                    tmpl_hash = hashlib.md5(f.read()).hexdigest()[:8]
+                _nav_logger.info(f"[Nav] Matching template: {os.path.basename(tmpl_path)}, hash={tmpl_hash}")
+                
                 detail = context.run_recognition(
                     "LocateOnMap",
                     map_mat,
@@ -183,18 +196,25 @@ class GeneralNavigationAction(CustomAction):
                                 "type": "TemplateMatch",
                                 "param": {
                                     "template": [tmpl_path],
-                                    "threshold": 0.5
+                                    "threshold": 0.5,
+                                    "method": 10001  # TM_SQDIFF_NORMED (inverted), 与 FGO-py 一致
                                 }
                             }
                         }
                     }
                 )
-                _nav_logger.info(f"[Nav] run_recognition detail={detail}, box={getattr(detail, 'box', 'N/A')}")
+                
                 if detail is None or detail.box is None:
+                    _nav_logger.warning("[Nav] Template match failed (detail=None or box=None)")
                     return None
+                    
                 # detail.box = (x, y, w, h)，坐标在缩放后的大地图中
                 loc_x = detail.box[0]
                 loc_y = detail.box[1]
+                score = detail.best_result.score if hasattr(detail, 'best_result') and detail.best_result else 'N/A'
+                
+                _nav_logger.info(f"[Nav] Match result - loc=({loc_x}, {loc_y}), box=({detail.box[2]}, {detail.box[3]}), score={score}")
+                
                 cx = int(loc_x / 0.3 + 440)
                 cy = int(loc_y / 0.3 + 160)
                 return cx, cy
@@ -236,8 +256,14 @@ class GeneralNavigationAction(CustomAction):
                     controller.post_click(1231, 687).wait()
                     time.sleep(0.3)
 
+                    # 点击目标关卡
                     controller.post_click(int(screen_target_x), int(screen_target_y)).wait()
-                    _nav_logger.info("[Nav] Click executed. Returning success=True")
+                    _nav_logger.info("[Nav] Click executed. Waiting for game to return to quest selection...")
+                    
+                    # 等待游戏回到关卡选择界面（通常需要 2-3 秒）
+                    time.sleep(3)
+                    
+                    _nav_logger.info("[Nav] Returning success=True")
                     return CustomAction.RunResult(success=True)
 
                 _nav_logger.info(
@@ -274,7 +300,7 @@ class GeneralNavigationAction(CustomAction):
                 if screen is None or screen.size == 0:
                     return CustomAction.RunResult(success=False)
 
-                screencap_template_path, _ = _prepare_screencap_template(screen)
+                screencap_template_path, _ = _prepare_screencap_template(screen, iteration=iteration+1)
                 pos = _locate_on_map(screencap_template_path)
                 if pos is None:
                     _nav_logger.error("[Nav] Re-position match failed!")
