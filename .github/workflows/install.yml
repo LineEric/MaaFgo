@@ -95,6 +95,29 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Download MaaFramework
+        id: download_mfw
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: MaaXYZ/MaaFramework
+          fileName: "MAA-${{ matrix.platform }}-${{ matrix.arch }}*"
+          latest: true
+          out-file-path: "deps"
+          extract: true
+
+      - name: Flatten MaaFramework directory
+        shell: bash
+        run: |
+          # 查找解压后的 MaaFramework 目录并移动内容到 deps 根目录
+          MFW_DIR=$(find deps -maxdepth 1 -type d -name "MAA-*" | head -n 1)
+          if [ -n "$MFW_DIR" ] && [ "$MFW_DIR" != "deps" ]; then
+            echo "Moving contents from $MFW_DIR to deps/"
+            mv "$MFW_DIR"/* deps/
+            mv "$MFW_DIR"/.* deps/ 2>/dev/null || true
+            rmdir "$MFW_DIR"
+          fi
+          ls -la deps/
+
       - name: Setup Python
         uses: actions/setup-python@v6.2.0
         with:
@@ -127,14 +150,14 @@ jobs:
       - name: Install Agent Dependencies
         shell: bash
         run: |
-          # 使用刚才下载的 Python 安装依赖到 build/deps
+          # 使用嵌入式 Python 直接安装依赖到 site-packages
           if [[ "${{ matrix.platform }}" == "win" ]]; then
             # 1. 下载 get-pip.py
             curl -L https://bootstrap.pypa.io/get-pip.py -o build/python/get-pip.py
             # 2. 安装 pip
             ./build/python/python.exe build/python/get-pip.py
-            # 3. 离线安装所有预下载的 Wheel 包
-            ./build/python/python.exe -m pip install --no-index --find-links deps/python_packages maafw maaagentbinary numpy Pillow --target build/deps
+            # 3. 离线安装所有预下载的 Wheel 包到 site-packages
+            ./build/python/python.exe -m pip install --no-index --find-links deps/python_packages maafw maaagentbinary numpy Pillow
           fi
 
 
@@ -180,11 +203,12 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
       - name: Download MaaFramework
+        id: download_mfw
         uses: robinraju/release-downloader@v1
         with:
           repository: MaaXYZ/MaaFramework
@@ -192,6 +216,19 @@ jobs:
           latest: true
           out-file-path: "deps"
           extract: true
+
+      - name: Flatten MaaFramework directory
+        shell: bash
+        run: |
+          # 查找解压后的 MaaFramework 目录并移动内容到 deps 根目录
+          MFW_DIR=$(find deps -maxdepth 1 -type d -name "MAA-*" | head -n 1)
+          if [ -n "$MFW_DIR" ] && [ "$MFW_DIR" != "deps" ]; then
+            echo "Moving contents from $MFW_DIR to deps/"
+            mv "$MFW_DIR"/* deps/
+            mv "$MFW_DIR"/.* deps/ 2>/dev/null || true
+            rmdir "$MFW_DIR"
+          fi
+          ls -la deps/
 
       - name: Download Python Dependencies
         shell: bash
@@ -312,7 +349,7 @@ jobs:
         run: |
           7z a -t7z -mx=9 -mmt -ms -r MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}.7z ./install/*
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}
           path: MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}.7z
