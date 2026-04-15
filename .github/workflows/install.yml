@@ -136,8 +136,6 @@ jobs:
       - name: Setup & Install MWU
         shell: bash
         run: |
-          # 安装脚本依赖
-          pip install json-with-comments
           # 解压 MWU 到 build 目录
           MWU_FILE=$(ls MWU-*.7z | head -n 1)
           echo "Found MWU file: $MWU_FILE"
@@ -227,8 +225,6 @@ jobs:
       - name: Setup & Install Avalonia
         shell: bash
         run: |
-          # 安装脚本依赖
-          pip install json-with-comments
           rm -rf install
           mkdir -p install
           # 复制 MFA 文件并清理运行时
