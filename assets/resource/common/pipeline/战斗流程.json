@@ -154,6 +154,7 @@
             "apple_type": "铜苹果",
             "battle_type": "continuous",
             "bbc_team_config": "",
+            "chaldea_import_source": "",
             "connect": "auto",
             "ld_index": 0,
             "ld_path": "",

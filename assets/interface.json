@@ -39,6 +39,7 @@
     "./tasks/登录.json",
     "./tasks/种树.json",
     "./tasks/日常战斗.json",
+    "./tasks/Chaldea启动.json",
     "./tasks/关闭游戏.json",
     "./tasks/冠位戴冠战.json",
     "./options/chapter.json",
@@ -82,12 +83,13 @@
     "./options/quests/OrdealCall.json",
     "./options/quests/平面之月.json",
     "./options/选择冠位难度.json",
-    "./options/选择冠位职介.json"
+    "./options/选择冠位职介.json",
+    "./options/chaldea_team.json"
   ],
   "agent": {
     "child_exec": "python",
     "child_args": [
-      "./agent/main.py"
+      "../agent/main.py"
     ]
   }
 }

@@ -157,6 +157,41 @@ class ExecuteBbcTask(CustomAction):
         ld_index = attach_data.get('ld_index', 0)
         manual_port = attach_data.get('manual_port', '')
         
+        # ========== Chaldea 队伍导入 ==========
+        chaldea_import_source = attach_data.get('chaldea_import_source', '')
+        
+        if chaldea_import_source:
+            try:
+                # 使用相对包引用或绝对引用，如果在一个目录下可以直接 import
+                import sys
+                agent_dir = os.path.dirname(os.path.abspath(__file__))
+                if agent_dir not in sys.path:
+                    sys.path.append(agent_dir)
+                
+                from chaldea_converter import fetch_and_convert
+                logger.info(f"[Chaldea] 开始解析导入来源: {chaldea_import_source[:30]}...")
+                
+                # 确定保存目录
+                bbc_settings_dir = os.path.join(BBC_PATH, 'settings')
+                os.makedirs(bbc_settings_dir, exist_ok=True)
+                
+                # 调用统一的 fetch_and_convert
+                converted_filename = fetch_and_convert(
+                    source=chaldea_import_source,
+                    output_dir=bbc_settings_dir,
+                )
+                
+                if converted_filename:
+                    # 获取文件名并使用它覆盖手动输入的选择
+                    team_config = converted_filename
+                    print(f"[Chaldea] 使用 Chaldea 队伍: {converted_filename}")
+                else:
+                    print(f"[Chaldea] 解析失败，回退到手选配置: {team_config}")
+            except Exception as e:
+                print(f"[Chaldea] 导入异常: {e}，回退到手选配置")
+                import traceback
+                traceback.print_exc()
+
         # 验证必需参数
         if not team_config:
             print(f"[ExecuteBbcTask] 错误：未提供队伍配置文件路径")
