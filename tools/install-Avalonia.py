@@ -182,7 +182,7 @@ def install_agent_deps():
             "--no-index",
             "--find-links", str(working_dir / "deps" / "python_packages"),
             "-t", str(libs_dir),
-            "maafw", "maaagentbinary", "numpy", "Pillow"
+            "opencv-python"
         ])
         print("Agent dependencies installed successfully.")
     except Exception as e:
