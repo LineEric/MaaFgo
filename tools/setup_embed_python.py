@@ -49,19 +49,13 @@ def setup_embed_python(target_dir, arch="amd64", version="3.12.10"):
         pth_file.write_text(content, encoding="utf-8")
         print(f"Configured {pth_file.name}")
     
-    # 4. 安装 pip
-    py_exe = target_path / "python.exe"
+    # 4. 下载 get-pip.py (留给 CI 调用 pip install)
     get_pip_script = target_path / "get-pip.py"
-    
     if not get_pip_script.exists():
-        print("Downloading get-pip.py...")
+        print("Downloading get-pip.py for later use...")
         urllib.request.urlretrieve("https://bootstrap.pypa.io/get-pip.py", get_pip_script)
     
-    print("Installing pip...")
-    os.system(f'"{py_exe}" "{get_pip_script}" --no-warn-script-location')
-    get_pip_script.unlink()
-    
-    print("Embedded Python setup complete.")
+    print("Embedded Python setup complete. Please run 'python.exe get-pip.py' to install pip.")
 
 if __name__ == "__main__":
     # 默认参数，CI 调用时可以传参
