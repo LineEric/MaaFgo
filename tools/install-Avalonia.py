@@ -207,7 +207,7 @@ def setup_embedded_python():
 
 
 def install_agent_deps():
-    """将 site-packages 中的 cv2 等库移动到 agent/libs/"""
+    """仅将 cv2 移动到 agent/libs/，避免与 MAAF 内置的 numpy 冲突"""
     libs_dir = install_path / "agent" / "libs"
     libs_dir.mkdir(parents=True, exist_ok=True)
     site_packages = install_path / "python" / "Lib" / "site-packages"
@@ -216,15 +216,24 @@ def install_agent_deps():
         print("Warning: site-packages not found, skipping agent deps move.")
         return
 
-    print(f"Moving dependencies from site-packages to {libs_dir}...")
-    for item in site_packages.iterdir():
-        # 移动 cv2, numpy, PIL 等导航所需的库
-        if item.name.startswith(("cv2", "numpy", "PIL", "pillow")):
-            dest = libs_dir / item.name
-            if dest.exists():
-                shutil.rmtree(dest) if dest.is_dir() else dest.unlink()
-            shutil.move(str(item), str(dest))
-            print(f"  Moved: {item.name}")
+    print(f"Moving cv2 to {libs_dir}...")
+    # 只移动 cv2
+    cv2_src = site_packages / "cv2"
+    if cv2_src.exists():
+        dest = libs_dir / "cv2"
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.move(str(cv2_src), str(dest))
+        print(f"  Moved: cv2")
+    
+    # 清理可能误移的其他库（如 numpy, PIL）
+    for item in libs_dir.iterdir():
+        if item.name.startswith(("numpy", "PIL", "pillow")):
+            if item.is_dir():
+                shutil.rmtree(item)
+            else:
+                item.unlink()
+            print(f"  Removed unnecessary lib: {item.name}")
 
 def install_agent():
     # 复制 agent 目录，但排除 MWU 版本文件

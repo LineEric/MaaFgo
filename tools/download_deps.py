@@ -7,8 +7,6 @@ def main():
     packages = [
         "maafw",
         "maaagentbinary",
-        "numpy",
-        "Pillow",
         "opencv-python"
     ]
     
