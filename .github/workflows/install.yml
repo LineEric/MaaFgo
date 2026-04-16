@@ -136,19 +136,12 @@ jobs:
       - name: Setup & Install MWU
         shell: bash
         run: |
-          # 1. 配置嵌入式 Python (仅下载和解压)
-          python tools/setup_embed_python.py build/python ${{ matrix.arch == 'x86_64' && 'amd64' || 'arm64' }}
-          
-          # 2. 安装依赖 (M9A 模式：直接在 CI 环境中通过 pip 安装到嵌入式 Python)
-          ./build/python/python.exe build/python/get-pip.py
-          ./build/python/python.exe -m pip install --upgrade pip
-          ./build/python/python.exe -m pip install -r requirements.txt
-          
-          # 3. 解压 MWU
+          # 1. 解压 MWU (MWU 自身包含 Nuitka 编译好的 Python 环境)
           MWU_FILE=$(ls MWU-*.7z | head -n 1)
           7z x "$MWU_FILE" -obuild -y
           
-          # 4. 调用脚本完成资源组装
+          # 2. 调用脚本完成资源组装与 deps 依赖注入
+          # install-MWU.py 现在会自动在 build/deps 中安装 cv2 和 numpy
           python tools/install-MWU.py ${{ env.tag }} ${{ matrix.platform }} ${{ matrix.arch }}
 
       - name: Get clean version

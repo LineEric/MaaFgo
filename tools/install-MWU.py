@@ -125,13 +125,9 @@ def install_resource():
 
     interface["version"] = version
 
-    # 设置 agent 使用内置 Python
-    if os_name == "win":
-        interface["agent"]["child_exec"] = r"./python/python.exe"
-    elif os_name == "macos":
-        interface["agent"]["child_exec"] = r"./python/bin/python3"
-    else:
-        interface["agent"]["child_exec"] = r"python3"
+    # 设置 agent 使用内置解释器（黑魔法模式下，MWU 会自动处理 python 调用）
+    # 对于黑魔法，通常不需要指定具体的 python.exe 路径，或者指向一个占位符
+    interface["agent"]["child_exec"] = "python"
 
     with open(install_path / "interface.json", "w", encoding="utf-8") as f:
         json.dump(interface, f, ensure_ascii=False, indent=2)
@@ -148,24 +144,31 @@ def install_chores():
     )
 
 
-def setup_embedded_python():
-    """M9A 模式：依赖由 CI 工作流通过 pip install -r requirements.txt 安装到嵌入式 Python"""
-    py_dir = install_path / "python"
-    if not py_dir.exists():
-        print("Error: Python directory not found in build. Ensure CI prepares it first.")
-    else:
-        # 确保 get-pip.py 存在，如果不存在则下载
-        get_pip_path = py_dir / "get-pip.py"
-        if not get_pip_path.exists():
-            print("Downloading get-pip.py...")
-            import urllib.request
-            urllib.request.urlretrieve("https://bootstrap.pypa.io/get-pip.py", str(get_pip_path))
-        
-        # 执行 pip 安装
-        python_exe = py_dir / "python.exe" if os_name == "win" else py_dir / "bin" / "python3"
-        subprocess.run([str(python_exe), str(get_pip_path)], check=True)
-        subprocess.run([str(python_exe), "-m", "pip", "install", "--upgrade", "pip"], check=True)
-        subprocess.run([str(python_exe), "-m", "pip", "install", "-r", str(working_dir / "requirements.txt")], check=True)
+def setup_deps_for_black_magic():
+    """
+    为 MWU 的黑魔法 Agent 机制准备 deps 目录
+    将 cv2 和 numpy 安装到 build/deps，以便动态加载
+    """
+    deps_path = install_path / "deps"
+    deps_path.mkdir(exist_ok=True)
+    
+    print(f"Installing extra dependencies for Agent to: {deps_path}")
+    
+    # 读取 pyproject.toml 中的 numpy 版本以确保 ABI 兼容
+    # 这里为了简化，先硬编码为与 MWU 主程序匹配的版本
+    target_numpy = "numpy==2.3.5" 
+    
+    try:
+        subprocess.run([
+            sys.executable, "-m", "pip", "install", 
+            target_numpy,
+            "opencv-python", 
+            "--target", str(deps_path),
+            "--no-cache-dir"
+        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print("Successfully installed cv2 and numpy into deps folder.")
+    except Exception as e:
+        print(f"Warning: Failed to install deps: {e}")
 
 
 def install_agent():
@@ -200,7 +203,7 @@ if __name__ == "__main__":
     install_deps()
     install_resource()
     install_chores()
-    setup_embedded_python()  # M9A 模式：在构建时安装依赖到嵌入式 Python
+    setup_deps_for_black_magic()  # 替换为 deps 准备逻辑
     install_agent()
     install_bbcdll()
     install_tasks()
