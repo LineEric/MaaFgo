@@ -20,7 +20,11 @@
     "七丘之城": {
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "next": [
+            "进入主线记录1",
+            "[JumpBack]主线记录1导航"
+        ]
     },
     "下总国": {
         "recognition": {
@@ -35,16 +39,24 @@
     "伦敦": {
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "next": [
+            "进入主线记录1",
+            "[JumpBack]主线记录1导航"
+        ]
     },
     "俄刻阿诺斯": {
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "next": [
+            "进入主线记录1",
+            "[JumpBack]主线记录1导航"
+        ]
     },
     "冬木": {
         "next": [
-            "冬木导航",
+            "进入主线记录1",
             "[JumpBack]主线记录1导航"
         ],
         "recognition": {
@@ -54,12 +66,20 @@
     "卡美洛": {
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "next": [
+            "进入主线记录1",
+            "[JumpBack]主线记录1导航"
+        ]
     },
     "合众为一": {
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "next": [
+            "进入主线记录1",
+            "[JumpBack]主线记录1导航"
+        ]
     },
     "塞勒姆": {
         "recognition": {
@@ -69,7 +89,11 @@
     "奥尔良": {
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "next": [
+            "进入主线记录1",
+            "[JumpBack]主线记录1导航"
+        ]
     },
     "奥林波斯": {
         "recognition": {
@@ -79,7 +103,11 @@
     "巴比伦尼亚": {
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "next": [
+            "进入主线记录1",
+            "[JumpBack]主线记录1导航"
+        ]
     },
     "平安京": {
         "recognition": {
@@ -97,6 +125,14 @@
         }
     },
     "由伽刹多罗": {
+        "recognition": {
+            "type": "DirectHit"
+        }
+    },
+    "章节导航": {
+        "next": [
+            "冬木"
+        ],
         "recognition": {
             "type": "DirectHit"
         }
@@ -122,14 +158,6 @@
         }
     },
     "雅戈泰": {
-        "recognition": {
-            "type": "DirectHit"
-        }
-    },
-    "章节导航": {
-        "next": [
-            "冬木"
-        ],
         "recognition": {
             "type": "DirectHit"
         }

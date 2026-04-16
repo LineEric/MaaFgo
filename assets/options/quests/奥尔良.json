@@ -3,164 +3,164 @@
         "奥尔良": {
             "type": "select",
             "label": "关卡",
-            "default": "栋雷米",
+            "default": "贞德诞生之地",
             "cases": [
                 {
-                    "name": "栋雷米",
-                    "label": "栋雷米",
+                    "name": "贞德诞生之地",
+                    "label": "贞德诞生之地",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "栋雷米"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/贞德诞生之地.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "沃库勒尔",
-                    "label": "沃库勒尔",
+                    "name": "起始的堡垒",
+                    "label": "起始的堡垒",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "沃库勒尔"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/起始的堡垒.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "拉沙里泰",
-                    "label": "拉沙里泰",
+                    "name": "卢瓦尔河畔",
+                    "label": "卢瓦尔河畔",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "拉沙里泰"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/卢瓦尔河畔.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "汝拉",
-                    "label": "汝拉",
+                    "name": "太古之森",
+                    "label": "太古之森",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "汝拉"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/太古之森.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "里昂",
-                    "label": "里昂",
+                    "name": "死者之城",
+                    "label": "死者之城",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "里昂"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/死者之城.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "蒂耶尔",
-                    "label": "蒂耶尔",
+                    "name": "刃物之镇",
+                    "label": "刃物之镇",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "蒂耶尔"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/刃物之镇.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "奥尔良",
-                    "label": "奥尔良",
+                    "name": "命运的堡垒",
+                    "label": "命运的堡垒",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "奥尔良"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/命运的堡垒.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "巴黎",
-                    "label": "巴黎",
+                    "name": "艺术之都",
+                    "label": "艺术之都",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "巴黎"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/艺术之都.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "马赛",
-                    "label": "马赛",
+                    "name": "毗邻地中海",
+                    "label": "毗邻地中海",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "马赛"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/毗邻地中海.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "波尔多",
-                    "label": "波尔多",
+                    "name": "美酒干杯",
+                    "label": "美酒干杯",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "波尔多"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Orleans/美酒干杯.png"
                             ]
                         }
                     }

@@ -1,28 +1,5 @@
 {
-    "找到冬木": {
-        "action": {
-            "type": "Click"
-        },
-        "next": [
-            "地图坐标导航"
-        ],
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "roi": [
-                    646,
-                    112,
-                    572,
-                    485
-                ],
-                "template": [
-                    "OoTTemple/冬木.png"
-                ],
-                "threshold": 0.7
-            }
-        }
-    },
-    "冬木寻找": {
+    "进入主线记录1寻找章节": {
         "action": {
             "type": "Swipe",
             "param": {
@@ -50,10 +27,10 @@
             "type": "DirectHit"
         }
     },
-    "冬木导航": {
+    "进入主线记录1": {
         "next": [
-            "找到冬木",
-            "[JumpBack]冬木寻找"
+            "找到进入主线记录1章节",
+            "[JumpBack]进入主线记录1寻找章节"
         ],
         "recognition": {
             "type": "TemplateMatch",
@@ -65,6 +42,29 @@
                     80
                 ],
                 "template": "OoTTemple/主线记录1-1.png"
+            }
+        }
+    },
+    "找到进入主线记录1章节": {
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "地图坐标导航"
+        ],
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    646,
+                    112,
+                    572,
+                    485
+                ],
+                "template": [
+                    "OoTTemple/冬木.png"
+                ],
+                "threshold": 0.7
             }
         }
     }

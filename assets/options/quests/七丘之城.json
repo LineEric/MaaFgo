@@ -3,180 +3,180 @@
         "七丘之城": {
             "type": "select",
             "label": "关卡",
-            "default": "亚壁街道",
+            "default": "街道女王",
             "cases": [
                 {
-                    "name": "亚壁街道",
-                    "label": "亚壁街道",
+                    "name": "街道女王",
+                    "label": "街道女王",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "亚壁街道"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/街道女王.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "罗马",
-                    "label": "罗马",
+                    "name": "罗马非一日建成",
+                    "label": "罗马非一日建成",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "罗马"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/罗马非一日建成.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "佛罗伦萨",
-                    "label": "佛罗伦萨",
+                    "name": "花之都",
+                    "label": "花之都",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "佛罗伦萨"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/花之都.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "梅迪奥兰",
-                    "label": "梅迪奥兰",
+                    "name": "平原中心",
+                    "label": "平原中心",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "梅迪奥兰"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/平原中心.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "马西利亚",
-                    "label": "马西利亚",
+                    "name": "远古的港口",
+                    "label": "远古的港口",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "马西利亚"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/远古的港口.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "高卢",
-                    "label": "高卢",
+                    "name": "燃烧的战火",
+                    "label": "燃烧的战火",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "高卢"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/燃烧的战火.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "有形之岛",
-                    "label": "有形之岛",
+                    "name": "女神的洞窟",
+                    "label": "女神的洞窟",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "有形之岛"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/女神的洞窟.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "联军首都",
-                    "label": "联军首都",
+                    "name": "罗马的地平线",
+                    "label": "罗马的地平线",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "联军首都"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/罗马的地平线.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "埃特纳火山",
-                    "label": "埃特纳火山",
+                    "name": "沸腾的大地",
+                    "label": "沸腾的大地",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "埃特纳火山"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/沸腾的大地.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "不列颠尼亚",
-                    "label": "不列颠尼亚",
+                    "name": "浓雾深邃之森",
+                    "label": "浓雾深邃之森",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "不列颠尼亚"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/浓雾深邃之森.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "日耳曼尼亚",
-                    "label": "日耳曼尼亚",
+                    "name": "黑森林",
+                    "label": "黑森林",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "日耳曼尼亚"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Septem/黑森林.png"
                             ]
                         }
                     }

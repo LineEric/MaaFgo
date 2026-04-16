@@ -19,6 +19,11 @@
                             "attach": {
                                 "chapter": "冬木"
                             }
+                        },
+                        "找到进入主线记录1章节": {
+                            "template": [
+                                "OoTTemple/冬木.png"
+                            ]
                         }
                     }
                 },
@@ -36,6 +41,11 @@
                             "attach": {
                                 "chapter": "奥尔良"
                             }
+                        },
+                        "找到进入主线记录1章节": {
+                            "template": [
+                                "OoTTemple/奥尔良.png"
+                            ]
                         }
                     }
                 },
@@ -53,6 +63,11 @@
                             "attach": {
                                 "chapter": "七丘之城"
                             }
+                        },
+                        "找到进入主线记录1章节": {
+                            "template": [
+                                "OoTTemple/七丘之城.png"
+                            ]
                         }
                     }
                 },
@@ -70,6 +85,11 @@
                             "attach": {
                                 "chapter": "俄刻阿诺斯"
                             }
+                        },
+                        "找到进入主线记录1章节": {
+                            "template": [
+                                "OoTTemple/俄刻阿诺斯.png"
+                            ]
                         }
                     }
                 },
@@ -87,6 +107,11 @@
                             "attach": {
                                 "chapter": "伦敦"
                             }
+                        },
+                        "找到进入主线记录1章节": {
+                            "template": [
+                                "OoTTemple/伦敦.png"
+                            ]
                         }
                     }
                 },
@@ -104,6 +129,11 @@
                             "attach": {
                                 "chapter": "合众为一"
                             }
+                        },
+                        "找到进入主线记录1章节": {
+                            "template": [
+                                "OoTTemple/合众为一.png"
+                            ]
                         }
                     }
                 },
@@ -121,6 +151,11 @@
                             "attach": {
                                 "chapter": "卡美洛"
                             }
+                        },
+                        "找到进入主线记录1章节": {
+                            "template": [
+                                "OoTTemple/卡美洛.png"
+                            ]
                         }
                     }
                 },
@@ -138,6 +173,11 @@
                             "attach": {
                                 "chapter": "巴比伦尼亚"
                             }
+                        },
+                        "找到进入主线记录1章节": {
+                            "template": [
+                                "OoTTemple/巴比伦尼亚.png"
+                            ]
                         }
                     }
                 },
