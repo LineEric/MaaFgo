@@ -3,10 +3,10 @@
         "巴比伦尼亚": {
             "type": "select",
             "label": "关卡",
-            "default": "q废都巴比伦",
+            "default": "废都巴比伦",
             "cases": [
                 {
-                    "name": "q废都巴比伦",
+                    "name": "废都巴比伦",
                     "label": "废都巴比伦",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -22,7 +22,7 @@
                     }
                 },
                 {
-                    "name": "q北之高台",
+                    "name": "北之高台",
                     "label": "北之高台",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -38,7 +38,7 @@
                     }
                 },
                 {
-                    "name": "q黑色杉木林",
+                    "name": "黑色杉木林",
                     "label": "黑色杉木林",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -54,7 +54,7 @@
                     }
                 },
                 {
-                    "name": "q高原",
+                    "name": "高原",
                     "label": "高原",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -70,7 +70,7 @@
                     }
                 },
                 {
-                    "name": "q湿地",
+                    "name": "湿地",
                     "label": "湿地",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -86,7 +86,7 @@
                     }
                 },
                 {
-                    "name": "q乌尔",
+                    "name": "乌尔",
                     "label": "乌尔",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -102,7 +102,7 @@
                     }
                 },
                 {
-                    "name": "q埃里都",
+                    "name": "埃里都",
                     "label": "埃里都",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -118,7 +118,7 @@
                     }
                 },
                 {
-                    "name": "q观测所",
+                    "name": "观测所",
                     "label": "观测所",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -134,7 +134,7 @@
                     }
                 },
                 {
-                    "name": "q芦苇原",
+                    "name": "芦苇原",
                     "label": "芦苇原",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -150,7 +150,7 @@
                     }
                 },
                 {
-                    "name": "q库撒",
+                    "name": "库撒",
                     "label": "库撒",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -166,7 +166,7 @@
                     }
                 },
                 {
-                    "name": "q北壁",
+                    "name": "北壁",
                     "label": "北壁",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -182,7 +182,7 @@
                     }
                 },
                 {
-                    "name": "q尼普尔",
+                    "name": "尼普尔",
                     "label": "尼普尔",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -198,7 +198,7 @@
                     }
                 },
                 {
-                    "name": "q艾比夫山",
+                    "name": "艾比夫山",
                     "label": "艾比夫山",
                     "pipeline_override": {
                         "地图坐标导航": {
@@ -214,7 +214,7 @@
                     }
                 },
                 {
-                    "name": "q鲜血神殿",
+                    "name": "鲜血神殿",
                     "label": "鲜血神殿",
                     "pipeline_override": {
                         "地图坐标导航": {

@@ -3,11 +3,11 @@
         "奥尔良": {
             "type": "select",
             "label": "关卡",
-            "default": "q栋雷米",
+            "default": "栋雷米",
             "cases": [
                 {
-                    "name": "q栋雷米",
-                    "label": "q栋雷米",
+                    "name": "栋雷米",
+                    "label": "栋雷米",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -22,8 +22,8 @@
                     }
                 },
                 {
-                    "name": "q沃库勒尔",
-                    "label": "q沃库勒尔",
+                    "name": "沃库勒尔",
+                    "label": "沃库勒尔",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -38,8 +38,8 @@
                     }
                 },
                 {
-                    "name": "q拉沙里泰",
-                    "label": "q拉沙里泰",
+                    "name": "拉沙里泰",
+                    "label": "拉沙里泰",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -54,8 +54,8 @@
                     }
                 },
                 {
-                    "name": "q汝拉",
-                    "label": "q汝拉",
+                    "name": "汝拉",
+                    "label": "汝拉",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -70,8 +70,8 @@
                     }
                 },
                 {
-                    "name": "q里昂",
-                    "label": "q里昂",
+                    "name": "里昂",
+                    "label": "里昂",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -86,8 +86,8 @@
                     }
                 },
                 {
-                    "name": "q蒂耶尔",
-                    "label": "q蒂耶尔",
+                    "name": "蒂耶尔",
+                    "label": "蒂耶尔",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -102,8 +102,8 @@
                     }
                 },
                 {
-                    "name": "q奥尔良",
-                    "label": "q奥尔良",
+                    "name": "奥尔良",
+                    "label": "奥尔良",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -118,8 +118,8 @@
                     }
                 },
                 {
-                    "name": "q巴黎",
-                    "label": "q巴黎",
+                    "name": "巴黎",
+                    "label": "巴黎",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -134,8 +134,8 @@
                     }
                 },
                 {
-                    "name": "q马赛",
-                    "label": "q马赛",
+                    "name": "马赛",
+                    "label": "马赛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -150,8 +150,8 @@
                     }
                 },
                 {
-                    "name": "q波尔多",
-                    "label": "q波尔多",
+                    "name": "波尔多",
+                    "label": "波尔多",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {

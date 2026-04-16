@@ -63,11 +63,6 @@ class GeneralNavigationAction(CustomAction):
             chapter_cn = attach_data.get("chapter", "")
             target_quest = attach_data.get("quests", "")
             
-            # 【关键修复】去除章节名的 'c' 前缀和关卡名的 'q' 前缀
-            if chapter_cn.startswith('c'):
-                chapter_cn = chapter_cn[1:]
-            if target_quest.startswith('q'):
-                target_quest = target_quest[1:]
             
             if not chapter_cn or not target_quest:
                 return CustomAction.RunResult(success=False)

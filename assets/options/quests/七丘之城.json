@@ -3,11 +3,11 @@
         "七丘之城": {
             "type": "select",
             "label": "关卡",
-            "default": "q亚壁街道",
+            "default": "亚壁街道",
             "cases": [
                 {
-                    "name": "q亚壁街道",
-                    "label": "q亚壁街道",
+                    "name": "亚壁街道",
+                    "label": "亚壁街道",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -22,8 +22,8 @@
                     }
                 },
                 {
-                    "name": "q罗马",
-                    "label": "q罗马",
+                    "name": "罗马",
+                    "label": "罗马",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -38,8 +38,8 @@
                     }
                 },
                 {
-                    "name": "q佛罗伦萨",
-                    "label": "q佛罗伦萨",
+                    "name": "佛罗伦萨",
+                    "label": "佛罗伦萨",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -54,8 +54,8 @@
                     }
                 },
                 {
-                    "name": "q梅迪奥兰",
-                    "label": "q梅迪奥兰",
+                    "name": "梅迪奥兰",
+                    "label": "梅迪奥兰",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -70,8 +70,8 @@
                     }
                 },
                 {
-                    "name": "q马西利亚",
-                    "label": "q马西利亚",
+                    "name": "马西利亚",
+                    "label": "马西利亚",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -86,8 +86,8 @@
                     }
                 },
                 {
-                    "name": "q高卢",
-                    "label": "q高卢",
+                    "name": "高卢",
+                    "label": "高卢",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -102,8 +102,8 @@
                     }
                 },
                 {
-                    "name": "q有形之岛",
-                    "label": "q有形之岛",
+                    "name": "有形之岛",
+                    "label": "有形之岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -118,8 +118,8 @@
                     }
                 },
                 {
-                    "name": "q联军首都",
-                    "label": "q联军首都",
+                    "name": "联军首都",
+                    "label": "联军首都",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -134,8 +134,8 @@
                     }
                 },
                 {
-                    "name": "q埃特纳火山",
-                    "label": "q埃特纳火山",
+                    "name": "埃特纳火山",
+                    "label": "埃特纳火山",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -150,8 +150,8 @@
                     }
                 },
                 {
-                    "name": "q不列颠尼亚",
-                    "label": "q不列颠尼亚",
+                    "name": "不列颠尼亚",
+                    "label": "不列颠尼亚",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -166,8 +166,8 @@
                     }
                 },
                 {
-                    "name": "q日耳曼尼亚",
-                    "label": "q日耳曼尼亚",
+                    "name": "日耳曼尼亚",
+                    "label": "日耳曼尼亚",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {

@@ -3,11 +3,11 @@
         "俄刻阿诺斯": {
             "type": "select",
             "label": "关卡",
-            "default": "q海盗船",
+            "default": "海盗船",
             "cases": [
                 {
-                    "name": "q海盗船",
-                    "label": "q海盗船",
+                    "name": "海盗船",
+                    "label": "海盗船",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -22,8 +22,8 @@
                     }
                 },
                 {
-                    "name": "q海盗岛",
-                    "label": "q海盗岛",
+                    "name": "海盗岛",
+                    "label": "海盗岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -38,8 +38,8 @@
                     }
                 },
                 {
-                    "name": "q王者的居岛",
-                    "label": "q王者的居岛",
+                    "name": "王者的居岛",
+                    "label": "王者的居岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -54,8 +54,8 @@
                     }
                 },
                 {
-                    "name": "q地图上标记的岛",
-                    "label": "q地图上标记的岛",
+                    "name": "地图上标记的岛",
+                    "label": "地图上标记的岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -70,8 +70,8 @@
                     }
                 },
                 {
-                    "name": "q潮眼之海",
-                    "label": "q潮眼之海",
+                    "name": "潮眼之海",
+                    "label": "潮眼之海",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -86,8 +86,8 @@
                     }
                 },
                 {
-                    "name": "q翼龙之岛",
-                    "label": "q翼龙之岛",
+                    "name": "翼龙之岛",
+                    "label": "翼龙之岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -102,8 +102,8 @@
                     }
                 },
                 {
-                    "name": "q暴风雨海域",
-                    "label": "q暴风雨海域",
+                    "name": "暴风雨海域",
+                    "label": "暴风雨海域",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -118,8 +118,8 @@
                     }
                 },
                 {
-                    "name": "q群岛寂静的入海口",
-                    "label": "q群岛寂静的入海口",
+                    "name": "群岛寂静的入海口",
+                    "label": "群岛寂静的入海口",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -134,8 +134,8 @@
                     }
                 },
                 {
-                    "name": "q群岛隐藏之岛",
-                    "label": "q群岛隐藏之岛",
+                    "name": "群岛隐藏之岛",
+                    "label": "群岛隐藏之岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -150,8 +150,8 @@
                     }
                 },
                 {
-                    "name": "q暗礁海域",
-                    "label": "q暗礁海域",
+                    "name": "暗礁海域",
+                    "label": "暗礁海域",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
@@ -166,8 +166,8 @@
                     }
                 },
                 {
-                    "name": "q火山臼之岛",
-                    "label": "q火山臼之岛",
+                    "name": "火山臼之岛",
+                    "label": "火山臼之岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
