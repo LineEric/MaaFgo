@@ -108,23 +108,11 @@ def install_resource():
 
     # Copy options and i18n directories
     if (working_dir / "assets" / "options").exists():
-        # 复制 options 目录，但排除 Avalonia 版本的 bbc_team_config.json
         shutil.copytree(
             working_dir / "assets" / "options",
             install_path / "options",
-            ignore=shutil.ignore_patterns("bbc_team_config-Avalonia.json"),
             dirs_exist_ok=True,
         )
-        # 将 bbc_team_config-MWU.json 重命名为 bbc_team_config.json
-        mwu_config = install_path / "options" / "bbc_team_config-MWU.json"
-        target_config = install_path / "options" / "bbc_team_config.json"
-        if mwu_config.exists():
-            shutil.move(str(mwu_config), str(target_config))
-        # 删除 MWU artifact 中可能存在的 Avalonia 配置文件
-        avalonia_config = install_path / "options" / "bbc_team_config-Avalonia.json"
-        if avalonia_config.exists():
-            avalonia_config.unlink()
-            print(f"Removed Avalonia config: {avalonia_config}")
     if (working_dir / "assets" / "i18n").exists():
         shutil.copytree(
             working_dir / "assets" / "i18n",
@@ -161,32 +149,32 @@ def install_chores():
 
 
 def setup_embedded_python():
-    """M9A 模式：仅确保 Python 目录存在，依赖由 CI 工作流通过 pip install -r requirements.txt 安装"""
+    """M9A 模式：依赖由 CI 工作流通过 pip install -r requirements.txt 安装到嵌入式 Python"""
     py_dir = install_path / "python"
     if not py_dir.exists():
         print("Error: Python directory not found in build. Ensure CI prepares it first.")
+    else:
+        # 确保 get-pip.py 存在，如果不存在则下载
+        get_pip_path = py_dir / "get-pip.py"
+        if not get_pip_path.exists():
+            print("Downloading get-pip.py...")
+            import urllib.request
+            urllib.request.urlretrieve("https://bootstrap.pypa.io/get-pip.py", str(get_pip_path))
+        
+        # 执行 pip 安装
+        python_exe = py_dir / "python.exe" if os_name == "win" else py_dir / "bin" / "python3"
+        subprocess.run([str(python_exe), str(get_pip_path)], check=True)
+        subprocess.run([str(python_exe), "-m", "pip", "install", "--upgrade", "pip"], check=True)
+        subprocess.run([str(python_exe), "-m", "pip", "install", "-r", str(working_dir / "requirements.txt")], check=True)
 
-
-def install_agent_deps():
-    """MWU 依赖加载机制：优先 deps/python_packages，失败则 fallback 到 site-packages
-    因此 cv2 和 numpy 留在 site-packages 即可，不需要移动到 agent/libs"""
-    print("Agent deps will be loaded from site-packages by MWU fallback mechanism.")
 
 def install_agent():
-    # 复制 agent 目录，但排除 Avalonia 版本文件
+    # 复制 agent 目录
     shutil.copytree(
         working_dir / "agent",
         install_path / "agent",
-        ignore=shutil.ignore_patterns("main-Avalonia.py", "bbc_action-Avalonia.py"),
         dirs_exist_ok=True,
     )
-    
-    # MWU 特殊处理：将 bbc_action-mwu.py 覆盖为 bbc_action.py
-    mwu_bbc = install_path / "agent" / "custom" / "bbc_action-mwu.py"
-    target_bbc = install_path / "agent" / "custom" / "bbc_action.py"
-    if mwu_bbc.exists():
-        shutil.move(str(mwu_bbc), str(target_bbc))
-        print(f"MWU: Moved bbc_action-mwu.py to bbc_action.py")
 
 
 def install_bbcdll():
@@ -209,11 +197,10 @@ def install_tasks():
 
 
 if __name__ == "__main__":
-    setup_embedded_python()  # 新增：配置 Python 和安装依赖
     install_deps()
     install_resource()
     install_chores()
-    install_agent_deps()  # 移动依赖到 agent/libs
+    setup_embedded_python()  # M9A 模式：在构建时安装依赖到嵌入式 Python
     install_agent()
     install_bbcdll()
     install_tasks()
