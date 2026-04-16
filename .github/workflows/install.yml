@@ -119,10 +119,19 @@ jobs:
         with:
           python-version: "3.12.10"
 
+      - name: Copy Resources
+        shell: bash
+        run: |
+          # 使用 MWU 官方的资源复制脚本
+          curl -L https://github.com/ravizhan/MWU/raw/refs/heads/main/deploy/copy_resources.py -o ./copy_resources.py
+          uv run ./copy_resources.py
+
       - name: Download Python Dependencies
         shell: bash
         run: |
-          python tools/download_deps.py ${{ matrix.platform }} ${{ matrix.arch }}
+          # 使用 MWU 官方的依赖下载脚本
+          curl -L https://github.com/ravizhan/MWU/raw/refs/heads/main/deploy/download_deps.py -o ./download_deps.py
+          uv run ./download_deps.py
 
       - name: Download MWU Artifact
         id: download_mwu
