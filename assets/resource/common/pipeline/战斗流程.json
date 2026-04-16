@@ -205,5 +205,22 @@
         "next": [
             "BBC成功"
         ]
+    },
+    "使用chaldea队伍": {
+        "action": {
+            "type": "Custom",
+            "param": {
+                "custom_action": "动作名占位,chaldea相关"
+            }
+        },
+        "next": [
+            "执行BBC任务"
+        ],
+        "recognition": {
+            "type": "DirectHit"
+        },
+        "attach": {
+            "chaldea_import_source": ""
+        }
     }
 }
