@@ -16,7 +16,7 @@
                     485
                 ],
                 "template": [
-                    "主线记录1导航/冬木.png"
+                    "OoTTemple/冬木.png"
                 ],
                 "threshold": 0.7
             }
@@ -64,7 +64,7 @@
                     424,
                     80
                 ],
-                "template": "主线记录1导航/主线记录1-1.png"
+                "template": "OoTTemple/主线记录1-1.png"
             }
         }
     }

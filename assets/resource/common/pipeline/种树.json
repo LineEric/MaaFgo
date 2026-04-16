@@ -44,7 +44,7 @@
                     50
                 ],
                 "template": [
-                    "种树/1个直接交换.png"
+                    "trees/1个直接交换.png"
                 ],
                 "threshold": 0.6,
                 "green_mask": true
@@ -125,7 +125,7 @@
                     282,
                     72
                 ],
-                "template": "种树/交换完成关闭.png",
+                "template": "trees/交换完成关闭.png",
                 "threshold": 0.6,
                 "green_mask": true
             }
@@ -157,8 +157,8 @@
                     28
                 ],
                 "template": [
-                    "种树/0个苹果.png",
-                    "种树/1个苹果.png"
+                    "trees/0个苹果.png",
+                    "trees/1个苹果.png"
                 ],
                 "threshold": 0.6
             }
@@ -180,7 +180,7 @@
                     27
                 ],
                 "template": [
-                    "种树/青铜树苗.png"
+                    "trees/青铜树苗.png"
                 ],
                 "threshold": 0.6
             }
@@ -211,7 +211,7 @@
                     57
                 ],
                 "template": [
-                    "种树/确认完成种树点击.png"
+                    "trees/确认完成种树点击.png"
                 ]
             }
         }
@@ -271,7 +271,7 @@
                     104
                 ],
                 "template": [
-                    "种树/加号.png"
+                    "trees/加号.png"
                 ]
             }
         }
