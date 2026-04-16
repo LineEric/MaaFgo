@@ -110,11 +110,18 @@ def install_resource():
             dirs_exist_ok=True,
         )
 
-    # 更新 interface.json 中的版本号
+    # 更新 interface.json 中的版本号和 agent 配置
     with open(install_path / "interface.json", "r", encoding="utf-8") as f:
         interface = json.load(f)
 
     interface["version"] = version
+    # 保持黑魔法模式的配置
+    interface["agent"] = {
+        "child_exec": "python",
+        "child_args": [
+            "./agent/main.py"
+        ]
+    }
 
     with open(install_path / "interface.json", "w", encoding="utf-8") as f:
         json.dump(interface, f, ensure_ascii=False, indent=2)
