@@ -195,7 +195,6 @@ jobs:
           submodules: true
 
       - name: Download MaaFramework
-        id: download_mfw
         uses: robinraju/release-downloader@v1
         with:
           repository: MaaXYZ/MaaFramework
@@ -204,18 +203,14 @@ jobs:
           out-file-path: "deps"
           extract: true
 
-      - name: Debug MaaFramework download
+      - name: Flatten MaaFramework directory
         shell: bash
         run: |
-          echo "=== Downloaded files ==="
-          echo "${{ toJson(steps.download_mfw.outputs.downloaded_files) }}"
-          echo "=== deps directory ==="
-          ls -la deps/ || echo "deps not found"
-          if [ -d "deps/bin" ]; then
-            echo "deps/bin exists"
-            ls deps/bin/ | head -5
-          else
-            echo "ERROR: deps/bin does NOT exist!"
+          rm -f deps/*.zip
+          MFW_DIR=$(find deps -maxdepth 1 -type d -name "MAA-*" | head -n 1)
+          if [ -n "$MFW_DIR" ] && [ "$MFW_DIR" != "deps" ]; then
+            mv "$MFW_DIR"/* deps/
+            rmdir "$MFW_DIR"
           fi
 
       - name: Download MXU
