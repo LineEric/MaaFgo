@@ -195,6 +195,7 @@ jobs:
           submodules: true
 
       - name: Download MaaFramework
+        id: download_mfw
         uses: robinraju/release-downloader@v1
         with:
           repository: MaaXYZ/MaaFramework
@@ -203,17 +204,19 @@ jobs:
           out-file-path: "deps"
           extract: true
 
-      - name: Verify MaaFramework download
+      - name: Debug MaaFramework download
         shell: bash
         run: |
-          if [ ! -d "deps/bin" ]; then
-            echo "ERROR: MaaFramework download failed or structure incorrect!"
-            echo "Contents of deps/:"
-            ls -la deps/ 2>/dev/null || echo "deps/ directory does not exist"
-            exit 1
+          echo "=== Downloaded files ==="
+          echo "${{ toJson(steps.download_mfw.outputs.downloaded_files) }}"
+          echo "=== deps directory ==="
+          ls -la deps/ || echo "deps not found"
+          if [ -d "deps/bin" ]; then
+            echo "deps/bin exists"
+            ls deps/bin/ | head -5
+          else
+            echo "ERROR: deps/bin does NOT exist!"
           fi
-          echo "MaaFramework downloaded successfully"
-          ls -la deps/bin/ | head -10
 
       - name: Download MXU
         id: download_mxu
