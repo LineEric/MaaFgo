@@ -171,6 +171,127 @@ jobs:
           name: ${{ env.repo_name }}-MWU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}
           path: ${{ env.repo_name }}-MWU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z
 
+  build-mxu:
+    env:
+      repo_name: ${{ needs.meta.outputs.repo_name }}
+      tag: ${{ needs.meta.outputs.tag }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+            arch: x86_64
+    runs-on: ${{ matrix.os }}
+    name: Build MXU (${{ matrix.platform }}-${{ matrix.arch }})
+    needs: meta
+
+    steps:
+      - name: Check-out repository
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7.5.0
+        with:
+          enable-cache: true
+
+      - name: Download MaaFramework
+        id: download_mfw
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: MaaXYZ/MaaFramework
+          fileName: "MAA-${{ matrix.platform }}-${{ matrix.arch }}*"
+          latest: true
+          out-file-path: "deps"
+          extract: true
+
+      - name: Flatten MaaFramework directory
+        shell: bash
+        run: |
+          MFW_DIR=$(find deps -maxdepth 1 -type d -name "MAA-*" | head -n 1)
+          if [ -n "$MFW_DIR" ] && [ "$MFW_DIR" != "deps" ]; then
+            echo "Moving contents from $MFW_DIR to deps/"
+            mv "$MFW_DIR"/* deps/
+            mv "$MFW_DIR"/.* deps/ 2>/dev/null || true
+            rmdir "$MFW_DIR"
+          fi
+          ls -la deps/
+
+      - name: Setup Python
+        uses: actions/setup-python@v6.2.0
+        with:
+          python-version: "3.12.10"
+
+      - name: Download Python Dependencies
+        shell: bash
+        run: |
+          python tools/download_deps.py ${{ matrix.platform }} ${{ matrix.arch }}
+
+      - name: Download MXU
+        id: download_mxu
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: xlxyvergil/MXU
+          fileName: "MXU-${{ matrix.platform }}-${{ matrix.arch }}*"
+          latest: true
+          out-file-path: "MXU"
+          extract: true
+
+      - name: Clean up MXU archive
+        shell: bash
+        run: |
+          ARCHIVE_FILE_PATH="${{ fromJson(steps.download_mxu.outputs.downloaded_files)[0] }}"
+          rm -f "${ARCHIVE_FILE_PATH}"
+          echo "Archive cleanup command executed for MXU."
+
+      - name: Create MXU version
+        shell: bash
+        run: |
+          python tools/install-MXU.py ${{ env.tag }}
+          if [ -d "install/python" ]; then
+            cp -rpvn install/python/. install-mxu/python/
+          fi
+          if [ -d "install/deps" ]; then
+            cp -rpvn install/deps/. install-mxu/deps/
+          fi
+
+      - name: Copy MXU executable
+        shell: bash
+        run: |
+          if [ -d "MXU" ]; then
+            echo "Copying MXU files to install-mxu directory..."
+            mkdir -p install-mxu
+            if [ -f "MXU/mxu.exe" ]; then
+              cp MXU/mxu.exe install-mxu/MaaFgo.exe
+            elif [ -f "MXU/mxu" ]; then
+              cp MXU/mxu install-mxu/MaaFgo
+            fi
+          else
+            echo "MXU directory not found, skipping copy."
+          fi
+
+      - name: Get clean version
+        id: get_version
+        shell: bash
+        run: |
+          tag="${{ env.tag }}"
+          version=$(echo "$tag" | sed 's/^v//; s/Avalonia$//; s/MWU$//')
+          echo "clean_version=$version" >> $GITHUB_OUTPUT
+
+      - name: Compress MXU Artifact
+        run: |
+          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z "./install-mxu/*"
+
+      - name: Upload MXU Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}
+          path: ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z
+
   build-avalonia:
     needs: meta
     runs-on: ${{ matrix.runner }}
@@ -297,7 +418,7 @@ jobs:
   debug:
     if: ${{ needs.meta.outputs.is_release == 'false' }}
     runs-on: ubuntu-slim
-    needs: [meta, build-mwu, build-avalonia, changelog]
+    needs: [meta, build-mwu, build-avalonia, build-mxu, changelog]
     steps:
       - name: Show Outputs
         run: |
@@ -309,7 +430,7 @@ jobs:
 
   release:
     if: ${{ needs.meta.outputs.is_release == 'true' }}
-    needs: [meta, build-mwu, build-avalonia, changelog]
+    needs: [meta, build-mwu, build-avalonia, build-mxu, changelog]
     runs-on: ubuntu-slim
     steps:
       - uses: actions/download-artifact@v8.0.1
