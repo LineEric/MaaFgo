@@ -20,14 +20,24 @@ def install_deps():
 
     MXU 要求将 MaaFramework 的 bin 文件夹内容解压到 maafw 文件夹中。
     参考: https://github.com/MistEO/MXU#依赖文件
-    
-    注意：CI中已flatten，deps根目录即为MAA内容
     """
 
+    # 判断deps结构：flatten后直接用deps，否则用deps/bin
+    deps_bin = working_dir / "deps" / "bin"
+    deps_root = working_dir / "deps"
+    
+    if deps_bin.exists():
+        # M9A 模式：有 bin 子目录
+        src_dir = deps_bin
+    elif deps_root.exists():
+        # MWU 模式：flatten 后的根目录
+        src_dir = deps_root
+    else:
+        raise FileNotFoundError(f"Neither {deps_bin} nor {deps_root} exists")
+
     # MaaFramework 运行库 → maafw/
-    # Flatten后直接使用deps根目录
     shutil.copytree(
-        working_dir / "deps",
+        src_dir,
         install_path / "maafw",
         ignore=shutil.ignore_patterns(
             "*MaaDbgControlUnit*",

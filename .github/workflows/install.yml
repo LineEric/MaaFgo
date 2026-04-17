@@ -209,17 +209,23 @@ jobs:
           out-file-path: "deps"
           extract: true
 
-      - name: Flatten MaaFramework directory
+      - name: Verify deps directory
         shell: bash
         run: |
-          MFW_DIR=$(find deps -maxdepth 1 -type d -name "MAA-*" | head -n 1)
-          if [ -n "$MFW_DIR" ] && [ "$MFW_DIR" != "deps" ]; then
-            echo "Moving contents from $MFW_DIR to deps/"
-            mv "$MFW_DIR"/* deps/
-            mv "$MFW_DIR"/.* deps/ 2>/dev/null || true
-            rmdir "$MFW_DIR"
+          echo "=== Checking deps directory ==="
+          if [ ! -d "deps" ]; then
+            echo "ERROR: deps directory does not exist!"
+            exit 1
           fi
           ls -la deps/
+          if [ -d "deps/bin" ]; then
+            echo "Found deps/bin (M9A style)"
+          elif [ -d "deps/share" ]; then
+            echo "Found deps/share (M9A style)"
+          else
+            echo "No bin or share subdirectory found, checking for flatten structure..."
+            ls -la deps/ | head -20
+          fi
 
       - name: Setup Python
         uses: actions/setup-python@v6.2.0
