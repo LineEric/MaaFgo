@@ -195,6 +195,7 @@ jobs:
           submodules: true
 
       - name: Download MaaFramework
+        id: download_mfw
         uses: robinraju/release-downloader@v1
         with:
           repository: MaaXYZ/MaaFramework
@@ -210,6 +211,7 @@ jobs:
           MFW_DIR=$(find deps -maxdepth 1 -type d -name "MAA-*" | head -n 1)
           if [ -n "$MFW_DIR" ] && [ "$MFW_DIR" != "deps" ]; then
             mv "$MFW_DIR"/* deps/
+            mv "$MFW_DIR"/.* deps/ 2>/dev/null || true
             rmdir "$MFW_DIR"
           fi
 
