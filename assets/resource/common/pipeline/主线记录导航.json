@@ -1,14 +1,14 @@
 {
-    "主线记录1导航": {
+    "主线记录导航": {
         "next": [
-            "点击主线记录1",
-            "[JumpBack]寻找主线记录1"
+            "点击主线记录",
+            "[JumpBack]寻找主线记录"
         ],
         "recognition": {
             "type": "DirectHit"
         }
     },
-    "寻找主线记录1": {
+    "寻找主线记录": {
         "action": {
             "type": "Swipe",
             "param": {
@@ -32,24 +32,21 @@
             }
         },
         "next": [
-            "寻找主线记录1-1"
+            "找到主线记录"
         ],
         "recognition": {
             "type": "DirectHit"
         }
     },
-    "寻找主线记录1-1": {
+    "找到主线记录": {
         "recognition": {
             "type": "DirectHit"
         }
     },
-    "点击主线记录1": {
+    "点击主线记录": {
         "action": {
             "type": "Click"
         },
-        "next": [
-            "点击主线记录1-1"
-        ],
         "recognition": {
             "type": "TemplateMatch",
             "param": {
@@ -63,9 +60,12 @@
                     "OoTTemple/主线记录1.png"
                 ]
             }
-        }
+        },
+        "next": [
+            "完成点击主线记录"
+        ]
     },
-    "点击主线记录1-1": {
+    "完成点击主线记录": {
         "recognition": {
             "type": "DirectHit"
         }

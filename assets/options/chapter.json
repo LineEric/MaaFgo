@@ -20,9 +20,19 @@
                                 "chapter": "冬木"
                             }
                         },
-                        "找到进入主线记录1章节": {
+                        "找到进入主线记录章节": {
                             "template": [
                                 "OoTTemple/冬木.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1.png"
                             ]
                         }
                     }
@@ -42,9 +52,19 @@
                                 "chapter": "奥尔良"
                             }
                         },
-                        "找到进入主线记录1章节": {
+                        "找到进入主线记录章节": {
                             "template": [
                                 "OoTTemple/奥尔良.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1.png"
                             ]
                         }
                     }
@@ -64,9 +84,19 @@
                                 "chapter": "七丘之城"
                             }
                         },
-                        "找到进入主线记录1章节": {
+                        "找到进入主线记录章节": {
                             "template": [
                                 "OoTTemple/七丘之城.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1.png"
                             ]
                         }
                     }
@@ -86,9 +116,19 @@
                                 "chapter": "俄刻阿诺斯"
                             }
                         },
-                        "找到进入主线记录1章节": {
+                        "找到进入主线记录章节": {
                             "template": [
                                 "OoTTemple/俄刻阿诺斯.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1.png"
                             ]
                         }
                     }
@@ -108,9 +148,19 @@
                                 "chapter": "伦敦"
                             }
                         },
-                        "找到进入主线记录1章节": {
+                        "找到进入主线记录章节": {
                             "template": [
                                 "OoTTemple/伦敦.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1.png"
                             ]
                         }
                     }
@@ -130,9 +180,19 @@
                                 "chapter": "合众为一"
                             }
                         },
-                        "找到进入主线记录1章节": {
+                        "找到进入主线记录章节": {
                             "template": [
                                 "OoTTemple/合众为一.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1.png"
                             ]
                         }
                     }
@@ -152,9 +212,19 @@
                                 "chapter": "卡美洛"
                             }
                         },
-                        "找到进入主线记录1章节": {
+                        "找到进入主线记录章节": {
                             "template": [
                                 "OoTTemple/卡美洛.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1.png"
                             ]
                         }
                     }
@@ -174,9 +244,19 @@
                                 "chapter": "巴比伦尼亚"
                             }
                         },
-                        "找到进入主线记录1章节": {
+                        "找到进入主线记录章节": {
                             "template": [
                                 "OoTTemple/巴比伦尼亚.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "OoTTemple/主线记录1.png"
                             ]
                         }
                     }
@@ -195,6 +275,21 @@
                             "attach": {
                                 "chapter": "新宿"
                             }
+                        },
+                        "找到进入主线记录章节": {
+                            "template": [
+                                "EoRemnant/新宿.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "EoRemnant/主线记录1-5-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "EoRemnant/主线记录1-5.png"
+                            ]
                         }
                     }
                 },
@@ -212,6 +307,21 @@
                             "attach": {
                                 "chapter": "雅戈泰"
                             }
+                        },
+                        "找到进入主线记录章节": {
+                            "template": [
+                                "EoRemnant/雅戈泰.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "EoRemnant/主线记录1-5-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "EoRemnant/主线记录1-5.png"
+                            ]
                         }
                     }
                 },
@@ -229,6 +339,21 @@
                             "attach": {
                                 "chapter": "下总国"
                             }
+                        },
+                        "找到进入主线记录章节": {
+                            "template": [
+                                "EoRemnant/下总国.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "EoRemnant/主线记录1-5-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "EoRemnant/主线记录1-5.png"
+                            ]
                         }
                     }
                 },
@@ -246,6 +371,21 @@
                             "attach": {
                                 "chapter": "塞勒姆"
                             }
+                        },
+                        "找到进入主线记录章节": {
+                            "template": [
+                                "EoRemnant/塞勒姆.png"
+                            ]
+                        },
+                        "进入主线记录": {
+                            "template": [
+                                "EoRemnant/主线记录1-5-1.png"
+                            ]
+                        },
+                        "点击主线记录": {
+                            "template": [
+                                "EoRemnant/主线记录1-5.png"
+                            ]
                         }
                     }
                 },

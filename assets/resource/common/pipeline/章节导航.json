@@ -18,15 +18,19 @@
         }
     },
     "七丘之城": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
-        },
-        "next": [
-            "进入主线记录1",
-            "[JumpBack]主线记录1导航"
-        ]
+        }
     },
     "下总国": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
         }
@@ -37,63 +41,67 @@
         }
     },
     "伦敦": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
-        },
-        "next": [
-            "进入主线记录1",
-            "[JumpBack]主线记录1导航"
-        ]
+        }
     },
     "俄刻阿诺斯": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
-        },
-        "next": [
-            "进入主线记录1",
-            "[JumpBack]主线记录1导航"
-        ]
+        }
     },
     "冬木": {
         "next": [
-            "进入主线记录1",
-            "[JumpBack]主线记录1导航"
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
         ],
         "recognition": {
             "type": "DirectHit"
         }
     },
     "卡美洛": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
-        },
-        "next": [
-            "进入主线记录1",
-            "[JumpBack]主线记录1导航"
-        ]
+        }
     },
     "合众为一": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
-        },
-        "next": [
-            "进入主线记录1",
-            "[JumpBack]主线记录1导航"
-        ]
+        }
     },
     "塞勒姆": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
         }
     },
     "奥尔良": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
-        },
-        "next": [
-            "进入主线记录1",
-            "[JumpBack]主线记录1导航"
-        ]
+        }
     },
     "奥林波斯": {
         "recognition": {
@@ -101,13 +109,13 @@
         }
     },
     "巴比伦尼亚": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
-        },
-        "next": [
-            "进入主线记录1",
-            "[JumpBack]主线记录1导航"
-        ]
+        }
     },
     "平安京": {
         "recognition": {
@@ -120,6 +128,10 @@
         }
     },
     "新宿": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
         }
@@ -158,6 +170,10 @@
         }
     },
     "雅戈泰": {
+        "next": [
+            "进入主线记录",
+            "[JumpBack]主线记录导航"
+        ],
         "recognition": {
             "type": "DirectHit"
         }

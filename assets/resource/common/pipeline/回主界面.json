@@ -9,10 +9,10 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    1099,
-                    3,
-                    173,
-                    81
+                    992,
+                    2,
+                    287,
+                    70
                 ],
                 "template": [
                     "活动报酬.png"
