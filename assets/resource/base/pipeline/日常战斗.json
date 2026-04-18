@@ -2,7 +2,10 @@
     "战斗完成信息": {
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "next": [
+            "bbc弹窗信息输出"
+        ]
     },
     "执行bbc战斗": {
         "max_hit": 1,
@@ -23,13 +26,13 @@
         }
     },
     "执行战斗结束": {
-        "recognition": {
-            "type": "DirectHit"
-        },
+        "max_hit": 1,
         "next": [
             "结束战斗"
         ],
-        "max_hit": 1
+        "recognition": {
+            "type": "DirectHit"
+        }
     },
     "执行章节导航": {
         "max_hit": 1,
@@ -60,6 +63,14 @@
         ],
         "recognition": {
             "type": "DirectHit"
+        }
+    },
+    "bbc弹窗信息输出": {
+        "recognition": {
+            "type": "DirectHit"
+        },
+        "focus": {
+            "Node.Recognition.Starting": "<span style=\"color: #FF0000;\">BBC任务正常完成！</span>"
         }
     }
 }

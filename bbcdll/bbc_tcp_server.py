@@ -468,9 +468,14 @@ def start_tcp_server(bb_window, port=25001):
                     else:
                         return {'success': False, 'message': 'Popup not found or resolved'}
             
-            elif command == 'run_bbc_task':
-                # 执行完整BBC任务流程
-                result = api_run_bbc_task(args)
+            elif command == 'start_bbc':
+                # 启动BBC：处理免责声明和连接模拟器
+                result = api_start_bbc(args)
+                return result
+            
+            elif command == 'execute_battle':
+                # 执行战斗流程
+                result = api_execute_battle(args)
                 return result
             
             else:
@@ -744,21 +749,13 @@ def api_start_battle(page):
     except Exception as e:
         return False
 
-def api_run_bbc_task(args):
-    """执行完整BBC任务流程"""
+def api_start_bbc(args):
+    """启动BBC：处理免责声明和连接模拟器"""
     import time
-    global _current_task_args, _task_should_end, _task_end_reason
+    global _current_task_args
     
-    _log('info', f'[Task] api_run_bbc_task 开始，args={args}')
+    _log('info', f'[Start] api_start_bbc 开始，args={args}')
     
-    # 重置结束标志
-    _task_should_end = False
-    _task_end_reason = ''
-    
-    team_config = args.get('team_config', '')
-    run_count = args.get('run_count', 1)
-    apple_type = args.get('apple_type', 'gold')
-    battle_type = args.get('battle_type', 'continuous')
     connect = args.get('connect', 'auto')
     support_order_mismatch = args.get('support_order_mismatch', False)
     team_config_error = args.get('team_config_error', False)
@@ -777,58 +774,81 @@ def api_run_bbc_task(args):
     # 等待免责声明关闭（自动处理，等待足够时间）
     time.sleep(5)  # 等待5秒确保免责声明已处理
     
-    # 执行连接
     # 检查bb_window是否已设置
     if _bb_window_global is None:
         return {'success': False, 'reason': 'bb_window_not_set'}
     
     if connect == 'auto':
         # auto模式：不执行连接，依赖BBC自动连接
-        _log('info', '[Task] connect=auto，跳过连接步骤')
+        _log('info', '[Start] connect=auto，跳过连接步骤')
     elif connect == 'mumu' and mumu_path:
         mumu_pkg = args.get('mumu_pkg', '')
         mumu_app_index = args.get('mumu_app_index', 0)
-        _log('info', f'[Task] 执行 MuMu 连接，path={mumu_path}, index={mumu_index}, pkg={mumu_pkg}, app_index={mumu_app_index}')
+        _log('info', f'[Start] 执行 MuMu 连接，path={mumu_path}, index={mumu_index}, pkg={mumu_pkg}, app_index={mumu_app_index}')
         if not api_connect_mumu(_bb_window_global, type('Args', (), {
             'path': mumu_path, 'index': mumu_index,
             'pkg': mumu_pkg if mumu_pkg else None,
             'app_index': mumu_app_index
         })()):
-            _log('error', '[Task] MuMu 连接失败')
+            _log('error', '[Start] MuMu 连接失败')
             return {
                 'success': False,
                 'reason': 'mumu_connect_failed',
                 'result': {'type': 'connect_failed', 'category': 'error', 'description': 'MuMu模拟器连接失败'}
             }
     elif connect == 'ldplayer' and ld_path:
-        _log('info', f'[Task] 执行雷电连接，path={ld_path}, index={ld_index}')
+        _log('info', f'[Start] 执行雷电连接，path={ld_path}, index={ld_index}')
         if not api_connect_ld(_bb_window_global, type('Args', (), {
             'path': ld_path, 'index': ld_index
         })()):
-            _log('error', '[Task] 雷电连接失败')
+            _log('error', '[Start] 雷电连接失败')
             return {
                 'success': False,
                 'reason': 'ldplayer_connect_failed',
                 'result': {'type': 'connect_failed', 'category': 'error', 'description': '雷电模拟器连接失败'}
             }
     elif connect == 'manual' and manual_port:
-        _log('info', f'[Task] 执行 ADB 连接，port={manual_port}')
+        _log('info', f'[Start] 执行 ADB 连接，port={manual_port}')
         if not api_connect_adb(_bb_window_global, type('Args', (), {
             'ip': manual_port
         })()):
-            _log('error', '[Task] ADB 连接失败')
+            _log('error', '[Start] ADB 连接失败')
             return {
                 'success': False,
                 'reason': 'adb_connect_failed',
                 'result': {'type': 'connect_failed', 'category': 'error', 'description': 'ADB设备连接失败'}
             }
+    
     # 等待连接完成
     time.sleep(1)
     
+    _log('info', '[Start] BBC启动完成')
+    return {'success': True}
+
+def api_execute_battle(args):
+    """执行战斗流程：加载配置、设置参数、启动战斗、等待结束"""
+    import time
+    global _task_should_end, _task_end_reason
+    
+    _log('info', f'[Battle] api_execute_battle 开始，args={args}')
+    
+    # 重置结束标志
+    _task_should_end = False
+    _task_end_reason = ''
+    
+    team_config = args.get('team_config', '')
+    run_count = args.get('run_count', 1)
+    apple_type = args.get('apple_type', 'gold')
+    battle_type = args.get('battle_type', 'continuous')
+    
+    # 检查bb_window是否已设置
+    if _bb_window_global is None:
+        return {'success': False, 'reason': 'bb_window_not_set'}
+    
     # 加载配置
-    _log('info', f'[Task] 加载配置文件: {team_config}')
+    _log('info', f'[Battle] 加载配置文件: {team_config}')
     if not api_load_config(_bb_window_global, team_config):
-        _log('error', f'[Task] 配置文件加载失败: {team_config}')
+        _log('error', f'[Battle] 配置文件加载失败: {team_config}')
         return {
             'success': False,
             'error': f'配置文件加载失败: {team_config}'
@@ -836,45 +856,58 @@ def api_run_bbc_task(args):
     
     # 设置参数
     page = _bb_window_global.pages[0]
-    _log('info', f'[Task] 设置参数: run_count={run_count}, apple_type={apple_type}, battle_type={battle_type}')
+    _log('info', f'[Battle] 设置参数: run_count={run_count}, apple_type={apple_type}, battle_type={battle_type}')
     api_set_run_times(page, run_count)
     api_set_apple_type(page, apple_type)
     api_set_battle_type(page, battle_type)
     
     # 启动战斗
-    _log('info', '[Task] 启动战斗')
+    _log('info', '[Battle] 启动战斗')
     if not api_start_battle(page):
-        _log('error', '[Task] 战斗启动失败')
+        _log('error', '[Battle] 战斗启动失败')
         return {
             'success': False,
             'error': '战斗启动失败，请检查队伍配置'
         }
-    _log('info', '[Task] 战斗已启动，进入等待循环')
+    _log('info', '[Battle] 战斗已启动，进入等待循环')
     
     # 轮询等待战斗结束
-    # 无限等待战斗结束
     while True:
-        # 检查是否有结束弹窗
-        # 通过检查popup队列中是否有停止相关弹窗
         temp_list = []
         battle_ended = False
         end_reason = ''
+        
+        # 检查弹窗队列
         while not popup_event_queue.empty():
             try:
                 p = popup_event_queue.get_nowait()
                 temp_list.append(p)
                 title = p.get('title', '')
+                message = p.get('message', '')
+                
                 # 判断为战斗结束的弹窗
                 end_popups = ['脚本停止！']
-                if any(popup in title for popup in end_popups):
+                
+                # 排除游戏重启相关的弹窗（不应视为战斗结束）
+                restart_keywords = ['闪退', '重启', '启动游戏失败', '检测错误']
+                is_restart_popup = any(keyword in title or keyword in message for keyword in restart_keywords)
+                
+                # 助战排序/队伍配置选择取消也视为战斗结束
+                cancel_popups = ['助战排序不符合', '队伍配置错误！']
+                is_cancel_popup = any(popup in title for popup in cancel_popups) and _current_task_args.get(
+                    'support_order_mismatch' if '助战排序' in title else 'team_config_error', True
+                ) == False
+                
+                if not is_restart_popup and (any(popup in title for popup in end_popups) or is_cancel_popup):
                     battle_ended = True
-                    end_reason = p.get('message', '')
+                    end_reason = message
             except:
                 break
+        
         for p in temp_list:
             popup_event_queue.put(p)
         
-        # 检查是否用户选择取消（从_last_resolved_popup获取弹窗信息）
+        # 检查是否用户选择取消
         if _task_should_end:
             global _last_resolved_popup
             if _last_resolved_popup:
@@ -905,6 +938,7 @@ def api_run_bbc_task(args):
                         _resolve_popup(popup_id, 'ok')
             
             if end_popup_info:
+                # 正常结束：有"脚本停止！"弹窗
                 return {
                     'success': True,
                     'popup_title': end_popup_info.get('title', ''),
@@ -912,11 +946,12 @@ def api_run_bbc_task(args):
                     'user_decision': 'ok'
                 }
             else:
+                # 取消结束：助战排序/队伍配置选择取消
                 return {
-                    'success': True,
-                    'popup_title': '脚本停止！',
+                    'success': False,
+                    'popup_title': '用户取消',
                     'popup_message': end_reason,
-                    'user_decision': 'ok'
+                    'user_decision': 'cancel'
                 }
         
         time.sleep(1)
