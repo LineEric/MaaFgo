@@ -182,8 +182,8 @@ class ExecuteBbcTask(CustomAction):
             # 【直接在这里根据消息决定下一步去哪】
             if "羁绊" in popup_message:
                 context.override_next("执行BBC任务", ["BBC弹窗-羁绊"])
-            elif "测试" in popup_message:  # 假设你想匹配其他关键字
-                context.override_next("执行BBC任务", ["BBC弹窗-测试"])
+            elif "完成设定次数" in popup_message:  # 假设你想匹配其他关键字
+                context.override_next("执行BBC任务", ["BBC弹窗-完成"])
             else:
                 # 如果没有匹配到特殊的弹窗，走默认的 next
                 pass
