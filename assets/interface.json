@@ -22,14 +22,14 @@
     {
       "name": "B服",
       "path": [
-        "resource/common",
+        "resource/base",
         "resource/cn"
       ]
     },
     {
       "name": "日服",
       "path": [
-        "resource/common",
+        "resource/base",
         "resource/jp"
       ]
     }
