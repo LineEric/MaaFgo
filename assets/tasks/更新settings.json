@@ -1,0 +1,9 @@
+{
+  "task": [
+    {
+      "name": "更新bbc脚本",
+      "label": "更新bbc脚本",
+      "entry": "更新settings"
+    }
+  ]
+}
