@@ -3,7 +3,10 @@
         {
             "name": "启动bbc",
             "label": "启动bbc",
-            "entry": "启动bbc"
+            "entry": "启动bbc",
+            "option": [
+                "connect_method"
+            ]
         }
     ]
 }

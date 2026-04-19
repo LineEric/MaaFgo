@@ -12,7 +12,6 @@
                 "bbc_run_count",
                 "apple_type",
                 "bbc_battle_type",
-                "connect_method",
                 "support_order_mismatch",
                 "team_config_error"
             ]
