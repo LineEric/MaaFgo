@@ -7,7 +7,6 @@
             "entry": "bbc战斗",
             "option": [
                 "chaldea_team",
-                "bbc_team_config",
                 "bbc_run_count",
                 "apple_type",
                 "bbc_battle_type",
