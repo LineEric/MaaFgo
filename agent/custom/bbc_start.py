@@ -6,6 +6,7 @@ import struct
 import subprocess
 import logging
 import psutil
+import threading
 from maa.agent.agent_server import AgentServer
 from maa.custom_action import CustomAction
 from maa.context import Context
@@ -122,6 +123,9 @@ class StartBbc(CustomAction):
             
             attach_data = node_data.get('attach', {})
             
+            # 调试：打印完整的 attach 数据
+            logger.info(f"[StartBbc] 完整 attach 数据: {json.dumps(attach_data, ensure_ascii=False)}")
+            
             # 提取连接相关参数
             connect = attach_data.get('connect', 'auto')
             mumu_path = attach_data.get('mumu_path', '')
@@ -135,8 +139,10 @@ class StartBbc(CustomAction):
             # 将连接类型转换为 BBC 服务端命令
             connect_cmd_map = {
                 'mumu': 'connect_mumu',
-                'ld': 'connect_ld', 
+                'ld': 'connect_ld',
+                'ldplayer': 'connect_ld', 
                 'adb': 'connect_adb',
+                'manual': 'connect_adb',
                 'connect_mumu': 'connect_mumu',
                 'connect_ld': 'connect_ld',
                 'connect_adb': 'connect_adb'
@@ -225,7 +231,6 @@ class StartBbc(CustomAction):
                 tcp_client.stop()
                 
                 if result.success:
-                    logger.info(f"[StartBbc] BBC启动并连接成功 (尝试 {attempt})")
                     return CustomAction.RunResult(success=True)
                 else:
                     logger.warning(f"[StartBbc] 模拟器连接失败 (尝试 {attempt})，终止进程")
@@ -487,6 +492,10 @@ class StartBbc(CustomAction):
             # auto模式不发送连接命令，直接等待
             connect_success = True
             if connect_args.get('mode') != 'auto':
+                # 先等待 BBC UI 完全就绪（额外等待2秒）
+                logger.info("[Connect] 等待 BBC UI 完全就绪...")
+                time.sleep(5)
+                
                 # 发送连接命令
                 connect_result = tcp_client.send_command(connect_cmd, connect_args, timeout=30)
                 if not connect_result.get('success'):
@@ -507,24 +516,36 @@ class StartBbc(CustomAction):
             
             # 验证连接状态
             status_result = tcp_client.send_command('get_connection', {}, timeout=5)
-            device_available = False
-            device_connected = False
             
-            if status_result.get('success'):
-                device_available = status_result.get('available', False)
-                device_connected = status_result.get('connected', False)
-            else:
-                logger.warning(f"[Connect] 获取连接状态失败: {status_result.get('error')}")
+            # BBC 服务端直接返回连接状态字典，没有 success 字段
+            device_available = status_result.get('available', False)
+            device_connected = status_result.get('connected', False)
             
-            # 最终判断
-            if connect_success and (device_available or device_connected):
-                logger.info(f"[Connect] 模拟器连接成功 (available={device_available}, connected={device_connected})")
-                return CustomAction.RunResult(success=True)
-            elif connect_success:
-                logger.warning(f"[Connect] 模拟器未连接 (available={device_available}, connected={device_connected})")
-                return CustomAction.RunResult(success=True)
-            else:
+            # 最终判断 - 按顺序检查并输出
+            # 1. 检查 BBC 是否启动并连接
+            if not connect_success:
+                logger.error("[StartBbc] BBC启动失败")
                 return CustomAction.RunResult(success=False)
+            
+            logger.info("[StartBbc] BBC启动并连接成功")
+            for handler in logger.handlers:
+                handler.flush()
+            
+            # 2. 检查模拟器是否连接成功
+            if device_available or device_connected:
+                logger.info(f"[Connect] 模拟器连接成功 (available={device_available}, connected={device_connected})")
+            else:
+                logger.warning(f"[Connect] 模拟器未连接 (available={device_available}, connected={device_connected})")
+            for handler in logger.handlers:
+                handler.flush()
+            
+            # 3. 输出详细的连接信息
+            final_status = tcp_client.send_command('get_connection', {}, timeout=5)
+            logger.info(f"[Connect] BBC连接模拟器详情: {json.dumps(final_status, ensure_ascii=False)}")
+            for handler in logger.handlers:
+                handler.flush()
+            
+            return CustomAction.RunResult(success=True)
         finally:
             # 等待回调线程结束（最多1秒）
             callback_thread.join(timeout=1)

@@ -139,7 +139,7 @@ class ExecuteBbcTask(CustomAction):
             logger.info(f"[ExecuteBbcTask] 参数: team={team_config}, count={run_count}, apple={apple_type}, type={battle_type}")
             
             # 步骤1: 尝试TCP连接，失败则触发bbc_start
-            tcp_client = self._ensure_bbc_connected(context, attach_data)
+            tcp_client = self._ensure_bbc_connected(context)
             if not tcp_client:
                 return CustomAction.RunResult(success=False)
             
@@ -148,13 +148,17 @@ class ExecuteBbcTask(CustomAction):
                 tcp_client.stop()
                 return CustomAction.RunResult(success=False)
             
-            # 步骤3: 配置并启动战斗
-            if not self._setup_and_start_battle(tcp_client, team_config, run_count, apple_type, battle_type):
+            # 步骤3: 配置并启动战斗（同时启动回调监听）
+            state, callback_thread = self._setup_and_start_battle(
+                tcp_client, team_config, run_count, apple_type, battle_type,
+                support_order_mismatch, team_config_error
+            )
+            if state is None:
                 tcp_client.stop()
                 return CustomAction.RunResult(success=False)
             
-            # 步骤4: 监听回调等待战斗结束
-            popup_title, popup_message = self._wait_for_battle_end(tcp_client, attach_data)
+            # 步骤4: 等待战斗结束
+            popup_title, popup_message = self._wait_for_battle_end(tcp_client, state, callback_thread)
             
             tcp_client.stop()
             
@@ -178,7 +182,7 @@ class ExecuteBbcTask(CustomAction):
             logger.error(f"[ExecuteBbcTask] 异常: {e}", exc_info=True)
             return CustomAction.RunResult(success=False)
     
-    def _ensure_bbc_connected(self, context: Context, attach_data: dict):
+    def _ensure_bbc_connected(self, context: Context):
         """确保BBC已连接，必要时触发bbc_start"""
         from .bbc_start import BbcTcpClient
         
@@ -276,18 +280,46 @@ class ExecuteBbcTask(CustomAction):
         return True
     
     def _setup_and_start_battle(self, tcp_client, team_config: str, run_count: int, 
-                                apple_type: str, battle_type: str) -> bool:
-        """配置战斗参数并启动"""
+                                apple_type: str, battle_type: str,
+                                support_order_mismatch: bool, team_config_error: bool) -> tuple:
+        """配置战斗参数并启动，返回 (state, callback_thread) 或 (None, None)"""
+        
+        # 共享状态（提前创建，用于回调监听）
+        state = {
+            'finished': False,
+            'popup_title': '',
+            'popup_message': ''
+        }
+        
+        # 在启动战斗前就开启回调监听，确保能捕获所有弹窗
+        callback_thread = threading.Thread(
+            target=self._listen_callbacks,
+            args=(tcp_client, support_order_mismatch, team_config_error, state),
+            daemon=True
+        )
+        callback_thread.start()
+        logger.info("[ExecuteBbcTask] 回调监听已启动")
+        
         # 加载配置
         logger.info(f"[ExecuteBbcTask] 加载配置: {team_config}")
         result = tcp_client.send_command('load_config', {'filename': team_config}, timeout=10)
         if not result.get('success'):
             logger.error(f"[ExecuteBbcTask] 加载配置失败: {result.get('error')}")
-            return False
+            return None, None
+        
+        # 检查是否在配置过程中就有弹窗
+        if state['finished']:
+            logger.warning(f"[ExecuteBbcTask] 配置阶段检测到弹窗: {state['popup_title']}")
+            return state, callback_thread  # 弹窗已处理，返回 state 让上层处理结果
         
         # 设置参数
         logger.info(f"[ExecuteBbcTask] 设置苹果类型: {apple_type}")
         tcp_client.send_command('set_apple_type', {'apple_type': apple_type}, timeout=5)
+        
+        # 再次检查弹窗
+        if state['finished']:
+            logger.warning(f"[ExecuteBbcTask] 参数设置阶段检测到弹窗: {state['popup_title']}")
+            return state, callback_thread
         
         logger.info(f"[ExecuteBbcTask] 设置运行次数: {run_count}")
         tcp_client.send_command('set_run_times', {'times': run_count}, timeout=5)
@@ -300,31 +332,13 @@ class ExecuteBbcTask(CustomAction):
         result = tcp_client.send_command('start_battle', {}, timeout=10)
         if not result.get('success'):
             logger.error(f"[ExecuteBbcTask] 启动战斗失败: {result.get('error')}")
-            return False
+            return None, None
         
         logger.info("[ExecuteBbcTask] 战斗已启动，等待结束...")
-        return True
+        return state, callback_thread
     
-    def _wait_for_battle_end(self, tcp_client, attach_data: dict):
-        """监听回调端口等待战斗结束"""
-        support_order_mismatch = attach_data.get('support_order_mismatch', False)
-        team_config_error = attach_data.get('team_config_error', False)
-        
-        # 共享状态
-        state = {
-            'finished': False,
-            'popup_title': '',
-            'popup_message': ''
-        }
-        
-        # 启动回调监听线程
-        callback_thread = threading.Thread(
-            target=self._listen_callbacks,
-            args=(tcp_client, support_order_mismatch, team_config_error, state),
-            daemon=True
-        )
-        callback_thread.start()
-        
+    def _wait_for_battle_end(self, tcp_client, state: dict, callback_thread):
+        """等待战斗结束（回调监听已提前启动）"""
         # 主循环：心跳检查 + 等待结束
         while not state['finished']:
             # 心跳检查（30秒）
