@@ -46,7 +46,7 @@ def _ensure_cache_loaded() -> None:
 
     # ---- 第一级: 本地 JSON 数据库 ----
     _chaldea_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(_chaldea_dir, "..", "..", "assets", "resource", "Chaldea")
+    data_dir = os.path.join(_chaldea_dir, "..", "utils", "Chaldea")
     servant_path = os.path.join(data_dir, "servant_names_CN.json")
     equip_path = os.path.join(data_dir, "equip_names_CN.json")
 
