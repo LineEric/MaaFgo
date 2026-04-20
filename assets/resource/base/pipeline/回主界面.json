@@ -1,20 +1,20 @@
 {
-    "主界面判断-有无通知按钮": {
+    "主界面判断-main-ui": {
         "next": [
             "无弹窗",
             "[JumpBack]有弹窗返回"
         ],
         "post_wait_freezes": 500,
         "recognition": {
-            "type": "OCR",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    8,
-                    6,
-                    182,
-                    72
+                    5,
+                    2,
+                    183,
+                    84
                 ],
-                "expected": "お知らせ"
+                "template": "main_ui.png"
             }
         }
     },
@@ -53,10 +53,10 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    1234,
-                    84,
-                    44,
-                    36
+                    1227,
+                    75,
+                    53,
+                    62
                 ],
                 "template": [
                     "回主界面/判断是否要初始化_1.png"
@@ -66,7 +66,7 @@
     },
     "回主界面": {
         "next": [
-            "主界面判断-有无通知按钮",
+            "主界面判断-main-ui",
             "[JumpBack]主界面判断-返回"
         ],
         "recognition": {
@@ -83,10 +83,10 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    204,
-                    553,
-                    57,
-                    58
+                    192,
+                    539,
+                    86,
+                    85
                 ],
                 "template": "主界面圣晶石.png",
                 "green_mask": true
