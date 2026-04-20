@@ -35,6 +35,11 @@
             "type": "DirectHit"
         }
     },
+    "初始化完成": {
+        "recognition": {
+            "type": "DirectHit"
+        }
+    },
     "初始化界面": {
         "action": {
             "type": "Click",
@@ -49,7 +54,8 @@
         },
         "recognition": {
             "type": "DirectHit"
-        }
+        },
+        "max_hit": 2
     },
     "判断是否要初始化": {
         "recognition": {
@@ -65,7 +71,8 @@
                     "回主界面/判断是否要初始化_1.png"
                 ]
             }
-        }
+        },
+        "max_hit": 2
     },
     "回主界面": {
         "next": [
@@ -79,7 +86,8 @@
     "无弹窗": {
         "next": [
             "判断是否要初始化",
-            "[JumpBack]初始化界面"
+            "[JumpBack]初始化界面",
+            "初始化完成"
         ],
         "post_wait_freezes": 500,
         "recognition": {
