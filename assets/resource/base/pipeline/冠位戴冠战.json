@@ -69,7 +69,7 @@
     },
     "冠位戴冠战-开始": {
         "focus": {
-            "Node.Action.Starting": "**<span style=\"color: #FF0000;\">开始戴冠战</span>**"
+            "Node.Action.Starting": "<span style=\"color: #FF0000;\">开始戴冠战</span>"
         },
         "next": [
             "冠位戴冠战列表",
@@ -161,10 +161,10 @@
             "type": "Click",
             "param": {}
         },
-        "timeout": 5000,
-        "next": [
-            "bbc战斗"
-        ]
+        "timeout": 3000,
+        "focus": {
+            "Node.Action.Succeeded": "进入副本完成"
+        }
     },
     "戴冠战-不匹配上滑": {
         "max_hit": 15,

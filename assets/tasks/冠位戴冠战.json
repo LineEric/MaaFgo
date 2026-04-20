@@ -2,8 +2,9 @@
     "task": [
       {
             "name": "冠位戴冠战",
+            "label": "冠位戴冠战",
             "description": "由于导航功能尚未完善（基本的地图的导航都还没做），仅白纸化地球可用。bbchannel的安装方法请查看 <https://www.bilibili.com/video/BV1c3DgBWEjN> 。全版本使用bbc的方式一致。",
-            "entry": "冠位戴冠战-开始",
+            "entry": "日常战斗",
             "resource": [
                 "日服"
             ],
@@ -14,14 +15,18 @@
                 "选择冠位职介",
                 "选择冠位难度",
                 "team_index",
-                "bbc_team_config",
+                "team_config",
                 "bbc_run_count",
                 "apple_type",
                 "bbc_battle_type",
-                "connect_method",
                 "support_order_mismatch",
                 "team_config_error"
-            ]
+            ],
+            "pipeline_override": {
+              "执行章节导航": {
+                "next": ["冠位戴冠战-开始"]
+              }
+            }
       }
 
     ]
