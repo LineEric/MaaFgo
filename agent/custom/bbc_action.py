@@ -36,12 +36,61 @@ class ExecuteBbcTask(CustomAction):
     """执行BBC战斗任务 - 事件驱动模式"""
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
+        """主入口：带自动重启的战斗流程"""
+        max_retries = 2  # 最多重试2次
+        last_error = None
+        
+        for attempt in range(max_retries):
+            if attempt > 0:
+                logger.warning(f"[ExecuteBbcTask] 第{attempt}次重试...")
+                # 执行BBC重启
+                if not self._restart_bbc(context):
+                    return CustomAction.RunResult(success=False)
+            
+            # 执行单次战斗流程
+            result = self._execute_single_battle(context)
+            last_error = result.get('error', '')
+            
+            # 检查是否需要重启
+            if result.get('need_restart', False):
+                logger.warning("[ExecuteBbcTask] 检测到游戏异常，准备重启...")
+                continue  # 进入下一次循环
+            else:
+                # 返回最终结果
+                if result['success']:
+                    return CustomAction.RunResult(success=True)
+                else:
+                    # 失败时输出错误信息
+                    if last_error:
+                        context.override_pipeline({
+                            "bbc弹窗信息输出": {
+                                "focus": {
+                                    "Node.Recognition.Starting": f"<span style=\"color: #FF0000;\">{last_error}</span>"
+                                }
+                            }
+                        })
+                    return CustomAction.RunResult(success=False)
+        
+        # 达到最大重试次数
+        error_msg = f"战斗失败（已重试{max_retries-1}次）" + (f": {last_error}" if last_error else "")
+        logger.error(f"[ExecuteBbcTask] {error_msg}")
+        context.override_pipeline({
+            "bbc弹窗信息输出": {
+                "focus": {
+                    "Node.Recognition.Starting": f"<span style=\"color: #FF0000;\">{error_msg}</span>"
+                }
+            }
+        })
+        return CustomAction.RunResult(success=False)
+    
+    def _execute_single_battle(self, context: Context) -> dict:
+        """执行单次战斗流程（不含重启逻辑）"""
         try:
             # 从 Context 获取节点数据
             node_data = context.get_node_data("执行BBC任务")
             if not node_data:
                 logger.error("[ExecuteBbcTask] 无法获取节点数据")
-                return CustomAction.RunResult(success=False)
+                return {'success': False, 'error': '无法获取节点数据'}
             
             attach_data = node_data.get('attach', {})
             
@@ -55,23 +104,24 @@ class ExecuteBbcTask(CustomAction):
             
             # 验证必需参数
             if not team_config or run_count is None or apple_type is None:
-                logger.error(f"[ExecuteBbcTask] 参数不完整: team={team_config}, count={run_count}, apple={apple_type}")
-                return CustomAction.RunResult(success=False)
+                error_msg = f"参数不完整: team={team_config}, count={run_count}, apple={apple_type}"
+                logger.error(f"[ExecuteBbcTask] {error_msg}")
+                return {'success': False, 'error': error_msg}
             
             run_count = int(run_count)
             logger.info(f"[ExecuteBbcTask] 参数: team={team_config}, count={run_count}, apple={apple_type}, type={battle_type}")
             
-            # 步骤1: 尝试TCP连接，失败则触发bbc_start
+            # 步顤1: 尝试TCP连接，失败则触发bbc_start
             if not self._ensure_bbc_connected(context):
-                return CustomAction.RunResult(success=False)
+                return {'success': False, 'error': 'BBC连接失败'}
             
             # 清空消息队列，避免读取历史弹窗
             bbc_manager.clear_message_queue()
             
-            # 步骤2: 验证模拟器连接
+            # 步顤2: 验证模拟器连接
             if not self._verify_emulator_connection(attach_data, context):
                 bbc_manager.disconnect_tcp()
-                return CustomAction.RunResult(success=False)
+                return {'success': False, 'error': '模拟器连接失败'}
             
             # 步骤3: 配置并启动战斗（同时启动回调监听）
             state = self._setup_and_start_battle(
@@ -80,7 +130,7 @@ class ExecuteBbcTask(CustomAction):
             )
             if state is None:
                 bbc_manager.disconnect_tcp()
-                return CustomAction.RunResult(success=False)
+                return {'success': False, 'error': '战斗启动失败'}
             
             # 步骤4: 等待战斗结束
             popup_title, popup_message = self._wait_for_battle_end(state, state['popup_event'])
@@ -101,11 +151,41 @@ class ExecuteBbcTask(CustomAction):
             else:
                 logger.info("[ExecuteBbcTask] 战斗正常结束")
             
-            return CustomAction.RunResult(success=True)
+            # 返回结果和是否需要重启的标志
+            return {
+                'success': True,
+                'need_restart': state.get('need_restart', False)
+            }
             
         except Exception as e:
-            logger.error(f"[ExecuteBbcTask] 异常: {e}", exc_info=True)
-            return CustomAction.RunResult(success=False)
+            error_msg = f"异常: {str(e)}"
+            logger.error(f"[ExecuteBbcTask] {error_msg}", exc_info=True)
+            return {'success': False, 'error': error_msg}
+    
+    def _restart_bbc(self, context: Context) -> bool:
+        """重启BBC进程"""
+        try:
+            logger.info("[Restart] 停止BBC进程...")
+            stop_result = context.run_task("停止bbc")
+            if not stop_result:
+                logger.error("[Restart] 停止BBC失败")
+                return False
+            
+            time.sleep(2)
+            
+            logger.info("[Restart] 启动BBC进程...")
+            start_result = context.run_task("启动bbc")
+            if not start_result:
+                logger.error("[Restart] 启动BBC失败")
+                return False
+            
+            time.sleep(3)
+            logger.info("[Restart] BBC重启完成")
+            return True
+            
+        except Exception as e:
+            logger.error(f"[Restart] 重启异常: {e}", exc_info=True)
+            return False
     
     def _ensure_bbc_connected(self, context: Context):
         """确保BBC已连接，必要时触发bbc_start"""

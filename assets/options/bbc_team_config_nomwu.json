@@ -10,14 +10,7 @@
                     "name": "先执行更新bbc脚本进行更新操作",
                     "label": "先执行更新bbc脚本进行更新操作"
                 }
-            ],
-            "pipeline_override": {
-                "执行BBC任务": {
-                    "attach": {
-                        "bbc_team_config": "{bbc_team_config}"
-                    }
-                }
-            }
+            ]
         }
     }
 }

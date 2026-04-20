@@ -73,6 +73,7 @@ def install_resource():
         nomwu_config = working_dir / "assets" / "options" / "bbc_team_config_nomwu.json"
         if nomwu_config.exists():
             shutil.copy2(nomwu_config, install_path / "options" / "bbc_team_config.json")
+            nomwu_config.unlink()  # 删除源文件
     
     if (working_dir / "assets" / "i18n").exists():
         shutil.copytree(
