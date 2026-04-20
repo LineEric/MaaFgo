@@ -44,7 +44,7 @@ class ImportChaldeaTeam(CustomAction):
     def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
         try:
             # 从 Context 获取节点数据
-            node_data = context.get_node_data("导入Chaldea队伍")
+            node_data = context.get_node_data("使用chaldea队伍")
             if not node_data:
                 logger.error("[ImportChaldeaTeam] 无法获取节点数据")
                 return CustomAction.RunResult(success=False)
