@@ -233,14 +233,12 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    209,
-                    557,
-                    50,
-                    50
+                    473,
+                    613,
+                    119,
+                    103
                 ],
-                "template": [
-                    "主界面圣晶石.png"
-                ],
+                "template": "task.png",
                 "threshold": 0.6,
                 "green_mask": true
             }
