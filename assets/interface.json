@@ -6,7 +6,7 @@
   "license": "MIT",
   "welcome": "首次使用！欢迎使用 MaaFgo!",
   "github": "https://github.com/xlxyvergil/MaaFgo",
-  "version": "v1.1.18",
+  "version": "v1.1.22-hotfix",
   "languages": {
     "zh_cn": "i18n/zh_cn.json"
   },
@@ -24,9 +24,6 @@
       "path": [
         "resource/base",
         "resource/cn"
-      ],
-      "option": [
-        "cnocr"
       ]
     },
     {
@@ -48,7 +45,8 @@
     "./tasks/Chaldea启动.json",
     "tasks/关闭游戏.json",
     "tasks/冠位戴冠战.json",
-    "options/cnocr.json",
+    "options/选择队伍配置.json",
+    "options/chaldea_team_config.json",
     "options/chapter.json",
     "options/team_index.json",
     "options/bbc_team_config.json",

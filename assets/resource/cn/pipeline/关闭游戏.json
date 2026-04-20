@@ -5,6 +5,23 @@
             "param": {
                 "package": "com.bilibili.fatego"
             }
+        },
+        "recognition": {
+            "type": "DirectHit"
+        },
+        "next": [
+            "关闭bbc"
+        ]
+    },
+    "关闭bbc": {
+        "recognition": {
+            "type": "DirectHit"
+        },
+        "action": {
+            "type": "Custom",
+            "param": {
+                "custom_action": "stop_bbc"
+            }
         }
     }
 }

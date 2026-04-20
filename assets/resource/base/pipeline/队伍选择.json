@@ -19,10 +19,10 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    674,
-                    102,
-                    152,
-                    132
+                    640,
+                    67,
+                    598,
+                    526
                 ],
                 "template": [
                     "team/点击队伍编制.png"
@@ -42,10 +42,10 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    256,
-                    542,
-                    97,
-                    80
+                    216,
+                    522,
+                    174,
+                    174
                 ],
                 "template": [
                     "team/编队.png"
@@ -559,14 +559,15 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    688,
-                    1,
-                    29,
-                    37
+                    675,
+                    2,
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D1.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -576,17 +577,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D10.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -596,17 +598,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D11.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -616,17 +619,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D12.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -636,17 +640,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D13.png"
-                ]
+                ],
+                "threshold": 0.8
             }
         }
     },
@@ -656,17 +661,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D14.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -676,17 +682,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D15.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -699,14 +706,15 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D2.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -716,18 +724,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D3.png"
                 ],
-                "detector": "SIFT"
+                "threshold": 0.85
             }
         }
     },
@@ -737,17 +745,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D4.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -757,17 +766,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D5.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -777,17 +787,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D6.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -797,17 +808,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D7.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -817,17 +829,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D8.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },
@@ -837,17 +850,18 @@
         ],
         "post_wait_freezes": 1000,
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    440,
+                    675,
                     2,
-                    416,
-                    62
+                    67,
+                    38
                 ],
                 "template": [
                     "team/D9.png"
-                ]
+                ],
+                "threshold": 0.85
             }
         }
     },

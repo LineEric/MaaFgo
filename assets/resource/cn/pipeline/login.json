@@ -24,6 +24,23 @@
             }
         }
     },
+    "可能已经完成登录": {
+        "next": [
+            "回主界面"
+        ],
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    3,
+                    3,
+                    181,
+                    83
+                ],
+                "template": "main_ui.png"
+            }
+        }
+    },
     "开始更新": {
         "action": {
             "type": "Click"
@@ -148,22 +165,5 @@
         "recognition": {
             "type": "DirectHit"
         }
-    },
-    "可能已经完成登录": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "roi": [
-                    930,
-                    1,
-                    349,
-                    78
-                ],
-                "template": "活动报酬.png"
-            }
-        },
-        "next": [
-            "回主界面"
-        ]
     }
 }
