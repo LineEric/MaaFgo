@@ -113,114 +113,6 @@ class ExecuteBbcTask(CustomAction):
     """执行BBC战斗任务 - 事件驱动模式"""
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
-<<<<<<< HEAD
-        # 从 Context 获取节点数据（包含 pipeline_override 合并后的值）
-        node_data = context.get_node_data("执行BBC任务")
-        print(f"[ExecuteBbcTask] node_data={node_data}")
-        
-        if not node_data:
-            print(f"[ExecuteBbcTask] 错误：无法获取节点数据")
-            return CustomAction.RunResult(success=False)
-        
-        # 从 attach 字段获取所有参数
-        attach_data = node_data.get('attach', {})
-        print(f"[ExecuteBbcTask] attach_data={attach_data}")
-        
-        # 提取所有参数
-        team_config = attach_data.get('bbc_team_config', '')
-        run_count = attach_data.get('run_count')
-        apple_type = attach_data.get('apple_type')
-        battle_type = attach_data.get('battle_type', '连续出击')
-        connect = attach_data.get('connect', 'auto')
-        support_order_mismatch = attach_data.get('support_order_mismatch', False)
-        team_config_error = attach_data.get('team_config_error', False)
-        
-        # 连接相关参数
-        mumu_path = attach_data.get('mumu_path', '')
-        mumu_index = attach_data.get('mumu_index', 0)
-        mumu_pkg = attach_data.get('mumu_pkg', 'com.bilibili.fatego')
-        mumu_app_index = attach_data.get('mumu_app_index', 0)
-        ld_path = attach_data.get('ld_path', '')
-        ld_index = attach_data.get('ld_index', 0)
-        manual_port = attach_data.get('manual_port', '')
-
-        # ========== Chaldea 队伍导入 ==========
-        chaldea_import_source = attach_data.get('chaldea_import_source', '')
-        
-        if chaldea_import_source:
-            try:
-                # 使用相对包引用或绝对引用，如果在一个目录下可以直接 import
-                import sys
-                agent_dir = os.path.dirname(os.path.abspath(__file__))
-                if agent_dir not in sys.path:
-                    sys.path.append(agent_dir)
-                
-                from chaldea_converter import fetch_and_convert
-                logger.info(f"[Chaldea] 开始解析导入来源: {chaldea_import_source[:30]}...")
-                
-                # 确定保存目录
-                bbc_settings_dir = os.path.join(BBC_PATH, 'settings')
-                os.makedirs(bbc_settings_dir, exist_ok=True)
-                
-                # 调用统一的 fetch_and_convert
-                converted_filename = fetch_and_convert(
-                    source=chaldea_import_source,
-                    output_dir=bbc_settings_dir,
-                )
-                
-                if converted_filename:
-                    # 获取文件名并使用它覆盖手动输入的选择
-                    team_config = converted_filename
-                    print(f"[Chaldea] 使用 Chaldea 队伍: {converted_filename}")
-                else:
-                    print(f"[Chaldea] 解析失败，回退到手选配置: {team_config}")
-            except Exception as e:
-                print(f"[Chaldea] 导入异常: {e}，回退到手选配置")
-                import traceback
-                traceback.print_exc()
-                
-        # 验证必需参数
-        if not team_config:
-            print(f"[ExecuteBbcTask] 错误：未提供队伍配置文件路径")
-            return CustomAction.RunResult(success=False)
-        
-        if run_count is None or apple_type is None:
-            print(f"[ExecuteBbcTask] 错误：参数不完整，run_count={run_count}, apple_type={apple_type}")
-            return CustomAction.RunResult(success=False)
-        
-        run_count = int(run_count)
-        print(f"[ExecuteBbcTask] team_config={team_config}, run_count={run_count}, apple_type={apple_type}, battle_type={battle_type}, connect={connect}")
-        
-        # 执行完整BBC流程（启动+配置+战斗）
-        success, popup_message = self._execute_full_bbc_flow(
-            team_config, run_count, apple_type, battle_type, connect,
-            support_order_mismatch, team_config_error,
-            mumu_path, mumu_index, mumu_pkg, mumu_app_index,
-            ld_path, ld_index, manual_port)
-
-        if success:
-            print(f"[ExecuteBbcTask] 执行成功，返回消息: {popup_message}")
-
-            # 【直接在这里根据消息决定下一步去哪】
-            if "羁绊" in popup_message:
-                context.override_next("执行BBC任务", ["BBC弹窗-羁绊"])
-            elif "测试" in popup_message:  # 假设你想匹配其他关键字
-                context.override_next("执行BBC任务", ["BBC弹窗-测试"])
-            else:
-                # 如果没有匹配到特殊的弹窗，走默认的 next
-                pass
-
-            return CustomAction.RunResult(success=True)
-        else:
-            return CustomAction.RunResult(success=False)
-
-    def _execute_full_bbc_flow(self, team_config, run_count, apple_type, battle_type, connect,
-                                support_order_mismatch, team_config_error,
-                                mumu_path, mumu_index, mumu_pkg, mumu_app_index,
-                                ld_path, ld_index, manual_port):
-        """执行完整BBC流程：启动 -> 配置 -> 战斗"""
-=======
->>>>>>> main
         try:
             # 从 Context 获取节点数据
             node_data = context.get_node_data("执行BBC任务")
@@ -237,7 +129,10 @@ class ExecuteBbcTask(CustomAction):
             battle_type = attach_data.get('battle_type', '连续出击')
             support_order_mismatch = attach_data.get('support_order_mismatch', False)
             team_config_error = attach_data.get('team_config_error', False)
-            
+
+            # Chaldea 队伍导入：如果提供了来源，转换并覆盖 team_config
+            team_config = self._try_chaldea_import(attach_data, team_config)
+
             # 验证必需参数
             if not team_config or run_count is None or apple_type is None:
                 logger.error(f"[ExecuteBbcTask] 参数不完整: team={team_config}, count={run_count}, apple={apple_type}")
@@ -290,9 +185,43 @@ class ExecuteBbcTask(CustomAction):
             logger.error(f"[ExecuteBbcTask] 异常: {e}", exc_info=True)
             return CustomAction.RunResult(success=False)
     
+    def _try_chaldea_import(self, attach_data: dict, team_config: str) -> str:
+        """如果提供了 Chaldea 来源，转换为 BBC 配置并返回文件名；否则原样返回 team_config"""
+        chaldea_import_source = attach_data.get('chaldea_import_source', '')
+        if not chaldea_import_source:
+            return team_config
+
+        try:
+            import sys
+            agent_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            if agent_root not in sys.path:
+                sys.path.insert(0, agent_root)
+            from chaldea_converter import fetch_and_convert
+            from bbc_start import BBC_PATH
+
+            logger.info(f"[Chaldea] 开始解析导入来源: {chaldea_import_source[:50]}...")
+
+            bbc_settings_dir = os.path.join(BBC_PATH, 'settings')
+            os.makedirs(bbc_settings_dir, exist_ok=True)
+
+            converted_filename = fetch_and_convert(
+                source=chaldea_import_source,
+                output_dir=bbc_settings_dir,
+            )
+
+            if converted_filename:
+                logger.info(f"[Chaldea] 使用 Chaldea 队伍: {converted_filename}")
+                return converted_filename
+            else:
+                logger.warning(f"[Chaldea] 解析失败，回退到手选配置: {team_config}")
+                return team_config
+        except Exception as e:
+            logger.warning(f"[Chaldea] 导入异常: {e}，回退到手选配置", exc_info=True)
+            return team_config
+
     def _ensure_bbc_connected(self, context: Context):
         """确保BBC已连接，必要时触发bbc_start"""
-        from .bbc_start import BbcTcpClient
+        from bbc_start import BbcTcpClient
         
         tcp_client = BbcTcpClient()
         if tcp_client.connect(timeout=3):
@@ -372,7 +301,7 @@ class ExecuteBbcTask(CustomAction):
                 return False
             
             # 重新建立连接
-            from .bbc_start import BbcTcpClient
+            from bbc_start import BbcTcpClient
             new_tcp = BbcTcpClient()
             time.sleep(2)
             if not new_tcp.connect(timeout=5):
