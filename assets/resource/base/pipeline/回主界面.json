@@ -1,12 +1,12 @@
 {
-    "主界面判断-活动报酬": {
+    "主界面判断-有无通知按钮": {
         "next": [
             "无弹窗",
             "[JumpBack]有弹窗返回"
         ],
         "post_wait_freezes": 500,
         "recognition": {
-            "type": "TemplateMatch",
+            "type": "OCR",
             "param": {
                 "roi": [
                     8,
@@ -14,9 +14,7 @@
                     182,
                     72
                 ],
-                "template": "main_ui.png",
-                "threshold": 0.6,
-                "green_mask": false
+                "expected": "お知らせ"
             }
         }
     },
@@ -34,9 +32,41 @@
             "type": "DirectHit"
         }
     },
+    "初始化界面": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    1254,
+                    103,
+                    8,
+                    9
+                ]
+            }
+        },
+        "recognition": {
+            "type": "DirectHit"
+        }
+    },
+    "判断是否要初始化": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    1234,
+                    84,
+                    44,
+                    36
+                ],
+                "template": [
+                    "回主界面/判断是否要初始化_1.png"
+                ]
+            }
+        }
+    },
     "回主界面": {
         "next": [
-            "主界面判断-活动报酬",
+            "主界面判断-有无通知按钮",
             "[JumpBack]主界面判断-返回"
         ],
         "recognition": {
@@ -44,6 +74,10 @@
         }
     },
     "无弹窗": {
+        "next": [
+            "判断是否要初始化",
+            "[JumpBack]初始化界面"
+        ],
         "post_wait_freezes": 500,
         "recognition": {
             "type": "TemplateMatch",
