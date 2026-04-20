@@ -75,6 +75,7 @@
             "type": "Click"
         },
         "next": [
+            "关闭连续出击",
             "回主界面"
         ],
         "recognition": {
@@ -157,7 +158,8 @@
             "param": {
                 "template": [
                     "close_botton.png"
-                ]
+                ],
+                "threshold": 0.8
             }
         }
     },
@@ -193,5 +195,17 @@
         "recognition": {
             "type": "DirectHit"
         }
+    },
+    "关闭连续出击": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": "close_botton.png",
+                "threshold": 0.8
+            }
+        },
+        "next": [
+            "回主界面"
+        ]
     }
 }
