@@ -163,13 +163,13 @@ jobs:
 
       - name: Compress Final Artifact
         run: |
-          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-MWU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z "./build/*"
+          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MWU.7z "./build/*"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.repo_name }}-MWU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}
-          path: ${{ env.repo_name }}-MWU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z
+          name: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MWU
+          path: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MWU.7z
 
   build-mxu:
     env:
@@ -277,13 +277,13 @@ jobs:
 
       - name: Compress MXU Artifact
         run: |
-          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z "./install-mxu/*"
+          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MXU.7z "./install-mxu/*"
 
       - name: Upload MXU Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}
-          path: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z
+          name: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MXU
+          path: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MXU.7z
 
   build-avalonia:
     needs: meta
@@ -376,12 +376,12 @@ jobs:
       - name: Compress Avalonia artifact
         shell: bash
         run: |
-          7z a -t7z -mx=9 -mmt -ms -r MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}.7z ./install/*
+          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}-Avalonia.7z ./install/*
 
       - uses: actions/upload-artifact@v7
         with:
-          name: MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}
-          path: MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}.7z
+          name: ${{ env.repo_name }}-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}-Avalonia
+          path: ${{ env.repo_name }}-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}-Avalonia.7z
 
   changelog:
     name: Generate changelog
