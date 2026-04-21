@@ -1,11 +1,19 @@
 {
-    "战斗完成信息": {
+    "bbc弹窗信息输出": {
+        "focus": {
+            "Node.Recognition.Starting": "<span style=\"color: #FF0000;\">BBC任务正常完成！</span>"
+        },
         "recognition": {
             "type": "DirectHit"
-        },
+        }
+    },
+    "战斗完成信息": {
         "next": [
             "bbc弹窗信息输出"
-        ]
+        ],
+        "recognition": {
+            "type": "DirectHit"
+        }
     },
     "执行bbc战斗": {
         "max_hit": 1,
@@ -52,7 +60,7 @@
             "type": "DirectHit"
         }
     },
-    "日常战斗": {
+    "通用战斗调度": {
         "next": [
             "[JumpBack]执行回主界面",
             "[JumpBack]执行队伍选择",
@@ -65,12 +73,20 @@
             "type": "DirectHit"
         }
     },
-    "bbc弹窗信息输出": {
+    "日常战斗": {
         "recognition": {
             "type": "DirectHit"
         },
-        "focus": {
-            "Node.Recognition.Starting": "<span style=\"color: #FF0000;\">BBC任务正常完成！</span>"
-        }
+        "next": [
+            "通用战斗调度"
+        ]
+    },
+    "冠位戴冠战": {
+        "recognition": {
+            "type": "DirectHit"
+        },
+        "next": [
+            "通用战斗调度"
+        ]
     }
 }
