@@ -125,7 +125,9 @@ class ExecuteBbcTask(CustomAction):
             # 提前设置弹窗回调（在清空队列之前，确保不会错过弹窗）
             def on_popup(msg):
                 """弹窗回调函数 - 快速返回，不阻塞监听线程"""
-                mfaalog.info(f"[ExecuteBbcTask] 收到弹窗: {msg.get('popup_title', '')}")
+                popup_title = msg.get('popup_title', '')
+                popup_message = msg.get('popup_message', '')
+                mfaalog.info(f"[ExecuteBbcTask] 收到弹窗: {popup_title} - {popup_message}")
                 if not state['finished']:
                     self._handle_popups([msg], support_order_mismatch, team_config_error, state)
                     state['popup_event'].set()  # 通知监听线程
