@@ -277,13 +277,13 @@ jobs:
 
       - name: Compress MXU Artifact
         run: |
-          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z "./install-mxu/*"
+          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z "./install-mxu/*"
 
       - name: Upload MXU Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}
-          path: ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z
+          name: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}
+          path: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z
 
   build-avalonia:
     needs: meta
