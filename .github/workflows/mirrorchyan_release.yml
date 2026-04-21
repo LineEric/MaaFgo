@@ -20,6 +20,7 @@ jobs:
         with:
           filetype: latest-release
           filename: MaaFgo-*-MXU.7z
+          p7zip: true
           mirrorchyan_rid: MaaFgo
           tag: ${{ inputs.tag }}
 
