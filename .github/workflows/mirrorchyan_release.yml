@@ -22,7 +22,6 @@ jobs:
           filename: MaaFgo-*-MXU.7z
           mirrorchyan_rid: MaaFgo
           tag: ${{ inputs.tag }}
-          p7zip: true
 
           os: ${{ matrix.os }}
           arch: ${{ matrix.arch }}
