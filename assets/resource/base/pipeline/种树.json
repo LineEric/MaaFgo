@@ -254,10 +254,10 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    843,
-                    211,
-                    132,
-                    180
+                    855,
+                    239,
+                    110,
+                    122
                 ],
                 "template": [
                     "trees/加号.png"
