@@ -9,16 +9,13 @@ on:
 
 jobs:
   mirrorchyan:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         os: [win]
         arch: [x86_64]
     steps:
-      - run: |
-          brew install p7zip
-        
       - uses: MirrorChyan/uploading-action@v1
         with:
           filetype: latest-release
