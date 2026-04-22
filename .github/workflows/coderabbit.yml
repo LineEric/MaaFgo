@@ -1,0 +1,31 @@
+name: CodeRabbit PR Review
+
+# 1. 配置触发时机
+on:
+  pull_request:          # 当有新的 PR 被创建、更新或重新打开时
+    types: [opened, synchronize, reopened]
+  pull_request_review_comment: # 当在 PR 中发表评论时（用于唤醒机器人对话）
+    types: [created]
+
+# 2. 配置必要的权限
+permissions:
+  contents: read
+  pull-requests: write   # 必须赋予写权限，否则机器人无法在 PR 中发表评论
+
+# 3. 配置具体的执行任务
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run CodeRabbit Review
+        uses: coderabbitai/ai-pr-reviewer@latest # 使用官方最新的 Action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      # GitHub 自带令牌，无需手动配置
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # 需要你手动配置的 OpenAI 密钥
+        with:
+          debug: false                 # 关闭调试模式
+          review_simple_changes: false # 忽略过于简单的改动（如拼写错误），减少噪音
+          review_comment_lgtm: false   # 如果代码没毛病，是否强制发表 LGTM 评论
