@@ -1,5 +1,5 @@
-version: 2
-language: "zh-CN"  # 告诉AI：请用简体中文回复
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "zh-CN"
 reviews:
-  profile: "assertive"  # 默认是 chill（温和），改成 assertive（严厉）会更爱挑刺
-  high_level_summary: true # 自动在PR下方生成代码变更的高级摘要
+  profile: "assertive"
+  high_level_summary: true
