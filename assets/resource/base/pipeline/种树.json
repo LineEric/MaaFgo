@@ -1,202 +1,201 @@
 {
-  "0个苹果": {
-    "action": "Click",
-    "expected": "0",
-    "next": [
-      "回主界面"
-    ],
-    "recognition": "OCR",
-    "roi": [
-      891,
-      618,
-      31,
-      29
-    ],
-    "target": [
-      604,
-      598,
-      71,
-      43
-    ]
-  },
-  "1个直接交换": {
-    "action": "Click",
-    "green_mask": true,
-    "next": [
-      "交换完成关闭"
-    ],
-    "recognition": "TemplateMatch",
-    "roi": [
-      687,
-      552,
-      254,
-      85
-    ],
-    "template": [
-      "trees/1个直接交换.png"
-    ],
-    "threshold": 0.85
-  },
-  "1个苹果": {
-    "action": "Click",
-    "expected": "1",
-    "next": [
-      "1个直接交换"
-    ],
-    "recognition": "OCR",
-    "roi": [
-      895,
-      622,
-      27,
-      27
-    ],
-    "target": [
-      857,
-      605,
-      63,
-      30
-    ]
-  },
-  "主界面体力": {
-    "action": "Click",
-    "next": [
-      "打开体力界面"
-    ],
-    "recognition": "TemplateMatch",
-    "roi": [
-      125,
-      655,
-      81,
-      65
-    ],
-    "target": [
-      157,
-      683,
-      15,
-      23
-    ],
-    "template": [
-      "体力+.png"
-    ]
-  },
-  "交换完成关闭": {
-    "action": "Click",
-    "green_mask": true,
-    "next": [
-      "回主界面"
-    ],
-    "recognition": "TemplateMatch",
-    "roi": [
-      500,
-      524,
-      282,
-      72
-    ],
-    "template": [
-      "trees/交换完成关闭.png"
-    ],
-    "threshold": 0.6
-  },
-  "多个苹果": {
-    "action": "Click",
-    "inverse": true,
-    "next": [
-      "种树加号查找"
-    ],
-    "recognition": "TemplateMatch",
-    "roi": [
-      898,
-      619,
-      19,
-      28
-    ],
-    "target": [
-      856,
-      599,
-      67,
-      41
-    ],
-    "template": [
-      "trees/0个苹果.png",
-      "trees/1个苹果.png"
-    ],
-    "threshold": 0.6
-  },
-  "打开体力界面": {
-    "next": [
-      "0个苹果",
-      "1个苹果",
-      "多个苹果"
-    ],
-    "recognition": "TemplateMatch",
-    "roi": [
-      843,
-      610,
-      47,
-      44
-    ],
-    "template": [
-      "trees/青铜树苗.png"
-    ],
-    "threshold": 0.6
-  },
-  "确认完成种树点击": {
-    "next": [
-      "1个直接交换"
-    ],
-    "recognition": "TemplateMatch",
-    "roi": [
-      809,
-      243,
-      109,
-      106
-    ],
-    "template": [
-      "trees/确认完成种树点击.png"
-    ]
-  },
-  "种树": {
-    "next": [
-      "种树主界面识别",
-      "[JumpBack]回主界面"
-    ],
-    "recognition": "DirectHit"
-  },
-  "种树主界面识别": {
-    "green_mask": true,
-    "next": [
-      "主界面体力"
-    ],
-    "recognition": "TemplateMatch",
-    "roi": [
-      473,
-      613,
-      119,
-      103
-    ],
-    "template": "task.png",
-    "threshold": 0.6
-  },
-  "种树加号查找": {
-    "action": "Click",
-    "next": [
-      "确认完成种树点击"
-    ],
-    "recognition": "TemplateMatch",
-    "roi": [
-      855,
-      239,
-      110,
-      122
-    ],
-    "target": [
-      835,
-      288,
-      20,
-      26
-    ],
-    "template": [
-      "trees/加号.png"
-    ]
-  }
+    "0个苹果": {
+        "action": "Click",
+        "next": [
+            "回主界面"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            878,
+            617,
+            62,
+            37
+        ],
+        "target": [
+            604,
+            598,
+            71,
+            43
+        ],
+        "template": "trees/0个苹果.png"
+    },
+    "1个直接交换": {
+        "action": "Click",
+        "green_mask": true,
+        "next": [
+            "交换完成关闭"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            687,
+            552,
+            254,
+            85
+        ],
+        "template": [
+            "trees/1个直接交换.png"
+        ],
+        "threshold": 0.85
+    },
+    "1个苹果": {
+        "action": "Click",
+        "next": [
+            "1个直接交换"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            878,
+            617,
+            62,
+            37
+        ],
+        "target": [
+            857,
+            605,
+            63,
+            30
+        ],
+        "template": "trees/1个苹果.png"
+    },
+    "主界面体力": {
+        "action": "Click",
+        "next": [
+            "打开体力界面"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            125,
+            655,
+            81,
+            65
+        ],
+        "target": [
+            157,
+            683,
+            15,
+            23
+        ],
+        "template": [
+            "体力+.png"
+        ]
+    },
+    "交换完成关闭": {
+        "action": "Click",
+        "green_mask": true,
+        "next": [
+            "回主界面"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            500,
+            524,
+            282,
+            72
+        ],
+        "template": [
+            "trees/交换完成关闭.png"
+        ],
+        "threshold": 0.6
+    },
+    "多个苹果": {
+        "action": "Click",
+        "inverse": true,
+        "next": [
+            "种树加号查找"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            878,
+            617,
+            62,
+            37
+        ],
+        "target": [
+            856,
+            599,
+            67,
+            41
+        ],
+        "template": [
+            "trees/0个苹果.png",
+            "trees/1个苹果.png"
+        ]
+    },
+    "打开体力界面": {
+        "next": [
+            "0个苹果",
+            "1个苹果",
+            "多个苹果"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            843,
+            610,
+            47,
+            44
+        ],
+        "template": [
+            "trees/青铜树苗.png"
+        ],
+        "threshold": 0.6
+    },
+    "确认完成种树点击": {
+        "next": [
+            "1个直接交换"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            809,
+            243,
+            109,
+            106
+        ],
+        "template": [
+            "trees/确认完成种树点击.png"
+        ]
+    },
+    "种树": {
+        "next": [
+            "种树主界面识别",
+            "[JumpBack]回主界面"
+        ],
+        "recognition": "DirectHit"
+    },
+    "种树主界面识别": {
+        "green_mask": true,
+        "next": [
+            "主界面体力"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            473,
+            613,
+            119,
+            103
+        ],
+        "template": "task.png",
+        "threshold": 0.6
+    },
+    "种树加号查找": {
+        "action": "Click",
+        "next": [
+            "确认完成种树点击"
+        ],
+        "recognition": "TemplateMatch",
+        "roi": [
+            855,
+            239,
+            110,
+            122
+        ],
+        "target": [
+            835,
+            288,
+            20,
+            26
+        ],
+        "template": [
+            "trees/加号.png"
+        ]
+    }
 }
