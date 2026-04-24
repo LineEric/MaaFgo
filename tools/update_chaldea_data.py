@@ -2,7 +2,7 @@
 Chaldea 本地名称数据库更新工具
 
 从 Atlas Academy API 下载国服从者和礼装的名称数据，
-保存为 agent/data/ 下的本地 JSON 文件。
+保存为 agent/utils/Chaldea/ 下的本地 JSON 文件。
 
 运行一次即可建立/更新本地数据库，之后转换器无需网络即可查询名称。
 
@@ -24,9 +24,9 @@ if sys.stdout.encoding != 'utf-8':
 
 ATLAS_API = "https://api.atlasacademy.io"
 
-# 输出目录：assets/resource/Chaldea/
+# 输出目录: agent/utils/Chaldea/
 _TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(_TOOLS_DIR, "..", "assets", "resource", "Chaldea")
+DATA_DIR = os.path.join(_TOOLS_DIR, "..", "agent", "utils", "Chaldea")
 
 
 def fetch_json(url: str, timeout: int = 60) -> list | dict:
