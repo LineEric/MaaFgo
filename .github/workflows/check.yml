@@ -33,8 +33,7 @@ jobs:
       - name: Run maa-checker
         run: |
           npm ci
-          # 排除 Chaldea 目录，只检查其他资源
-          npx @nekosu/maa-tools check --resource-dirs assets/resource/base,assets/resource/cn,assets/resource/jp
+          npx @nekosu/maa-tools check
 
       - name: Install maafw
         run: |
