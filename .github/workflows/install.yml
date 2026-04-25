@@ -161,15 +161,11 @@ jobs:
           version=$(echo "$tag" | sed 's/^v//; s/Avalonia$//; s/MWU$//')
           echo "clean_version=$version" >> $GITHUB_OUTPUT
 
-      - name: Compress Final Artifact
-        run: |
-          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-MWU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z "./build/*"
-
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.repo_name }}-MWU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}
-          path: ${{ env.repo_name }}-MWU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z
+          name: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MWU
+          path: "./build/*"
 
   build-mxu:
     env:
@@ -275,18 +271,16 @@ jobs:
           version=$(echo "$tag" | sed 's/^v//; s/Avalonia$//; s/MWU$//')
           echo "clean_version=$version" >> $GITHUB_OUTPUT
 
-      - name: Compress MXU Artifact
-        run: |
-          7z a -t7z -mx=9 -mmt -ms -r ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z "./install-mxu/*"
-
       - name: Upload MXU Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}
-          path: ${{ env.repo_name }}-MXU-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}.7z
+          name: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MXU
+          path: "./install-mxu/*"
 
   build-avalonia:
     needs: meta
+    env:
+      repo_name: ${{ needs.meta.outputs.repo_name }}
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
@@ -373,15 +367,11 @@ jobs:
           version=$(echo "$tag" | sed 's/^v//; s/Avalonia$//; s/MWU$//')
           echo "version=$version" >> $GITHUB_OUTPUT
 
-      - name: Compress Avalonia artifact
-        shell: bash
-        run: |
-          7z a -t7z -mx=9 -mmt -ms -r MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}.7z ./install/*
-
-      - uses: actions/upload-artifact@v7
+      - name: Upload Avalonia artifact
+        uses: actions/upload-artifact@v7
         with:
-          name: MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}
-          path: MaaFGO-Avalonia-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}.7z
+          name: ${{ env.repo_name }}-${{ matrix.os }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.version }}-MFAA
+          path: "./install/*"
 
   changelog:
     name: Generate changelog
@@ -424,25 +414,34 @@ jobs:
   release:
     if: ${{ needs.meta.outputs.is_release == 'true' }}
     needs: [meta, build-mwu, build-avalonia, build-mxu, changelog]
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v8.0.1
         with:
-          path: release
+          path: assets
+
+      - name: Compress artifacts
+        run: |
+          cd assets
+          for f in *; do
+            if [[ $f == *"win"* ]]; then
+              (cd "$f" && zip -r "../$f.zip" .)
+            fi
+          done
 
       - uses: softprops/action-gh-release@v2.2.2
         with:
-          files: release/**/*.7z
+          files: assets/*.zip
           tag_name: ${{ needs.meta.outputs.tag }}
           body: ${{ needs.changelog.outputs.release_body }}
           draft: false
           prerelease: ${{ needs.meta.outputs.is_prerelease == 'true' }}
 
-#      - name: Trigger MirrorChyanUploading
-#        if: ${{ needs.meta.outputs.is_release == 'true' }}
-#        shell: bash
-#        run: |
-#          gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan.yml -f tag=${{ needs.meta.outputs.tag }}
-#          gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan_release_note.yml -f tag=${{ needs.meta.outputs.tag }}
-#        env:
-#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Trigger MirrorChyanUploading
+        if: ${{ github.repository_owner == 'xlxyvergil' }}
+        shell: bash
+        run: |
+          gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan_release.yml -f tag=${{ needs.meta.outputs.tag }}
+          gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan_release_note.yml -f tag=${{ needs.meta.outputs.tag }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

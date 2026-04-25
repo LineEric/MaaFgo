@@ -3,228 +3,228 @@
         "合众为一": {
             "type": "select",
             "label": "关卡",
-            "default": "布拉克山",
+            "default": "圣山",
             "cases": [
                 {
-                    "name": "布拉克山",
-                    "label": "布拉克山",
+                    "name": "圣山",
+                    "label": "圣山",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "布拉克山"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/圣山.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "里弗顿",
-                    "label": "里弗顿",
+                    "name": "巨大河床",
+                    "label": "巨大河床",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "里弗顿"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/巨大河床.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "丹佛",
-                    "label": "丹佛",
+                    "name": "里高之城",
+                    "label": "里高之城",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "丹佛"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/里高之城.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "德明",
-                    "label": "德明",
+                    "name": "新芝加哥",
+                    "label": "新芝加哥",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "德明"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/新芝加哥.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "拉伯克",
-                    "label": "拉伯克",
+                    "name": "德州骑警",
+                    "label": "德州骑警",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "拉伯克"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/德州骑警.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "达拉斯",
-                    "label": "达拉斯",
+                    "name": "牛镇体育馆",
+                    "label": "牛镇体育馆",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "达拉斯"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/牛镇体育馆.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "亚历山德里亚",
-                    "label": "亚历山德里亚",
+                    "name": "威克斯岛",
+                    "label": "威克斯岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "亚历山德里亚"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/威克斯岛.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "阿尔卡特拉斯岛",
-                    "label": "阿尔卡特拉斯岛",
+                    "name": "监狱岛",
+                    "label": "监狱岛",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "阿尔卡特拉斯岛"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/监狱岛.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "得梅因",
-                    "label": "得梅因",
+                    "name": "监视据点",
+                    "label": "监视据点",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "得梅因"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/监视据点.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "卡尼",
-                    "label": "卡尼",
+                    "name": "大平原",
+                    "label": "大平原",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "卡尼"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/大平原.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "蒙哥马利",
-                    "label": "蒙哥马利",
+                    "name": "南国医恋",
+                    "label": "南国医恋",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "蒙哥马利"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/南国医恋.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "夏洛特",
-                    "label": "夏洛特",
+                    "name": "淘金热",
+                    "label": "淘金热",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "夏洛特"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/淘金热.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "华盛顿",
-                    "label": "华盛顿",
+                    "name": "特别行政区",
+                    "label": "特别行政区",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "华盛顿"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/特别行政区.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "芝加哥",
-                    "label": "芝加哥",
+                    "name": "风之城",
+                    "label": "风之城",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "芝加哥"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/Unum/风之城.png"
                             ]
                         }
                     }

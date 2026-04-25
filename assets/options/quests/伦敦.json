@@ -3,148 +3,148 @@
         "伦敦": {
             "type": "select",
             "label": "关卡",
-            "default": "旧街",
+            "default": "马车与瓦斯灯",
             "cases": [
                 {
-                    "name": "旧街",
-                    "label": "旧街",
+                    "name": "马车与瓦斯灯",
+                    "label": "马车与瓦斯灯",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "旧街"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/马车与瓦斯灯.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "白色教堂",
-                    "label": "白色教堂",
+                    "name": "贫民窟",
+                    "label": "贫民窟",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "白色教堂"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/贫民窟.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "伦敦城",
-                    "label": "伦敦城",
+                    "name": "伦敦金融城",
+                    "label": "伦敦金融城",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "伦敦城"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/伦敦金融城.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "苏活区",
-                    "label": "苏活区",
+                    "name": "魅惑的繁华街",
+                    "label": "魅惑的繁华街",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "苏活区"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/魅惑的繁华街.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "威斯敏斯特",
-                    "label": "威斯敏斯特",
+                    "name": "苏格兰场",
+                    "label": "苏格兰场",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "威斯敏斯特"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/苏格兰场.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "摄政公园",
-                    "label": "摄政公园",
+                    "name": "王室的狩猎场",
+                    "label": "王室的狩猎场",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "摄政公园"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/王室的狩猎场.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "克勒肯维尔",
-                    "label": "克勒肯维尔",
+                    "name": "治愈之井",
+                    "label": "治愈之井",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "克勒肯维尔"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/治愈之井.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "萨瑟克",
-                    "label": "萨瑟克",
+                    "name": "博罗市场",
+                    "label": "博罗市场",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "萨瑟克"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/博罗市场.png"
                             ]
                         }
                     }
                 },
                 {
-                    "name": "海德公园",
-                    "label": "海德公园",
+                    "name": "水晶宫的残影",
+                    "label": "水晶宫的残影",
                     "pipeline_override": {
                         "地图坐标导航": {
                             "attach": {
-                                "quests": "q变动坐标点0号"
+                                "quests": "海德公园"
                             }
                         },
                         "关卡选择": {
                             "template": [
-                                "map/Fuyuki/熊熊燃烧的森林.png"
+                                "map/London/水晶宫的残影.png"
                             ]
                         }
                     }

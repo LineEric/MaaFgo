@@ -11,7 +11,7 @@ _custom_dir = os.path.dirname(os.path.abspath(__file__))
 if _custom_dir not in sys.path:
     sys.path.insert(0, _custom_dir)
 
-from bbc_connection_manager import bbc_manager
+from bbc_connection_manager import get_manager
 import mfaalog
 
 
@@ -118,6 +118,9 @@ class ExecuteBbcTask(CustomAction):
             listener_thread.start()
             mfaalog.info("[ExecuteBbcTask] 弹窗监听线程已启动")
             
+            # 获取或创建 Manager 实例（进程级单例）
+            manager = get_manager()
+            
             # 步顤1: 尝试TCP连接，失败则触发bbc_start
             if not self._ensure_bbc_connected(context):
                 return {'success': False, 'error': 'BBC连接失败'}
@@ -125,35 +128,37 @@ class ExecuteBbcTask(CustomAction):
             # 提前设置弹窗回调（在清空队列之前，确保不会错过弹窗）
             def on_popup(msg):
                 """弹窗回调函数 - 快速返回，不阻塞监听线程"""
-                mfaalog.info(f"[ExecuteBbcTask] 收到弹窗: {msg.get('popup_title', '')}")
+                popup_title = msg.get('popup_title', '')
+                popup_message = msg.get('popup_message', '')
+                mfaalog.info(f"[ExecuteBbcTask] 收到弹窗: {popup_title} - {popup_message}")
                 if not state['finished']:
-                    self._handle_popups([msg], support_order_mismatch, team_config_error, state)
+                    self._handle_popups([msg], support_order_mismatch, team_config_error, state, manager)
                     state['popup_event'].set()  # 通知监听线程
             
-            bbc_manager.set_popup_callback(on_popup)
+            manager.set_popup_callback(on_popup)
             mfaalog.info("[ExecuteBbcTask] 弹窗回调已设置")
             
             # 清空消息队列，避免读取历史弹窗
-            bbc_manager.clear_message_queue()
+            manager.clear_message_queue()
             
             # 步顤2: 验证模拟器连接
             if not self._verify_emulator_connection(attach_data, context):
-                bbc_manager.disconnect_tcp()
+                manager.disconnect_tcp()
                 return {'success': False, 'error': '模拟器连接失败'}
             
             # 步骤3: 配置并启动战斗（同时启动回调监听）
             battle_result = self._setup_and_start_battle(
                 team_config, run_count, apple_type, battle_type,
-                support_order_mismatch, team_config_error, state
+                support_order_mismatch, team_config_error, state, manager
             )
             if battle_result is None:
-                bbc_manager.disconnect_tcp()
+                manager.disconnect_tcp()
                 return {'success': False, 'error': '战斗启动失败'}
             
             # 步骤4: 等待战斗结束
             popup_title, popup_message = self._wait_for_battle_end(state)
             
-            bbc_manager.disconnect_tcp()
+            manager.disconnect_tcp()
             
             # 步骤5: 输出结果
             if popup_title or popup_message:
@@ -190,9 +195,10 @@ class ExecuteBbcTask(CustomAction):
     
     def _restart_bbc(self, context: Context) -> bool:
         """重启BBC进程"""
+        manager = get_manager()
         try:
             # 先断开当前连接
-            bbc_manager.disconnect_tcp()
+            manager.disconnect_tcp()
             time.sleep(1)
             
             mfaalog.info("[Restart] 停止BBC进程...")
@@ -220,8 +226,9 @@ class ExecuteBbcTask(CustomAction):
     
     def _ensure_bbc_connected(self, context: Context):
         """确保BBC已连接，必要时触发bbc_start"""
+        manager = get_manager()
         # 检查连接是否有效
-        if bbc_manager.ensure_connected(timeout=3):
+        if manager.ensure_connected(timeout=3):
             mfaalog.info("[ExecuteBbcTask] TCP连接有效")
             return True
         
@@ -235,7 +242,7 @@ class ExecuteBbcTask(CustomAction):
         
         # 重新检查连接
         time.sleep(2)
-        if bbc_manager.ensure_connected(timeout=5):
+        if manager.ensure_connected(timeout=5):
             mfaalog.info("[ExecuteBbcTask] bbc_start后TCP连接成功")
             return True
         
@@ -244,7 +251,8 @@ class ExecuteBbcTask(CustomAction):
     
     def _verify_emulator_connection(self, attach_data: dict, context: Context) -> bool:
         """验证模拟器连接，必要时调用Manager重启"""
-        conn_status = bbc_manager.send_command('get_connection', {}, timeout=5)
+        manager = get_manager()
+        conn_status = manager.send_command('get_connection', {}, timeout=5)
         
         # 检查是否有模拟器参数
         device_info = conn_status.get('device_info', {})
@@ -282,7 +290,7 @@ class ExecuteBbcTask(CustomAction):
                 }
             
             # 检查参数是否匹配
-            params_match = bbc_manager.check_emulator_params_match(connect_cmd, expected_args, emulator_params)
+            params_match = manager.check_emulator_params_match(connect_cmd, expected_args, emulator_params)
             if params_match:
                 mfaalog.info(f"[ExecuteBbcTask] 模拟器已连接且参数匹配: {emulator_params}")
                 return True
@@ -326,7 +334,7 @@ class ExecuteBbcTask(CustomAction):
             }
         
         # 调用Manager的完整重启流程
-        success = bbc_manager.restart_bbc_and_connect(connect_cmd, connect_args, max_retries=3)
+        success = manager.restart_bbc_and_connect(connect_cmd, connect_args, max_retries=3)
         
         if success:
             mfaalog.info("[ExecuteBbcTask] BBC重启并连接成功")
@@ -338,40 +346,39 @@ class ExecuteBbcTask(CustomAction):
     def _setup_and_start_battle(self, team_config: str, run_count: int, 
                                 apple_type: str, battle_type: str,
                                 support_order_mismatch: bool, team_config_error: bool,
-                                state: dict) -> dict:
-        """配置战斗参数并启动，返回 state 或 None"""
+                                state: dict, manager) -> dict:
         
         # 回调已在 _execute_single_battle 中设置，这里直接使用
         
         # 加载配置
         mfaalog.info(f"[ExecuteBbcTask] 加载配置: {team_config}")
-        result = bbc_manager.send_command('load_config', {'filename': team_config}, timeout=10)
+        result = manager.send_command('load_config', {'filename': team_config}, timeout=10)
         if not result.get('success'):
             mfaalog.error(f"[ExecuteBbcTask] 加载配置失败: {result.get('error')}")
             return None
         
         # 检查配置阶段是否有弹窗
-        popup_msgs = bbc_manager.get_messages_by_title('', timeout=1)
-        if self._handle_popups(popup_msgs, support_order_mismatch, team_config_error, state):
+        popup_msgs = manager.get_messages_by_title('', timeout=1)
+        if self._handle_popups(popup_msgs, support_order_mismatch, team_config_error, state, manager):
             return state
         
         # 设置参数
         mfaalog.info(f"[ExecuteBbcTask] 设置苹果类型: {apple_type}")
-        bbc_manager.send_command('set_apple_type', {'apple_type': apple_type}, timeout=5)
+        manager.send_command('set_apple_type', {'apple_type': apple_type}, timeout=5)
         
-        popup_msgs = bbc_manager.get_messages_by_title('', timeout=1)
-        if self._handle_popups(popup_msgs, support_order_mismatch, team_config_error, state):
+        popup_msgs = manager.get_messages_by_title('', timeout=1)
+        if self._handle_popups(popup_msgs, support_order_mismatch, team_config_error, state, manager):
             return state
         
         mfaalog.info(f"[ExecuteBbcTask] 设置运行次数: {run_count}")
-        bbc_manager.send_command('set_run_times', {'times': run_count}, timeout=5)
+        manager.send_command('set_run_times', {'times': run_count}, timeout=5)
         
         mfaalog.info(f"[ExecuteBbcTask] 设置战斗类型: {battle_type}")
-        bbc_manager.send_command('set_battle_type', {'battle_type': battle_type}, timeout=5)
+        manager.send_command('set_battle_type', {'battle_type': battle_type}, timeout=5)
         
         # 启动战斗前最后检查一次弹窗
-        popup_msgs = bbc_manager.get_messages_by_title('', timeout=1)
-        if self._handle_popups(popup_msgs, support_order_mismatch, team_config_error, state):
+        popup_msgs = manager.get_messages_by_title('', timeout=1)
+        if self._handle_popups(popup_msgs, support_order_mismatch, team_config_error, state, manager):
             return state
         
         # 启动战斗（带重试机制）
@@ -381,7 +388,7 @@ class ExecuteBbcTask(CustomAction):
         
         for retry in range(max_retries):
             # 发送启动命令
-            result = bbc_manager.send_command('start_battle', {}, timeout=10)
+            result = manager.send_command('start_battle', {}, timeout=10)
             if not result.get('success'):
                 error = result.get('error', '')
                 mfaalog.error(f"[ExecuteBbcTask] 启动战斗命令失败: {error}")
@@ -396,7 +403,7 @@ class ExecuteBbcTask(CustomAction):
             
             # 等待并检查状态
             time.sleep(2)
-            ui_status = bbc_manager.send_command('get_ui_status', {}, timeout=5)
+            ui_status = manager.send_command('get_ui_status', {}, timeout=5)
             
             # 检查是否成功启动
             if ui_status.get('battle_running') or ui_status.get('device_running'):
@@ -414,20 +421,20 @@ class ExecuteBbcTask(CustomAction):
                 continue
             
             # 检查是否有其他弹窗
-            popup_msgs = bbc_manager.get_messages_by_title('', timeout=2)
+            popup_msgs = manager.get_messages_by_title('', timeout=2)
             if popup_msgs:
                 mfaalog.info(f"[ExecuteBbcTask] 检测到弹窗: {popup_msgs[0].get('popup_title', '')}")
         
         if not battle_started:
-            mfaalog.error("[ExecuteBbcTask] 启动战斗失败，已达到最大重试次数")
-            return None
+            error_msg = "启动战斗失败（阵容未设置，已重试3次）"
+            mfaalog.error(f"[ExecuteBbcTask] {error_msg}")
+            return {'success': False, 'error': error_msg, 'need_restart': True}
         
         mfaalog.info("[ExecuteBbcTask] 战斗已启动，等待结束...")
         return state
     
     def _handle_popups(self, messages: list, support_order_mismatch: bool, 
-                      team_config_error: bool, state: dict) -> bool:
-        """处理弹窗消息列表，返回是否遇到终止弹窗"""
+                      team_config_error: bool, state: dict, manager) -> bool:
         for msg in messages:
             popup_title = msg.get('popup_title', '')
             popup_message = msg.get('popup_message', '')
@@ -441,7 +448,7 @@ class ExecuteBbcTask(CustomAction):
                 mfaalog.info(f"[Callback] 助战弹窗(askyesno)，响应: {action}")
                 
                 if popup_id:
-                    bbc_manager.send_command('popup_response', {
+                    manager.send_command('popup_response', {
                         'popup_id': popup_id,
                         'action': action
                     }, timeout=5)
@@ -463,7 +470,7 @@ class ExecuteBbcTask(CustomAction):
                 mfaalog.info(f"[Callback] 队伍配置弹窗(askokcancel)，响应: {action}")
                 
                 if popup_id:
-                    bbc_manager.send_command('popup_response', {
+                    manager.send_command('popup_response', {
                         'popup_id': popup_id,
                         'action': action
                     }, timeout=5)
@@ -531,7 +538,7 @@ class ExecuteBbcTask(CustomAction):
             time.sleep(heartbeat_interval)
             
             # 心跳检查
-            status = bbc_manager.send_command('get_status', {}, timeout=5)
+            status = manager.send_command('get_status', {}, timeout=5)
             if not status.get('success'):
                 mfaalog.warning("[ExecuteBbcTask] BBC服务无响应")
                 state['finished'] = True
