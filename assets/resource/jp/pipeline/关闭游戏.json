@@ -1,7 +1,15 @@
 {
+    "关闭bbc": {
+        "action": "Custom",
+        "recognition": "DirectHit",
+        "custom_action": "stop_bbc"
+    },
     "关闭游戏": {
         "action": "StopApp",
-        "package": "com.aniplex.fategrandorder",
-        "recognition": "DirectHit"
+        "next": [
+            "关闭bbc"
+        ],
+        "recognition": "DirectHit",
+        "package": "com.aniplex.fategrandorder"
     }
 }
