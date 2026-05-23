@@ -1,0 +1,14 @@
+{
+    "preset": [
+        {
+            "name": "setting",
+            "label": "$preset.setting.label",
+            "description": "$preset.setting.description",
+            "task": [
+                {
+                    "name": "更新bbc脚本"
+                }
+            ]
+        }
+    ]
+}
