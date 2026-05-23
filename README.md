@@ -59,7 +59,8 @@ MaaFgo 是一款基于图像识别技术的 FGO（Fate/Grand Order）自动战�
   
     文字版说明：
     -  a.将BBC放入maaFGO的根目录
-    - b.将bbcdll文件夹内的文件放入BBchannel\\dist\\BBchannel64目录下【替换】（非64位的放BBchannel文件夹下）
+    -  b.将bbcdll文件夹内的文件放入BBchannel\\dist\\BBchannel64目录下【替换】（非64位的放BBchannel文件夹下）
+    -  c.(MXU版本）运行restart_mfa.exe，或在MXU内运行更新bbc脚本的任务
 
 2. **连接模拟器**
 
