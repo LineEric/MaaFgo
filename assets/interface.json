@@ -6,6 +6,7 @@
   "license": "MIT",
   "welcome": "首次使用！欢迎使用 MaaFgo!模拟器需要强制为1280*720模式!",
   "github": "https://github.com/xlxyvergil/MaaFgo",
+  "icon": "resource/icon.png",
   "mirrorchyan_rid": "MaaFgo",
   "mirrorchyan_multiplatform": true,
   "version": "v1.1.23",
