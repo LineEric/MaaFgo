@@ -17,8 +17,7 @@
     {
       "name": "安卓设备",
       "type": "Adb",
-      "display_short_side": 720,
-      "permission_required": true
+      "display_short_side": 720
     }
   ],
   "resource": [
