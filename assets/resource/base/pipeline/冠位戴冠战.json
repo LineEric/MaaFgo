@@ -205,7 +205,7 @@
             }
         },
         "repeat": 4,
-        "post_delay": 3000,
+        "post_delay": 5000,
         "next": [
             "戴冠战-尝试进入副本"
         ]
