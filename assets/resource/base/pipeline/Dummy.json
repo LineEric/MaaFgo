@@ -1,4 +1,5 @@
 {
+    "全局空节点": {},
     "Global_Null": {
         "doc": "【全局默认空on_error覆盖】Jumpback链路崩毁默认节点",
         "pre_delay": 0,
@@ -8,16 +9,13 @@
             "其他异常"
         ]
     },
-    "其他异常": {
-        "focus": {
-            "Node.Recognition.Starting": "出现未知异常报错"
-        }
-    },
     "风暴罐不足": {
         "recognition": {
             "type": "TemplateMatch",
             "param": {
-                "template": "errorcode/风暴罐不足.png"
+                "template": [
+                    "errorcode/风暴罐不足.png"
+                ]
             }
         },
         "action": {
@@ -37,5 +35,10 @@
         "next": [
             "回主界面"
         ]
+    },
+    "其他异常": {
+        "focus": {
+            "Node.Recognition.Starting": "出现未知异常报错"
+        }
     }
 }
