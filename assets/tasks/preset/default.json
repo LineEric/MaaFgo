@@ -15,10 +15,16 @@
                     "name": "冠位戴冠战"
                 },
                 {
-                    "name": "日常战斗"
+                    "name": "日常战斗",
+                    "enabled": false
                 },
                 {
-                    "name": "迦勒底之门"
+                    "name": "迦勒底之门",
+                    "enabled": false
+                },
+                {
+                    "name": "直接战斗",
+                    "enabled": false
                 }
             ]
         }
