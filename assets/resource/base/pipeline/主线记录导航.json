@@ -31,7 +31,10 @@
             "找到主线记录"
         ]
     },
-    "找到主线记录": {},
+    "找到主线记录": {
+        "post_wait_freezes": 1000,
+        "post_delay": 1000
+    },
     "点击主线记录": {
         "recognition": {
             "type": "TemplateMatch",
@@ -50,6 +53,8 @@
         "action": {
             "type": "Click"
         },
+        "post_wait_freezes": 1000,
+        "post_delay": 1000,
         "next": [
             "完成点击主线记录"
         ]
