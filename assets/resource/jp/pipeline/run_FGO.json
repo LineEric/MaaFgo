@@ -176,6 +176,7 @@
         "post_delay": 2000,
         "next": [
             "[JumpBack]关闭主界面弹窗",
+            "[JumpBack]关闭主界面弹窗2",
             "如果要SKIP",
             "如果有奖励",
             "[JumpBack]如果要关闭",
@@ -245,5 +246,19 @@
         "next": [
             "最终确认抵达主界面"
         ]
+    },
+    "关闭主界面弹窗2": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "close_botton.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 3000
     }
 }
