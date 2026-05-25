@@ -111,12 +111,12 @@ def install_resource():
             dirs_exist_ok=True,
         )
     
-    # MWU: 将 bbc_team_config_nomwu.json 复制并重命名为 bbc_team_config.json
-    nomwu_config = working_dir / "assets" / "bbc_team_config_nomwu.json"
-    shutil.copy2(
-        nomwu_config,
-        install_path / "bbc_team_config.json",
-    )
+    # MWU: 复制 bbc_team_config.json 到根目录
+    if (working_dir / "assets" / "bbc_team_config.json").exists():
+        shutil.copy2(
+            working_dir / "assets" / "bbc_team_config.json",
+            install_path / "bbc_team_config.json",
+        )
 
     # 更新 interface.json 中的版本号和 agent 配置
     with open(install_path / "interface.json", "r", encoding="utf-8") as f:
