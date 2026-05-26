@@ -239,6 +239,7 @@
                 ]
             }
         },
+        "post_delay": 1000,
         "focus": {
             "Node.Action.Succeeded": "点击确认副本是否匹配"
         },
