@@ -1,4 +1,18 @@
 {
+    "戴冠战-确定弹窗有打开": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "grand/grand_cancel.png"
+                ]
+            }
+        },
+        "next": [
+            "戴冠战-匹配检测",
+            "戴冠战-不匹配关闭"
+        ]
+    },
     "冠位戴冠战-开始": {
         "focus": {
             "Node.Action.Starting": "<span style=\"color: #FF0000;\">开始戴冠战</span>"
@@ -239,13 +253,13 @@
                 ]
             }
         },
-        "post_delay": 1000,
+        "post_delay": 2000,
         "focus": {
             "Node.Action.Succeeded": "点击确认副本是否匹配"
         },
         "next": [
-            "戴冠战-匹配检测",
-            "戴冠战-不匹配关闭"
+            "戴冠战-确定弹窗有打开",
+            "戴冠战-不匹配上滑"
         ]
     },
     "戴冠战-错误": {
