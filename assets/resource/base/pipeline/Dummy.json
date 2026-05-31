@@ -1,10 +1,10 @@
 {
-    "全局空节点": {},
     "Global_Null": {
         "doc": "【全局默认空on_error覆盖】Jumpback链路崩毁默认节点",
         "pre_delay": 0,
         "post_delay": 0,
         "next": [
+            "全局-战前吃体力",
             "风暴罐不足",
             "其他异常"
         ]
@@ -39,6 +39,166 @@
     "其他异常": {
         "focus": {
             "Node.Recognition.Starting": "出现未知异常报错"
+        },
+        "next": [
+            "回主界面"
+        ]
+    },
+    "全局空节点": {},
+    "全局-战前吃体力": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "AP_replenishment‌_UI.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "处于吃体力界面"
+        }
+    },
+    "全局-吃体力选择石头": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "apple_stone.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "全局-吃体力点击确定"
+        ]
+    },
+    "全局-吃体力选择金": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "apple_gold.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "全局-吃体力点击确定"
+        ]
+    },
+    "全局-吃体力选择银": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "apple_silver.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "全局-吃体力点击确定"
+        ]
+    },
+    "全局-吃体力选择蓝2": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "apple_blue.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "全局-吃体力点击确定"
+        ]
+    },
+    "全局-吃体力选择铜2": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "apple_copper.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "全局-吃体力点击确定"
+        ]
+    },
+    "全局-吃体力选择蓝": {
+        "action": {
+            "type": "Swipe",
+            "param": {
+                "begin": [
+                    608,
+                    477,
+                    97,
+                    51
+                ],
+                "end": [
+                    [
+                        616,
+                        151,
+                        100,
+                        44
+                    ]
+                ]
+            }
+        },
+        "post_delay": 3000,
+        "next": [
+            "全局-吃体力选择蓝2"
+        ]
+    },
+    "全局-吃体力选择铜": {
+        "action": {
+            "type": "Swipe",
+            "param": {
+                "begin": [
+                    608,
+                    477,
+                    97,
+                    51
+                ],
+                "end": [
+                    [
+                        616,
+                        151,
+                        100,
+                        44
+                    ]
+                ]
+            }
+        },
+        "post_delay": 3000,
+        "next": [
+            "全局-吃体力选择铜2"
+        ]
+    },
+    "全局-吃体力点击确定": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "决定.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
         }
     }
 }

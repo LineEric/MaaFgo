@@ -1,0 +1,70 @@
+{
+    "option": {
+        "战前吃苹果": {
+            "type": "select",
+            "label": "是否战前吃苹果",
+            "default": "gold",
+            "cases": [
+                {
+                    "name": "none",
+                    "label": "不食用"
+                },
+                {
+                    "name": "copper",
+                    "label": "铜苹果",
+                    "pipeline_override": {
+                        "全局-战前吃体力": {
+                            "next": [
+                                "全局-吃体力选择铜"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "silver",
+                    "label": "银苹果",
+                    "pipeline_override": {
+                        "全局-战前吃体力": {
+                            "next": [
+                                "全局-吃体力选择银"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "gold",
+                    "label": "金苹果",
+                    "pipeline_override": {
+                        "全局-战前吃体力": {
+                            "next": [
+                                "全局-吃体力选择金"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "blue",
+                    "label": "蓝苹果",
+                    "pipeline_override": {
+                        "全局-战前吃体力": {
+                            "next": [
+                                "全局-吃体力选择蓝"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "colorful",
+                    "label": "彩苹果",
+                    "pipeline_override": {
+                        "全局-战前吃体力": {
+                            "next": [
+                                "全局-吃体力选择石头"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
