@@ -14,6 +14,7 @@
             "team_config",
             "bbc_run_count",
             "apple_type",
+            "战前吃苹果",
             "bbc_battle_type",
             "support_order_mismatch",
             "team_config_error"
@@ -28,6 +29,7 @@
             "team_config",
             "bbc_run_count",
             "apple_type",
+            "战前吃苹果",
             "bbc_battle_type",
             "support_order_mismatch",
             "team_config_error"
@@ -42,6 +44,7 @@
             "team_config",
             "bbc_run_count",
             "apple_type",
+            "战前吃苹果",
             "bbc_battle_type",
             "support_order_mismatch",
             "team_config_error"

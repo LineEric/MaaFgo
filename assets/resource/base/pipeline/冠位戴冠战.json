@@ -224,7 +224,8 @@
             "Node.Recognition.Failed": "副本不匹配"
         },
         "next": [
-            "冠位戴冠战-进入1"
+            "冠位戴冠战-进入1",
+            "[JumpBack]戴冠战-体力不足"
         ]
     },
     "戴冠战-尝试进入副本": {
@@ -284,6 +285,25 @@
         "next": [
             "戴冠战-匹配检测",
             "戴冠战-不匹配关闭"
+        ]
+    },
+    "戴冠战-体力不足": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "grand/grand_ap_insufficient‌.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "体力不足"
+        },
+        "next": [
+            "全局-战前吃体力"
         ]
     }
 }
