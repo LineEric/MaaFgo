@@ -204,7 +204,7 @@
                 ]
             }
         },
-        "repeat": 4,
+        "repeat": 5,
         "post_delay": 5000,
         "next": [
             "戴冠战-尝试进入副本"
@@ -239,13 +239,13 @@
                 ]
             }
         },
-        "post_delay": 1000,
+        "post_delay": 2000,
         "focus": {
             "Node.Action.Succeeded": "点击确认副本是否匹配"
         },
         "next": [
-            "戴冠战-匹配检测",
-            "戴冠战-不匹配关闭"
+            "戴冠战-确定弹窗有打开",
+            "戴冠战-不匹配上滑"
         ]
     },
     "戴冠战-错误": {
@@ -271,5 +271,19 @@
         "focus": {
             "Node.Recognition.Starting": "未找到对应职介！脚本中止"
         }
+    },
+    "戴冠战-确定弹窗有打开": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "grand/grand_cancel.png"
+                ]
+            }
+        },
+        "next": [
+            "戴冠战-匹配检测",
+            "戴冠战-不匹配关闭"
+        ]
     }
 }
