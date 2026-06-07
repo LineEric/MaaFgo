@@ -200,7 +200,7 @@ if __name__ == "__main__":
     install_chores()
     install_bbcdll()  # 复制 bbcdll 目录
     install_tasks()  # 复制 tasks 目录
-    install_restart_files()  # 复制 restart 文件
+    # install_restart_files()  # MWU 版本不需要 restart_mfa.exe
     fix_cv2_path()  # 修复 cv2 模块路径
 
     print(f"Install to {install_path} successfully.")
