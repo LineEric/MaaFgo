@@ -21,7 +21,8 @@
         },
         "action": {
             "type": "Click"
-        }
+        },
+        "post_delay": 2000
     },
     "冠位戴冠战-职介": {
         "recognition": {
