@@ -99,7 +99,7 @@
     "options/选择冠位职介.json",
     "options/迦勒底之门-副本类型.json",
     "options/战前吃苹果.json",
-    "options/包名填写.json",
+    "options/包名填写.json"
   ],
   "agent": {
     "child_exec": "python",
