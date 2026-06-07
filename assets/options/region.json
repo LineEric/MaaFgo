@@ -1,0 +1,22 @@
+{
+    "option": {
+        "region": {
+            "type": "select",
+            "label": "服务器",
+            "default": "CN",
+            "cases": [
+                {
+                    "name": "CN",
+                    "label": "国服",
+                    "pipeline_override": {
+                        "周常任务自动执行": {
+                            "attach": {
+                                "region": "CN"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

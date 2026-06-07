@@ -1,0 +1,19 @@
+{
+    "周常任务自动执行": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "solve_and_run_weekly_missions",
+        "next": [
+            "bbc弹窗信息输出"
+        ],
+        "attach": {
+            "region": "{region}",
+            "progress": "{progress}",
+            "bbc_team_config": "{bbc_team_config}",
+            "apple_type": "{apple_type}",
+            "battle_type": "{battle_type}",
+            "support_order_mismatch": "{support_order_mismatch}",
+            "team_config_error": "{team_config_error}"
+        }
+    }
+}

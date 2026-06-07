@@ -1,0 +1,20 @@
+{
+    "task": [
+        {
+            "name": "周常任务自动执行",
+            "description": "求解当周周常任务并自动逐关刷完。需先在 BBC 中保存通用队伍配置。",
+            "label": "周常任务自动执行",
+            "entry": "周常任务自动执行",
+            "option": [
+                "region",
+                "progress",
+                "bbc_team_config",
+                "bbc_run_count",
+                "apple_type",
+                "bbc_battle_type",
+                "support_order_mismatch",
+                "team_config_error"
+            ]
+        }
+    ]
+}

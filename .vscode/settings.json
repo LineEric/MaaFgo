@@ -41,5 +41,8 @@
     },
     "python.analysis.extraPaths": [
         "./agent/custom"
-    ]
+    ],
+    "github.copilot.advanced": {
+        "debug.useNodeFetcher": true
+    }
 }

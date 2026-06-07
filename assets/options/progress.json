@@ -1,0 +1,16 @@
+{
+    "option": {
+        "progress": {
+            "type": "input",
+            "label": "主线进度限制 (War ID, 0=不限)",
+            "default": "0",
+            "pipeline_override": {
+                "周常任务自动执行": {
+                    "attach": {
+                        "progress": "{value}"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -9,6 +9,8 @@
     python tools/update_quest_data.py --region JP
     python tools/update_quest_data.py --missions-only   # 仅更新周常任务
     python tools/update_quest_data.py --quests-only     # 仅更新副本数据
+    python tools/update_quest_data.py --zh-names        # 更新 quest 中文名映射
+    python tools/update_quest_data.py --zh-names --force  # 强制重新拉取全部
 """
 
 import json
@@ -400,6 +402,8 @@ def main():
     parser.add_argument("--region", default="CN", choices=["CN", "JP", "NA"], help="服务器区域（默认 CN）")
     parser.add_argument("--quests-only", action="store_true", help="仅更新副本数据")
     parser.add_argument("--missions-only", action="store_true", help="仅更新周常任务")
+    parser.add_argument("--zh-names", action="store_true", help="更新 quest 中文名映射（从 Atlas Academy API）")
+    parser.add_argument("--force", action="store_true", help="强制重新拉取全部中文名")
     parser.add_argument("--source", default="auto", choices=["auto", "atlas", "chaldea"],
                         help="副本数据来源: auto=自动选择, atlas=Atlas Academy API, chaldea=Chaldea数据服务器")
     args = parser.parse_args()
@@ -407,7 +411,25 @@ def main():
     os.makedirs(DATA_DIR, exist_ok=True)
     region = args.region.upper()
 
-    if args.missions_only:
+    if args.zh_names:
+        # 更新 quest 中文名映射
+        from fetch_quest_zh_names import fetch_zh_names
+
+        # 从本地加载 quest_id 列表
+        quest_enemies_file = os.path.join(DATA_DIR, f"quest_enemies_{region}.json")
+        if not os.path.exists(quest_enemies_file):
+            print(f"[ERROR] 副本数据文件不存在: {quest_enemies_file}")
+            print("请先运行: python tools/update_quest_data.py")
+            return
+
+        with open(quest_enemies_file, "r", encoding="utf-8") as f:
+            quest_data = json.load(f)
+
+        quest_ids = sorted(int(k) for k in quest_data.keys())
+        print(f"\n=== 更新 quest 中文名映射 (region={region}) ===")
+        print(f"共 {len(quest_ids)} 个 quest")
+        fetch_zh_names(quest_ids, force=args.force)
+    elif args.missions_only:
         update_master_missions(region)
     elif args.quests_only:
         if args.source == "chaldea":

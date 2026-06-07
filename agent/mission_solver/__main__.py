@@ -5,6 +5,7 @@
     python -m agent.mission_solver
     python -m agent.mission_solver --progress 308
     python -m agent.mission_solver --date 2026-04-14
+    python -m agent.mission_solver --dry-run          # 离线验证映射
 """
 
 import argparse
@@ -24,7 +25,8 @@ def main():
     parser = argparse.ArgumentParser(description="MaaFgo 周常任务求解器")
     parser.add_argument("--region", default="CN", choices=["CN", "JP"], help="服务器区域 (默认 CN)")
     parser.add_argument("--progress", type=int, default=0, help="主线进度 War ID (0=不限)")
-    parser.add_argument("--date", type=str, default=None, help="目标日期 YYYY-MM-DD (默认今天)")
+    parser.add_argument("--date", type=str, default=None, help="目标日期 YYYY-MM-Ded (默认今天)")
+    parser.add_argument("--dry-run", action="store_true", help="dry-run 模式：求解 + 映射验证，不连接 BBC")
     parser.add_argument("--verbose", "-v", action="store_true", help="详细日志")
     args = parser.parse_args()
 
@@ -32,6 +34,12 @@ def main():
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(message)s",
     )
+
+    # dry-run 模式
+    if args.dry_run:
+        from .quest_index import dry_run
+        dry_run()
+        return
 
     # 解析日期
     target_date = None

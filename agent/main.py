@@ -23,6 +23,7 @@ import bbc_start
 import bbc_stop
 import sequential_tasks_action
 import general_navigation_action
+import weekly_mission_action
 
 
 def main():
