@@ -144,6 +144,10 @@ def install_chores():
         working_dir / "LICENSE",
         install_path,
     )
+    # 复制公告文件（MaaUI 欢迎页）
+    announcement = working_dir / "assets" / "Announcement.md"
+    if announcement.exists():
+        shutil.copy2(announcement, install_path)
 
 
 def install_bbcdll():
