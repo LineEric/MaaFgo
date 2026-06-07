@@ -2,9 +2,9 @@
   "interface_version": 2,
   "name": "MaaFgo",
   "description": "FGO自动战斗工具,模拟器需要强制为1280*720模式",
-  "contact": "QQ群: 无",
+  "contact": "QQ群: 1102496882",
   "license": "MIT",
-  "welcome": "首次使用！欢迎使用 MaaFgo!模拟器需要强制为1280*720模式!",
+  "welcome": "Announcement.md",
   "github": "https://github.com/xlxyvergil/MaaFgo",
   "icon": "resource/icon.png",
   "mirrorchyan_rid": "MaaFgo",
@@ -98,7 +98,8 @@
     "options/选择冠位难度.json",
     "options/选择冠位职介.json",
     "options/迦勒底之门-副本类型.json",
-    "options/战前吃苹果.json"
+    "options/战前吃苹果.json",
+    "options/包名填写.json"
   ],
   "agent": {
     "child_exec": "python",
