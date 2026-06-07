@@ -22,7 +22,7 @@
 
 ## 📖 更多帮助
 
-- 使用说明、功能列表、常见问题请参阅 [README.md](https://github.com/xlxyvergil/MaaFgo)
+- 使用说明、功能列表、常见问题请参阅 [使用说明](https://www.bilibili.com/opus/1205585422954004514?spm_id_from=333.1387.0.0)
 - 遇到 bug 请前往 [GitHub Issues](https://github.com/xlxyvergil/MaaFgo/issues) 或QQ群反馈
 
 ---
