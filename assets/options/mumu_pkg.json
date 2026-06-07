@@ -26,6 +26,17 @@
               }
             }
           }
+        },
+        {
+          "name": "应用宝服",
+          "label": "应用宝服",
+          "pipeline_override": {
+            "启动bbc": {
+              "attach": {
+                "mumu_pkg": "com.tencent.tmgp.fgo"
+              }
+            }
+          }
         }
       ]
     }

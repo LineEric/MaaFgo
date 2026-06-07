@@ -82,6 +82,13 @@ def install_resource():
         install_path,
     )
     
+    # MXU: 将 bbc_team_config_nomwu.json 复制并重命名为 bbc_team_config.json
+    nomwu_config = working_dir / "assets" / "bbc_team_config_nomwu.json"
+    shutil.copy2(
+        nomwu_config,
+        install_path / "bbc_team_config.json",
+    )
+    
     # 复制 restart_mfa.exe 到根目录
     if (working_dir / "assets" / "restart_mfa.exe").exists():
         shutil.copy2(
@@ -116,6 +123,10 @@ def install_chores():
                 working_dir / file,
                 install_path,
             )
+    # 复制公告文件（MaaUI 欢迎页）
+    announcement = working_dir / "assets" / "Announcement.md"
+    if announcement.exists():
+        shutil.copy2(announcement, install_path)
 
 
 def install_agent():

@@ -3,6 +3,7 @@
     "选择冠位难度": {
       "label": "$选择冠位难度",
       "type": "select",
+      "description": "最后一关会直接拉到最底选择，配置多个任务的话可以实现自动化推关",
       "cases": [
         {
           "name": "100⭐⭐",
@@ -37,6 +38,14 @@
                   ]
                 }
               }
+            }
+          }
+        },
+        {
+          "name": "最后一关",
+          "pipeline_override": {
+            "戴冠战-匹配检测": {
+              "recognition": "DirectHit"
             }
           }
         }

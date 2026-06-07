@@ -95,6 +95,20 @@
         },
         "action": {
             "type": "Click"
+        },
+        "next": [
+            "关卡选择-确认进入助战界面",
+            "[JumpBack]全局-战前吃体力"
+        ]
+    },
+    "关卡选择-确认进入助战界面": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "助战选择界面标记.png"
+                ]
+            }
         }
     },
     "地图坐标导航": {

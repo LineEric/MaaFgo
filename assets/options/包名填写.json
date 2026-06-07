@@ -1,0 +1,53 @@
+{
+    "option": {
+        "包名": {
+            "label": "包名",
+            "type": "select",
+            "default": "B服",
+            "cases": [
+                {
+                    "name": "B服",
+                    "label": "B服",
+                    "pipeline_override": {
+                        "打开游戏": {
+                            "action": {
+                                "type": "StartApp",
+                                "param": {
+                                    "package": "com.bilibili.fatego"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "应用宝服",
+                    "label": "应用宝服",
+                    "pipeline_override": {
+                        "打开游戏": {
+                            "action": {
+                                "type": "StartApp",
+                                "param": {
+                                    "package": "com.tencent.tmgp.fgo"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "日服",
+                    "label": "日服",
+                    "pipeline_override": {
+                        "打开游戏": {
+                            "action": {
+                                "type": "StartApp",
+                                "param": {
+                                    "package": "com.aniplex.fategrandorder"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

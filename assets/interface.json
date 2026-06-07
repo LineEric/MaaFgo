@@ -1,11 +1,12 @@
 {
   "interface_version": 2,
   "name": "MaaFgo",
-  "description": "FGO自动战斗工具",
-  "contact": "QQ群: 无",
+  "description": "FGO自动战斗工具,模拟器需要强制为1280*720模式",
+  "contact": "QQ群: 1102496882",
   "license": "MIT",
-  "welcome": "首次使用！欢迎使用 MaaFgo!",
+  "welcome": "Announcement.md",
   "github": "https://github.com/xlxyvergil/MaaFgo",
+  "icon": "resource/icon.png",
   "mirrorchyan_rid": "MaaFgo",
   "mirrorchyan_multiplatform": true,
   "version": "v1.1.23",
@@ -16,8 +17,7 @@
     {
       "name": "安卓设备",
       "type": "Adb",
-      "display_short_side": 720,
-      "permission_required": true
+      "display_short_side": 720
     }
   ],
   "resource": [
@@ -39,6 +39,8 @@
   "task": [],
   "option": {},
   "import": [
+    "tasks/preset/default.json",
+    "tasks/preset/setting.json",
     "tasks/登录.json",
     "tasks/更新settings.json",
     "tasks/启动bbc.json",
@@ -47,11 +49,13 @@
     "tasks/关闭游戏.json",
     "tasks/冠位戴冠战.json",
     "tasks/周常任务自动执行.json",
+    "tasks/迦勒底之门.json",
+    "tasks/直接战斗.json",
     "options/选择队伍配置.json",
     "options/chaldea_team_config.json",
     "options/chapter.json",
     "options/team_index.json",
-    "options/bbc_team_config.json",
+    "bbc_team_config.json",
     "options/bbc_run_count.json",
     "options/apple_type.json",
     "options/support_order_mismatch.json",
@@ -95,7 +99,10 @@
     "options/quests/原型肇始.json",
     "options/quests/梅塔特洛尼俄斯.json",
     "options/选择冠位难度.json",
-    "options/选择冠位职介.json"
+    "options/选择冠位职介.json",
+    "options/迦勒底之门-副本类型.json",
+    "options/战前吃苹果.json",
+    "options/包名填写.json"
   ],
   "agent": {
     "child_exec": "python",

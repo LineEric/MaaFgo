@@ -1,628 +1,797 @@
 {
     "点击队伍编制": {
-        "action": "Click",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    640,
+                    67,
+                    598,
+                    526
+                ],
+                "template": "team/点击队伍编制.png"
+            }
+        },
+        "pre_wait_freezes": 1000,
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    17,
+                    25,
+                    -28,
+                    -43
+                ]
+            }
+        },
         "next": [
             "队伍编制"
-        ],
-        "pre_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            640,
-            67,
-            598,
-            526
-        ],
-        "template": "team/点击队伍编制.png",
-        "target_offset": [
-            17,
-            25,
-            -28,
-            -43
         ]
     },
     "编队": {
-        "action": "Click",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    216,
+                    522,
+                    174,
+                    174
+                ],
+                "template": "team/编队.png"
+            }
+        },
+        "pre_wait_freezes": 1000,
+        "action": {
+            "type": "Click"
+        },
         "next": [
             "点击队伍编制"
-        ],
-        "pre_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            216,
-            522,
-            174,
-            174
-        ],
-        "template": "team/编队.png"
+        ]
     },
     "菜单": {
-        "action": "Click",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    1089,
+                    599,
+                    191,
+                    86
+                ],
+                "template": "菜单.png",
+                "green_mask": true,
+                "method": 3,
+                "threshold": 0.55
+            }
+        },
         "pre_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "green_mask": true,
-        "method": 3,
-        "roi": [
-            1089,
-            599,
-            191,
-            86
-        ],
-        "template": "菜单.png",
-        "threshold": 0.55,
-        "target_offset": [
-            50,
-            36,
-            -96,
-            -55
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    50,
+                    36,
+                    -96,
+                    -55
+                ]
+            }
+        }
     },
     "队伍1": {
         "next": [
             "队伍编制1",
             "[JumpBack]队伍1点击"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍10": {
         "next": [
             "队伍编制10",
             "[JumpBack]队伍点击10"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍11": {
         "next": [
             "队伍编制11",
             "[JumpBack]队伍点击11"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍12": {
         "next": [
             "队伍编制12",
             "[JumpBack]队伍点击12"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍13": {
         "next": [
             "队伍编制13",
             "[JumpBack]队伍点击13"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍14": {
         "next": [
             "队伍编制14",
             "[JumpBack]队伍点击14"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍15": {
         "next": [
             "队伍编制15",
             "[JumpBack]队伍点击15"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍1点击": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            465,
-            50,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    465,
+                    50,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍2": {
         "next": [
             "队伍编制2",
             "[JumpBack]队伍2点击"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍2点击": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            490,
-            50,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    490,
+                    50,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍3": {
         "next": [
             "队伍编制3",
             "[JumpBack]队伍点击3"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍4": {
         "next": [
             "队伍编制4",
             "[JumpBack]队伍点击4"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍5": {
         "next": [
             "队伍编制5",
             "[JumpBack]队伍点击5"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍6": {
         "next": [
             "队伍编制6",
             "[JumpBack]队伍点击6"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍7": {
         "next": [
             "队伍编制7",
             "[JumpBack]队伍点击7"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍8": {
         "next": [
             "队伍编制8",
             "[JumpBack]队伍点击8"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍9": {
         "next": [
             "队伍编制9",
             "[JumpBack]队伍点击9"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍点击10": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            689,
-            51,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    689,
+                    51,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击11": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            715,
-            51,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    715,
+                    51,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击12": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            741,
-            49,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    741,
+                    49,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击13": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            765,
-            49,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    765,
+                    49,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击14": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            790,
-            51,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    790,
+                    51,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击15": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            815,
-            50,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    815,
+                    50,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击3": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            514,
-            51,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    514,
+                    51,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击4": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            540,
-            50,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    540,
+                    50,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击5": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            564,
-            50,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    564,
+                    50,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击6": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            591,
-            51,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    591,
+                    51,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击7": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            614,
-            50,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    614,
+                    50,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击8": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            640,
-            51,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    640,
+                    51,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击9": {
-        "action": "Click",
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit",
-        "target": [
-            665,
-            51,
-            1,
-            1
-        ]
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    665,
+                    51,
+                    1,
+                    1
+                ]
+            }
+        },
+        "post_wait_freezes": 1000
     },
     "队伍点击决定": {
-        "action": "Click",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    1070,
+                    625,
+                    208,
+                    93
+                ],
+                "template": "team/队伍点击决定.png",
+                "green_mask": true,
+                "threshold": 0.6
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    58,
+                    24,
+                    -129,
+                    -47
+                ]
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍确定菜单"
         ],
         "on_error": [
             "队伍错误返回"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "green_mask": true,
-        "roi": [
-            1070,
-            625,
-            208,
-            93
-        ],
-        "template": "team/队伍点击决定.png",
-        "threshold": 0.6,
-        "target_offset": [
-            58,
-            24,
-            -129,
-            -47
         ]
     },
     "队伍界面决定": {
+        "post_wait_freezes": 1000,
         "next": [
             "队伍点击决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "DirectHit"
+        ]
     },
     "队伍确定菜单": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    1089,
+                    599,
+                    191,
+                    86
+                ],
+                "template": "菜单.png",
+                "green_mask": true,
+                "method": 3,
+                "threshold": 0.6
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "回主界面"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "green_mask": true,
-        "method": 3,
-        "roi": [
-            1089,
-            599,
-            191,
-            86
-        ],
-        "template": "菜单.png",
-        "threshold": 0.6
+        ]
     },
     "队伍编制": {
         "next": [
             "队伍1"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍编制1": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D1.png",
+                    "team/D1-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D1.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制10": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D10.png",
+                    "team/D10-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D10.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制11": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D11.png",
+                    "team/D11-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D11.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制12": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D12.png",
+                    "team/D12-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D12.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制13": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D13.png",
+                    "team/D13-2.png"
+                ],
+                "threshold": 0.8
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D13.png",
-        "threshold": 0.8
+        ]
     },
     "队伍编制14": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D14.png",
+                    "team/D14-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D14.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制15": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D15.png",
+                    "team/D15-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D15.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制2": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D2-2.png",
+                    "team/D2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D2.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制3": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D3.png",
+                    "team/D3-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D3.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制4": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D4.png",
+                    "team/D4-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D4.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制5": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D5.png",
+                    "team/D5-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D5.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制6": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D6-2.png",
+                    "team/D6.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D6.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制7": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D7.png",
+                    "team/D7-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D7.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制8": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D8.png",
+                    "team/D8-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D8.png",
-        "threshold": 0.85
+        ]
     },
     "队伍编制9": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    675,
+                    2,
+                    67,
+                    38
+                ],
+                "template": [
+                    "team/D9.png",
+                    "team/D9-2.png"
+                ],
+                "threshold": 0.85
+            }
+        },
+        "post_wait_freezes": 1000,
         "next": [
             "队伍界面决定"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "TemplateMatch",
-        "roi": [
-            675,
-            2,
-            67,
-            38
-        ],
-        "template": "team/D9.png",
-        "threshold": 0.85
+        ]
     },
     "队伍选择": {
         "next": [
             "编队",
             "[JumpBack]菜单"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "队伍错误返回": {
-        "action": "ClickKey",
+        "action": {
+            "type": "ClickKey",
+            "param": {
+                "key": [
+                    111
+                ]
+            }
+        },
+        "post_wait_freezes": 500,
         "next": [
             "点击队伍编制"
-        ],
-        "post_wait_freezes": 500,
-        "recognition": "DirectHit",
-        "key": [
-            111
         ]
     }
 }

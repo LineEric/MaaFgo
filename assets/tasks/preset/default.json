@@ -1,0 +1,32 @@
+{
+    "preset": [
+        {
+            "name": "default",
+            "label": "$preset.default.label",
+            "description": "$preset.default.description",
+            "task": [
+                {
+                    "name": "登录"
+                },
+                {
+                    "name": "启动bbc"
+                },
+                {
+                    "name": "冠位戴冠战"
+                },
+                {
+                    "name": "日常战斗",
+                    "enabled": false
+                },
+                {
+                    "name": "迦勒底之门",
+                    "enabled": false
+                },
+                {
+                    "name": "直接bbc战斗",
+                    "enabled": false
+                }
+            ]
+        }
+    ]
+}

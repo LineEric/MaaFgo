@@ -29,13 +29,13 @@
 
 ## 简介
 
-MaaFgo 是一款基于图像识别技术的 FGO（Fate/Grand Order）自动战斗工具，专为国服 B 站版本设计。通过 MWU 前端提供 Web 访问支持，让您可以在浏览器中轻松配置和监控战斗任务。
+MaaFgo 是一款基于图像识别技术的 FGO（Fate/Grand Order）自动战斗工具。通过 MWU 前端提供 Web 访问支持，让您可以在浏览器中轻松配置和监控战斗任务。
 
 ## 功能列表
 
 - 🎮 **自动登录** - 自动启动游戏并登录账号
 - 🌳 **自动种苹果** - 自动收取种苹果奖励
-- ⚔️ **日常战斗** - 自动完成日常副本战斗
+- ⚔️ **日常战斗** - 自动完成日常副本战斗（主线、日替、白纸化地球、冠位戴冠战）
 - 🔄 **自动战斗** - 基于 BBchannel 的智能战斗系统
 - 🎯 **自定义队伍** - 支持多种预设队伍配置
 - 📱 **多模拟器支持** - 支持雷电、MuMu 等主流安卓模拟器
@@ -46,15 +46,21 @@ MaaFgo 是一款基于图像识别技术的 FGO（Fate/Grand Order）自动战�
 
 - Windows 操作系统
 - 安卓模拟器（雷电模拟器 / MuMu 模拟器）
-- FGO 国服 B 站版本
 
 ### 快速开始
-
-bbchannel的安装方法请查看 <https://www.bilibili.com/video/BV1c3DgBWEjN> 。全版本使用bbc的方式一致。
 
 1. **下载 release 版本**
 
    前往 [Releases](https://github.com/xlxyvergil/MaaFgo/releases) 页面下载最新版本
+
+2. **正确放置bbc**
+  视频教程：
+   - bbchannel的安装方法请查看 <https://www.bilibili.com/video/BV1c3DgBWEjN> 。全版本使用bbc的方式一致。
+  
+    文字版说明：
+    -  a.将BBC放入maaFGO的根目录
+    -  b.将bbcdll文件夹内的文件放入BBchannel\\dist\\BBchannel64目录下【替换】（非64位的放BBchannel文件夹下）
+    -  c.(MXU版本）运行restart_mfa.exe，或在MXU内运行更新bbc脚本的任务（此操作是将bbc的队伍导入到该脚本）
 
 2. **连接模拟器**
 
@@ -83,8 +89,16 @@ bbchannel的安装方法请查看 <https://www.bilibili.com/video/BV1c3DgBWEjN> 
 | 其他 ADB 设备 | ✅ 支持 |
 
 ## 支持的章节
+  **国服B服**：
+  - 绝大多数主线
+  - Ordeal Call白纸化地球
+  - 迦勒底之门日替
 
-- Ordeal Call
+  **日服**：
+  - 绝大多数主线
+  - Ordeal Call白纸化地球
+  - 迦勒底之门日替
+  - 冠位戴冠战
 
 ## 开发相关
 
@@ -124,6 +138,18 @@ MaaFgo/
 
 - [BBchannel](https://github.com/Meowcolm024/FGO-Automata)  
   FGO 自动化战斗核心
+
+## 🙏 致谢
+
+### 开源项目
+
+| 项目 | 描述 |
+|:---|:---|
+| [**MaaFramework**](https://github.com/MaaXYZ/MaaFramework) | 图像识别自动化框架 |
+| [**MWU**](https://github.com/ravizhan/MWU) | 基于 Vue + FastAPI 的轻量级跨平台通用 WebUI |
+| [**MXU**](https://github.com/MistEO/MXU) | 基于 Tauri 2 + React 的轻量级跨平台通用 GUI |
+| [**BBchannel**](https://github.com/Meowcolm024/FGO-Automata) | FGO 自动化战斗核心 |
+| [**FGO-py**](https://github.com/hgjazhgj/FGO-py)  | **地图导航模块使用了其图像匹配算法、楼层导航逻辑及相关坐标参数。**|
 
 ### 开发者
 
