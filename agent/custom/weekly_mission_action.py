@@ -47,6 +47,15 @@ if _mission_solver_dir not in sys.path:
 # 项目根目录
 _PROJECT_DIR = os.path.normpath(os.path.join(_agent_dir, ".."))
 
+# OCR 进度缓存（由 OcrReadMissionProgress Action 写入，由 SolveAndRunWeeklyMissions 读取）
+_ocr_missions_cache: Optional[list[dict]] = None
+
+
+def _apply_ocr_progress(missions, ocr_results: list[dict]) -> int:
+    """将 OCR 缓存应用到任务列表"""
+    from mission_solver.mission_ocr import update_mission_progress_from_ocr
+    return update_mission_progress_from_ocr(missions, ocr_results)
+
 
 def _load_json(filepath: str) -> dict:
     if not os.path.exists(filepath):
@@ -202,12 +211,21 @@ class SolveAndRunWeeklyMissions(CustomAction):
             battle_type = attach.get("battle_type", 0)
             support_order_mismatch = attach.get("support_order_mismatch", False)
             team_config_error = attach.get("team_config_error", False)
+            ocr_enabled = str(attach.get("ocr_enabled", "false")).lower() == "true"
 
-            mfaalog.info(f"[周常任务] 参数: region={region}, progress={progress}, team={bbc_team_config}")
+            mfaalog.info(f"[周常任务] 参数: region={region}, progress={progress}, team={bbc_team_config}, ocr={ocr_enabled}")
 
-            # 2. 求解
+            # 2. 可选: 先导航到任务界面进行 OCR
+            if ocr_enabled:
+                mfaalog.info("[周常任务] OCR 模式: 导航至任务一览读取进度...")
+                try:
+                    context.run_task("导航至任务一览")
+                except Exception as e:
+                    mfaalog.warning(f"[周常任务] OCR 导航失败，将使用默认进度: {e}")
+
+            # 3. 求解
             mfaalog.info("[周常任务] 正在求解周常任务...")
-            plan = self._solve_missions(region, progress)
+            plan = self._solve_missions(region, progress, ocr_enabled=ocr_enabled)
             if not plan:
                 mfaalog.error("[周常任务] 求解失败或无可行方案")
                 return CustomAction.RunResult(success=False)
@@ -311,15 +329,27 @@ class SolveAndRunWeeklyMissions(CustomAction):
             mfaalog.error(f"[周常任务] 未预期异常: {e}")
             return CustomAction.RunResult(success=False)
 
-    def _solve_missions(self, region: str, progress: int) -> dict[int, int]:
-        """调用求解器计算最优方案"""
-        from mission_solver.data_loader import get_current_missions, get_free_quests
+    def _solve_missions(self, region: str, progress: int, ocr_enabled: bool = False) -> dict[int, int]:
+        """调用求解器计算最优方案，可选 OCR 读取进度"""
+        from mission_solver.data_loader import get_current_missions_with_fallback, get_free_quests
         from mission_solver.solver import solve
 
-        missions = get_current_missions(region)
+        # 优先在线获取任务数据（含 description）
+        missions = get_current_missions_with_fallback(region)
         if not missions:
             mfaalog.error(f"[周常任务] 未找到当前周常任务 (region={region})")
             return {}
+
+        mfaalog.info(f"[周常任务] 获取到 {len(missions)} 条任务")
+        for i, m in enumerate(missions, 1):
+            mfaalog.info(f"  {i}. {m.description[:40]}... (×{m.count})")
+
+        # OCR 读取进度
+        if ocr_enabled and _ocr_missions_cache is not None:
+            mfaalog.info(f"[周常任务] 应用 OCR 进度数据...")
+            _apply_ocr_progress(missions, _ocr_missions_cache)
+            completed = sum(1 for m in missions if m.is_completed)
+            mfaalog.info(f"[周常任务] OCR 进度: {completed}/{len(missions)} 已完成")
 
         quests = get_free_quests(region, progress)
         if not quests:
@@ -334,3 +364,153 @@ class SolveAndRunWeeklyMissions(CustomAction):
         filepath = os.path.join(_mission_solver_dir, f"quest_enemies_{region}.json")
         data = _load_json(filepath)
         return {int(k): v.get("name", str(k)) for k, v in data.items()}
+
+
+@AgentServer.custom_action("ocr_read_mission_progress")
+class OcrReadMissionProgress(CustomAction):
+    """
+    OCR 读取游戏内任务进度。
+
+    由 Pipeline 节点 "OCR读取任务进度" 触发。
+    截图 → 裁剪 → OCR → 模糊匹配 → 写入缓存。
+    支持多页滚动（一屏约 3 条，共 7 条需滚动 2 次）。
+    """
+
+    def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
+        global _ocr_missions_cache
+        mfaalog.info("[周常任务-OCR] 开始读取任务进度...")
+
+        try:
+            import cv2
+            import numpy as np
+            import time
+            from mission_solver.mission_ocr import (
+                get_mission_item_regions,
+                crop_image,
+                is_summary_mission,
+            )
+
+            controller = context.tasker.controller
+
+            # --- 确保处于"进行中"筛选状态 ---
+            mfaalog.info("[周常任务-OCR] 检查筛选状态...")
+            # 1280x720 下筛选按钮文字 ROI: [840,190,140,40]
+            filter_roi_720 = (840, 190, 980, 230)
+            for attempt in range(5):
+                screenshot = controller.post_screenshot().wait().get()
+                image = np.array(screenshot)
+                if image.ndim == 3 and image.shape[2] == 4:
+                    image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGR)
+
+                h, w = image.shape[:2]
+                scale_x = w / 1280
+                roi = tuple(int(v * scale_x) for v in filter_roi_720)
+                filter_img = crop_image(image, roi)
+                text = self._ocr_image(context, filter_img)
+
+                if "进行中" in text:
+                    mfaalog.info(f"[周常任务-OCR] 当前筛选状态: 进行中 (attempt {attempt+1})")
+                    break
+
+                # 点击筛选按钮切换 (1280x720: 约 [950,210])
+                click_x = int(950 * scale_x)
+                click_y = int(210 * scale_x)
+                mfaalog.info(f"[周常任务-OCR] 当前状态非'进行中'，点击筛选按钮切换... (attempt {attempt+1})")
+                controller.post_click(click_x, click_y).wait()
+                time.sleep(0.6)
+            else:
+                mfaalog.warning("[周常任务-OCR] 5次尝试仍未切换到'进行中'，将继续在当前状态下OCR")
+
+            # --- 开始多页 OCR ---
+
+            # 多页滚动识别
+            _ocr_missions_cache = []
+            max_scrolls = 3   # 最多滚动 3 次（7条任务，一屏3条）
+            scroll_amount = 465  # 每次滑动约 465px（3条高度）
+
+            for page in range(max_scrolls + 1):
+                # 截图
+                screenshot = controller.post_screenshot().wait().get()
+                if screenshot is None:
+                    mfaalog.error(f"[周常任务-OCR] 第 {page+1} 页截图失败")
+                    break
+
+                # 转换为 numpy array
+                image = np.array(screenshot)
+                if image.ndim == 3 and image.shape[2] == 4:
+                    image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGR)
+                elif image.ndim == 2:
+                    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
+                h, w = image.shape[:2]
+                mfaalog.info(f"[周常任务-OCR] 第 {page+1}/{max_scrolls+1} 页: {w}x{h}")
+
+                # 获取 ROI 区域
+                regions = get_mission_item_regions(w, h)
+                mfaalog.info(f"[周常任务-OCR] 识别 {len(regions)} 个任务条目")
+
+                page_results = 0
+                for i, region in enumerate(regions):
+                    desc_img = crop_image(image, region["description"])
+                    progress_img = crop_image(image, region["progress"])
+
+                    desc_text = self._ocr_image(context, desc_img)
+                    progress_text = self._ocr_image(context, progress_img)
+
+                    if desc_text:
+                        # 跳过汇总任务
+                        if is_summary_mission(desc_text):
+                            mfaalog.info(f"  [{i}] 跳过汇总任务: '{desc_text[:30]}'")
+                            continue
+
+                        _ocr_missions_cache.append({
+                            "description": desc_text,
+                            "progress": progress_text or "",
+                        })
+                        page_results += 1
+                        mfaalog.info(
+                            f"  [{i}] 描述: '{desc_text[:30]}...' "
+                            f"进度: '{progress_text}'"
+                        )
+
+                mfaalog.info(f"[周常任务-OCR] 第 {page+1} 页: {page_results} 条")
+
+                # 滑动翻页（最后一页不需要滑）
+                if page < max_scrolls:
+                    mfaalog.info("[周常任务-OCR] 滑动翻页...")
+                    controller.post_swipe(
+                        int(w * 0.7), int(h * 0.6),
+                        int(w * 0.7), int(h * 0.6) - scroll_amount,
+                        500
+                    ).wait()
+                    import time
+                    time.sleep(0.8)  # 等待滑动动画
+
+            mfaalog.info(f"[周常任务-OCR] 识别完成: 共 {len(_ocr_missions_cache)} 条")
+            return CustomAction.RunResult(success=True)
+
+        except ImportError as e:
+            mfaalog.error(f"[周常任务-OCR] 缺少依赖: {e} (需要 opencv-python)")
+            return CustomAction.RunResult(success=False)
+        except Exception as e:
+            mfaalog.error(f"[周常任务-OCR] 异常: {e}")
+            return CustomAction.RunResult(success=False)
+
+    @staticmethod
+    def _ocr_image(context: Context, image) -> str:
+        """
+        使用 MaaFramework 的 OCR 能力识别图片文字。
+        备选：尝试使用 PaddleOCR 或 Tesseract。
+        """
+        try:
+            import cv2
+            _, buf = cv2.imencode(".png", image)
+            img_bytes = buf.tobytes()
+
+            # MaaFramework OCR
+            result = context.run_recognition("OCR通用识别", image)
+            if result and result.best_result:
+                return result.best_result.text.strip()
+        except Exception:
+            pass
+        return ""

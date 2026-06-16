@@ -1,0 +1,38 @@
+{
+    "option": {
+        "ocr_enabled": {
+            "type": "dropdown",
+            "title": {
+                "zh_CN": "OCR进度识别",
+                "en_US": "OCR Progress Recognition"
+            },
+            "description": {
+                "zh_CN": "启用后自动导航到任务一览界面，OCR读取任务进度后再求解，避免已完成任务被重复计算",
+                "en_US": "When enabled, automatically navigate to mission list, OCR read progress before solving, avoid recalculating completed missions"
+            },
+            "default": "false",
+            "cases": [
+                {
+                    "name": "关闭",
+                    "pipeline_override": {
+                        "周常任务自动执行": {
+                            "attach": {
+                                "ocr_enabled": "false"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "开启",
+                    "pipeline_override": {
+                        "周常任务自动执行": {
+                            "attach": {
+                                "ocr_enabled": "true"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

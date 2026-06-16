@@ -13,7 +13,219 @@
             "apple_type": "{apple_type}",
             "battle_type": "{battle_type}",
             "support_order_mismatch": "{support_order_mismatch}",
-            "team_config_error": "{team_config_error}"
+            "team_config_error": "{team_config_error}",
+            "ocr_enabled": "{ocr_enabled}"
         }
+    },
+    "导航至任务一览": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [
+            1000,
+            400,
+            100,
+            30
+        ],
+        "next": [
+            "点击任务按钮"
+        ],
+        "post_delay": 800
+    },
+    "点击任务按钮": {
+        "recognition": "TemplateMatch",
+        "template": "task.png",
+        "action": "Click",
+        "next": [
+            "任务一览界面确认___",
+            "任务一览界面确认_周常标签"
+        ],
+        "post_delay": 500
+    },
+    "任务一览界面确认___": {
+        "recognition": "OCR",
+        "expect": [
+            "已完成任务"
+        ],
+        "roi": [
+            500,
+            180,
+            400,
+            50
+        ],
+        "action": "DoNothing",
+        "next": [
+            "检查筛选状态_1"
+        ]
+    },
+    "任务一览界面确认_周常标签": {
+        "recognition": "OCR",
+        "expect": [
+            "周常"
+        ],
+        "roi": [
+            560,
+            120,
+            100,
+            40
+        ],
+        "action": "DoNothing",
+        "next": [
+            "检查筛选状态_1"
+        ]
+    },
+    "检查筛选状态_1": {
+        "recognition": "OCR",
+        "expect": [
+            "进行中"
+        ],
+        "roi": [
+            840,
+            190,
+            140,
+            40
+        ],
+        "action": "DoNothing",
+        "next": [
+            "OCR读取任务进度"
+        ],
+        "on_error": [
+            "点击筛选_1"
+        ]
+    },
+    "点击筛选_1": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [
+            910,
+            210,
+            80,
+            30
+        ],
+        "post_delay": 500,
+        "next": [
+            "检查筛选状态_2"
+        ]
+    },
+    "检查筛选状态_2": {
+        "recognition": "OCR",
+        "expect": [
+            "进行中"
+        ],
+        "roi": [
+            840,
+            190,
+            140,
+            40
+        ],
+        "action": "DoNothing",
+        "next": [
+            "OCR读取任务进度"
+        ],
+        "on_error": [
+            "点击筛选_2"
+        ]
+    },
+    "点击筛选_2": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [
+            910,
+            210,
+            80,
+            30
+        ],
+        "post_delay": 500,
+        "next": [
+            "检查筛选状态_3"
+        ]
+    },
+    "检查筛选状态_3": {
+        "recognition": "OCR",
+        "expect": [
+            "进行中"
+        ],
+        "roi": [
+            840,
+            190,
+            140,
+            40
+        ],
+        "action": "DoNothing",
+        "next": [
+            "OCR读取任务进度"
+        ],
+        "on_error": [
+            "点击筛选_3"
+        ]
+    },
+    "点击筛选_3": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [
+            910,
+            210,
+            80,
+            30
+        ],
+        "post_delay": 500,
+        "next": [
+            "检查筛选状态_4"
+        ]
+    },
+    "检查筛选状态_4": {
+        "recognition": "OCR",
+        "expect": [
+            "进行中"
+        ],
+        "roi": [
+            840,
+            190,
+            140,
+            40
+        ],
+        "action": "DoNothing",
+        "next": [
+            "OCR读取任务进度"
+        ],
+        "on_error": [
+            "返回主界面_任务OCR后"
+        ],
+        "_comment": "4次尝试后仍未识别到'进行中'，跳过OCR直接返回"
+    },
+    "OCR读取任务进度": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "ocr_read_mission_progress",
+        "next": [
+            "返回主界面_任务OCR后"
+        ]
+    },
+    "返回主界面_任务OCR后": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [
+            70,
+            50,
+            80,
+            40
+        ],
+        "next": [
+            "主界面确认"
+        ],
+        "post_wait_freezes": 1000
+    },
+    "主界面确认": {
+        "recognition": "OCR",
+        "expect": [
+            "友情点召唤"
+        ],
+        "roi": [
+            20,
+            580,
+            180,
+            50
+        ],
+        "action": "DoNothing",
+        "next": []
     }
 }
