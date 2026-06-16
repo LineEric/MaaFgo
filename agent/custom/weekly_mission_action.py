@@ -225,10 +225,26 @@ class SolveAndRunWeeklyMissions(CustomAction):
 
             # 3. 求解
             mfaalog.info("[周常任务] 正在求解周常任务...")
-            plan = self._solve_missions(region, progress, ocr_enabled=ocr_enabled)
-            if not plan:
-                mfaalog.error("[周常任务] 求解失败或无可行方案")
+            solve_result = self._solve_missions(region, progress, ocr_enabled=ocr_enabled)
+            if solve_result is None:
+                mfaalog.error("[周常任务] 求解失败：缺少任务或副本数据")
                 return CustomAction.RunResult(success=False)
+
+            plan = solve_result.plan
+            manual_suffix = self._format_manual(solve_result.unsolvable_missions)
+
+            # 无可刷本任务（可能全是非战斗任务），如实汇报后结束
+            if not plan:
+                summary = "周常无需刷本" + manual_suffix
+                mfaalog.info(f"[周常任务] {summary}")
+                context.override_pipeline({
+                    "bbc弹窗信息输出": {
+                        "focus": {
+                            "Node.Recognition.Starting": f"<span style=\"color: #00FF00;\">{summary}</span>"
+                        }
+                    }
+                })
+                return CustomAction.RunResult(success=True)
 
             mfaalog.info(f"[周常任务] 求解完成: {len(plan)} 个关卡")
 
@@ -272,10 +288,18 @@ class SolveAndRunWeeklyMissions(CustomAction):
                         quest_override = coverride
                         break
 
-                # 合并三层 override
-                full_override = {
-                    **chapter_override,
-                    **quest_override,
+                # 每关克隆出独立 context，避免 override_pipeline 在 context 上累积导致
+                # 上一章节的 template 覆盖泄漏到下一章节（不同章节 override 的 key 集合不同）。
+                quest_ctx = context.clone()
+
+                # 章节、关卡、BBC 参数分三次 override，交由 MaaFW 深合并。
+                # 不能在 Python 侧用 {**chapter, **quest} 浅合并：两边都含「地图坐标导航」，
+                # 浅合并会让关卡的 attach.quests 整体冲掉章节的 attach.chapter。
+                if chapter_override:
+                    quest_ctx.override_pipeline(chapter_override)
+                if quest_override:
+                    quest_ctx.override_pipeline(quest_override)
+                quest_ctx.override_pipeline({
                     "执行BBC任务": {
                         "attach": {
                             "bbc_team_config": bbc_team_config,
@@ -286,16 +310,13 @@ class SolveAndRunWeeklyMissions(CustomAction):
                             "team_config_error": team_config_error,
                         }
                     }
-                }
-
-                # 注入 override
-                context.override_pipeline(full_override)
+                })
 
                 # 执行一次完整状态机
                 mfaalog.info(f"[周常任务]  启动通用战斗调度...")
                 try:
-                    task_result = context.run_task("通用战斗调度")
-                    if task_result and task_result.status.succeeded:
+                    task_result = quest_ctx.run_task("通用战斗调度")
+                    if self._battle_succeeded(task_result):
                         mfaalog.info(f"[周常任务]  ✅ {quest_name} 完成")
                         completed += 1
                     else:
@@ -314,7 +335,7 @@ class SolveAndRunWeeklyMissions(CustomAction):
                     return CustomAction.RunResult(success=False)
 
             # 6. 完成
-            summary = f"周常任务完成: {completed} 关成功, {skipped} 关跳过"
+            summary = f"周常任务完成: {completed} 关成功, {skipped} 关跳过" + manual_suffix
             mfaalog.info(f"[周常任务] {summary}")
             context.override_pipeline({
                 "bbc弹窗信息输出": {
@@ -329,16 +350,15 @@ class SolveAndRunWeeklyMissions(CustomAction):
             mfaalog.error(f"[周常任务] 未预期异常: {e}")
             return CustomAction.RunResult(success=False)
 
-    def _solve_missions(self, region: str, progress: int, ocr_enabled: bool = False) -> dict[int, int]:
-        """调用求解器计算最优方案，可选 OCR 读取进度"""
-        from mission_solver.data_loader import get_current_missions_with_fallback, get_free_quests
+    def _solve_missions(self, region: str, progress: int, ocr_enabled: bool = False):
+        """调用求解器计算最优方案，可选 OCR 读取进度。返回 SolveResult 或 None。"""
+        from mission_solver.data_loader import get_current_missions, get_free_quests
         from mission_solver.solver import solve
 
-        # 优先在线获取任务数据（含 description）
-        missions = get_current_missions_with_fallback(region)
+        missions = get_current_missions(region)
         if not missions:
             mfaalog.error(f"[周常任务] 未找到当前周常任务 (region={region})")
-            return {}
+            return None
 
         mfaalog.info(f"[周常任务] 获取到 {len(missions)} 条任务")
         for i, m in enumerate(missions, 1):
@@ -354,10 +374,44 @@ class SolveAndRunWeeklyMissions(CustomAction):
         quests = get_free_quests(region, progress)
         if not quests:
             mfaalog.error(f"[周常任务] 未找到候选副本 (region={region})")
-            return {}
+            return None
 
-        result = solve(quests, missions)
-        return result.plan
+        return solve(quests, missions)
+
+    @staticmethod
+    def _battle_succeeded(task_result) -> bool:
+        """判定单关是否真正打成功。
+
+        通用战斗调度是 DirectHit + JumpBack 状态机，其任务级 status 只反映
+        “pipeline 跑完了”，几乎恒为 succeeded，无法代表战斗胜负。真实成败由
+        执行BBC任务 这个节点的 action.success 决定，故优先读它；读不到时再
+        回退到任务级 status。
+        """
+        if task_result is None:
+            return False
+        try:
+            bbc_nodes = [n for n in task_result.nodes if n.name == "执行BBC任务"]
+        except Exception:
+            bbc_nodes = []
+        if bbc_nodes:
+            last = bbc_nodes[-1]
+            if last.action is not None:
+                return bool(last.action.success)
+            return bool(last.completed)
+        # 找不到 BBC 节点（未走到战斗就退出），无法精确判定，回退任务级 status
+        return bool(task_result.status and task_result.status.succeeded)
+
+    @staticmethod
+    def _format_manual(unsolvable_missions: list) -> str:
+        """把无法刷本完成的任务（非战斗/未支持）格式化为提示后缀。"""
+        if not unsolvable_missions:
+            return ""
+        names = []
+        for m in unsolvable_missions[:10]:
+            desc = (m.description or "").strip().replace("\n", " ")
+            names.append(desc[:20] if desc else "未知任务")
+        more = "…" if len(unsolvable_missions) > 10 else ""
+        return f"；以下任务需手动完成: {'、'.join(names)}{more}"
 
     def _load_quest_map(self, region: str) -> dict[int, str]:
         """加载 quest_id → 日文名 映射（用于日志输出）"""
@@ -397,7 +451,7 @@ class OcrReadMissionProgress(CustomAction):
             # 1280x720 下筛选按钮文字 ROI: [840,190,140,40]
             filter_roi_720 = (840, 190, 980, 230)
             for attempt in range(5):
-                screenshot = controller.post_screenshot().wait().get()
+                screenshot = controller.post_screencap().wait().get()
                 image = np.array(screenshot)
                 if image.ndim == 3 and image.shape[2] == 4:
                     image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGR)
@@ -430,7 +484,7 @@ class OcrReadMissionProgress(CustomAction):
 
             for page in range(max_scrolls + 1):
                 # 截图
-                screenshot = controller.post_screenshot().wait().get()
+                screenshot = controller.post_screencap().wait().get()
                 if screenshot is None:
                     mfaalog.error(f"[周常任务-OCR] 第 {page+1} 页截图失败")
                     break
@@ -498,17 +552,17 @@ class OcrReadMissionProgress(CustomAction):
 
     @staticmethod
     def _ocr_image(context: Context, image) -> str:
-        """
-        使用 MaaFramework 的 OCR 能力识别图片文字。
-        备选：尝试使用 PaddleOCR 或 Tesseract。
+        """对整张传入图做 OCR，返回识别到的文字。
+
+        通过内联 pipeline_override 临时定义一个 OCR 节点，无需在资产里预先建节点。
+        不设 expected（默认匹配全部）、不设 roi（整图识别）→ best_result.text 即识别结果。
         """
         try:
-            import cv2
-            _, buf = cv2.imencode(".png", image)
-            img_bytes = buf.tobytes()
-
-            # MaaFramework OCR
-            result = context.run_recognition("OCR通用识别", image)
+            result = context.run_recognition(
+                "WeeklyMissionAdHocOCR",
+                image,
+                pipeline_override={"WeeklyMissionAdHocOCR": {"recognition": "OCR"}},
+            )
             if result and result.best_result:
                 return result.best_result.text.strip()
         except Exception:

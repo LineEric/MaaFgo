@@ -249,6 +249,11 @@ def dry_run():
             print(f"     → 无映射，将被跳过")
             all_mapped = False
 
+    if result.unsolvable_missions:
+        print(f"\n=== 需手动完成（非战斗/未支持，共 {len(result.unsolvable_missions)} 条）===")
+        for m in result.unsolvable_missions:
+            print(f"  - {m.description}  (×{m.count})")
+
     if all_mapped:
         print(f"\n✅ 全部映射命中！可以开始实机运行。")
     else:

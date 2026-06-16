@@ -118,10 +118,11 @@ def get_current_missions(region: str = "CN", target_date: Optional[date] = None)
         selected = matched_entries[0]
         logger.info(f"选择活动任务: id={selected.get('id')}, {selected.get('startedAt')} ~ {selected.get('endedAt')}")
 
-    missions = [_parse_mission(m) for m in selected.get("missions", [])]
-    valid_missions = [m for m in missions if m.is_valid]
-    logger.info(f"匹配到 {len(valid_missions)} 条有效任务")
-    return valid_missions
+    # 保留所有 count>0 的任务（含非战斗任务），由求解器分类哪些可刷本完成、
+    # 哪些需手动完成。早过滤会丢掉非战斗任务的名字，导致无法向用户汇报。
+    missions = [_parse_mission(m) for m in selected.get("missions", []) if m.get("count", 0) > 0]
+    logger.info(f"匹配到 {len(missions)} 条任务")
+    return missions
 
 
 def get_free_quests(region: str = "CN", max_war_id: int = 0) -> list[QuestPhase]:

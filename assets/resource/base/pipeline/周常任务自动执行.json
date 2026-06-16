@@ -6,6 +6,9 @@
         "next": [
             "bbc弹窗信息输出"
         ],
+        "on_error": [
+            "bbc弹窗信息输出"
+        ],
         "attach": {
             "region": "{region}",
             "progress": "{progress}",

@@ -100,6 +100,11 @@ def main():
             detail_str = f"  → {', '.join(parts)}"
         print(f"  {name}  ×{count}  (AP {ap}){detail_str}")
 
+    if result.unsolvable_missions:
+        print(f"\n=== 需手动完成（非战斗/未支持，共 {len(result.unsolvable_missions)} 条）===")
+        for m in result.unsolvable_missions:
+            print(f"  - {m.description}  (×{m.count})")
+
     print()
 
 

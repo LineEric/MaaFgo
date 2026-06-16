@@ -91,3 +91,4 @@ class SolveResult:
     total_ap: int = 0
     total_runs: int = 0
     details: Optional[dict] = None  # 每个副本对每个任务的贡献明细
+    unsolvable_missions: list = field(default_factory=list)  # 无法通过刷本完成的任务（非战斗/未支持），需手动完成

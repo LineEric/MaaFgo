@@ -20,18 +20,6 @@ from .models import Mission, QuestPhase, SolveResult
 logger = logging.getLogger("MissionSolver")
 
 
-def _build_matrix(quests: list[QuestPhase], missions: list[Mission]) -> list[list[int]]:
-    """
-    构建贡献矩阵 A[m][n]
-    A[j][i] = 副本 i 对任务 j 的贡献值
-    """
-    matrix = []
-    for mission in missions:
-        row = [count_mission_target(mission, quest) for quest in quests]
-        matrix.append(row)
-    return matrix
-
-
 def solve(quests: list[QuestPhase], missions: list[Mission]) -> SolveResult:
     """
     求解最优刷本方案。
@@ -43,25 +31,41 @@ def solve(quests: list[QuestPhase], missions: list[Mission]) -> SolveResult:
     Returns:
         SolveResult 包含最优方案、总 AP、总次数和明细
     """
-    # 过滤无效任务
-    valid_missions = [m for m in missions if m.is_valid]
-    if not valid_missions:
-        logger.warning("没有有效的任务条件")
-        return SolveResult(plan={})
+    # 分类任务：能通过刷本完成的（战斗可解）纳入 ILP，其余归入 unsolvable。
+    #   不可解 = is_valid 为假（非战斗任务，无敌人/副本条件）
+    #         或 valid 但没有任何候选副本能产生贡献（未支持的关卡/特性）
+    solvable_missions = []   # 纳入求解的任务
+    solvable_rows = []       # 对应的贡献行
+    unsolvable_missions = []
 
-    # 构建贡献矩阵
-    A = _build_matrix(quests, valid_missions)
-    m = len(valid_missions)
+    for mission in missions:
+        if not mission.is_valid:
+            unsolvable_missions.append(mission)
+            continue
+        row = [count_mission_target(mission, quest) for quest in quests]
+        if not any(v > 0 for v in row):
+            unsolvable_missions.append(mission)
+            continue
+        solvable_missions.append(mission)
+        solvable_rows.append(row)
+
+    if unsolvable_missions:
+        logger.info(f"{len(unsolvable_missions)} 条任务无法通过刷本完成（非战斗/未支持），需手动完成:")
+        for um in unsolvable_missions:
+            logger.info(f"  - {um.description}")
+
+    if not solvable_missions:
+        logger.warning("没有可通过刷本完成的任务")
+        return SolveResult(plan={}, unsolvable_missions=unsolvable_missions)
+
+    m = len(solvable_missions)
     n = len(quests)
 
     # 过滤对所有任务贡献为 0 的副本
-    useful_cols = [i for i in range(n) if any(A[j][i] > 0 for j in range(m))]
-    if not useful_cols:
-        logger.warning("没有副本能完成任何任务")
-        return SolveResult(plan={})
+    useful_cols = [i for i in range(n) if any(solvable_rows[j][i] > 0 for j in range(m))]
 
     filtered_quests = [quests[i] for i in useful_cols]
-    filtered_A = [[A[j][i] for i in useful_cols] for j in range(m)]
+    filtered_A = [[solvable_rows[j][i] for i in useful_cols] for j in range(m)]
     fn = len(filtered_quests)
 
     logger.info(f"问题规模: {m} 个任务, {fn} 个候选副本 (从 {n} 个过滤)")
@@ -87,13 +91,11 @@ def solve(quests: list[QuestPhase], missions: list[Mission]) -> SolveResult:
         h.changeColIntegrality(i, highspy.HighsVarType.kInteger)
 
     # 添加约束: Σ(A[j][i] * x_i) >= b[j]
+    # 此处每条任务都已保证至少有一个候选副本贡献 >0（不可解任务已提前剔除）。
     for j in range(m):
         indices = [i for i in range(fn) if filtered_A[j][i] > 0]
         values = [float(filtered_A[j][i]) for i in indices]
-        if indices:
-            h.addRow(float(valid_missions[j].count), inf, len(indices), indices, values)
-        else:
-            logger.warning(f"任务 '{valid_missions[j].description}' 无匹配副本")
+        h.addRow(float(solvable_missions[j].count), inf, len(indices), indices, values)
 
     # 求解
     h.run()
@@ -101,7 +103,7 @@ def solve(quests: list[QuestPhase], missions: list[Mission]) -> SolveResult:
 
     if status != highspy.HighsModelStatus.kOptimal:
         logger.warning(f"求解未找到最优解，状态: {status}")
-        return SolveResult(plan={})
+        return SolveResult(plan={}, unsolvable_missions=unsolvable_missions)
 
     # 提取结果
     plan = {}
@@ -122,7 +124,7 @@ def solve(quests: list[QuestPhase], missions: list[Mission]) -> SolveResult:
 
             # 计算明细
             quest_details = {}
-            for j, mission in enumerate(valid_missions):
+            for j, mission in enumerate(solvable_missions):
                 contribution = filtered_A[j][i] * count
                 if contribution > 0:
                     quest_details[mission.description] = contribution
@@ -134,4 +136,5 @@ def solve(quests: list[QuestPhase], missions: list[Mission]) -> SolveResult:
         total_ap=total_ap,
         total_runs=total_runs,
         details=details,
+        unsolvable_missions=unsolvable_missions,
     )
