@@ -9,7 +9,6 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(script_dir)
 
 from configure import configure_ocr_model
-from bbc_config_helper import copy_options_with_bbc_config
 
 working_dir = Path(__file__).parent.parent
 install_path = working_dir / Path("install-mxu")
@@ -58,8 +57,13 @@ def install_resource():
         dirs_exist_ok=True,
     )
     
-    # 复制 options 和 i18n 目录（MaaFgo 特有）
-    copy_options_with_bbc_config(working_dir, install_path)
+    # 复制 options 目录（MaaFgo 特有）- 直接复制，不走 bbc_config_helper
+    if (working_dir / "assets" / "options").exists():
+        shutil.copytree(
+            working_dir / "assets" / "options",
+            install_path / "options",
+            dirs_exist_ok=True,
+        )
     
     if (working_dir / "assets" / "i18n").exists():
         shutil.copytree(
@@ -82,28 +86,12 @@ def install_resource():
         install_path,
     )
     
-    # MXU: 将 bbc_team_config_nomwu.json 复制并重命名为 bbc_team_config.json
-    nomwu_config = working_dir / "assets" / "bbc_team_config_nomwu.json"
+    # MXU: 复制 bbc_team_config.json（使用 scan_select 类型）
+    mxu_config = working_dir / "assets" / "bbc_team_config.json"
     shutil.copy2(
-        nomwu_config,
+        mxu_config,
         install_path / "bbc_team_config.json",
     )
-    
-    # 复制 restart_mfa.exe 到根目录
-    if (working_dir / "assets" / "restart_mfa.exe").exists():
-        shutil.copy2(
-            working_dir / "assets" / "restart_mfa.exe",
-            install_path,
-        )
-    
-    # 复制 restart_config.json 并修改 target_exe 为 MaaFgo.exe
-    if (working_dir / "assets" / "restart_config.json").exists():
-        with open(working_dir / "assets" / "restart_config.json", 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        config['target_exe'] = 'MaaFgo.exe'
-        config['description'] = 'MaaFgo重启配置'
-        with open(install_path / "restart_config.json", 'w', encoding='utf-8') as f:
-            json.dump(config, f, ensure_ascii=False, indent=2)
 
     # 更新 interface.json 中的版本号和 mirrorchyan 配置
     with open(install_path / "interface.json", "r", encoding="utf-8") as f:
