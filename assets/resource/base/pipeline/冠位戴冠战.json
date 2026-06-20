@@ -1,4 +1,14 @@
 {
+    "冠位戴冠战-助战确认": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "助战选择界面标记.png"
+                ]
+            }
+        }
+    },
     "冠位戴冠战-开始": {
         "focus": {
             "Node.Action.Starting": "<span style=\"color: #FF0000;\">开始戴冠战</span>"
@@ -56,10 +66,13 @@
         "action": {
             "type": "Click"
         },
-        "timeout": 3000,
+        "post_delay": 1500,
         "focus": {
             "Node.Action.Succeeded": "进入副本完成"
-        }
+        },
+        "next": [
+            "冠位戴冠战-助战确认"
+        ]
     },
     "冠位戴冠战-进入副本": {
         "recognition": {
