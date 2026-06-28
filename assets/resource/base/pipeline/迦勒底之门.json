@@ -23,9 +23,70 @@
             "[JumpBack]迦门-不匹配下滑"
         ]
     },
-    "迦门-QP本选择": {},
+    "迦门-日常副本": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "chaldea_gate/日常副本.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 2000,
+        "next": [
+            "迦门-前往顶部"
+        ]
+    },
+    "迦门-种火-选择职介和等级": {
+        "max_hit": 5,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "chaldea_gate/弓80.png"
+                ],
+                "green_mask": true,
+                "threshold": [
+                    0.72
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    0,
+                    0,
+                    -30,
+                    -30
+                ]
+            }
+        },
+        "post_delay": 2000,
+        "next": [
+            "迦门-副本选择完毕",
+            "[JumpBack]全局-战前吃体力",
+            "迦门-种火-选择职介和等级"
+        ]
+    },
+    "迦门-副本选择完毕": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "助战选择界面标记.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "已选择副本"
+        }
+    },
     "迦门-不匹配下滑": {
-        "max_hit": 30,
+        "max_hit": 35,
         "action": {
             "type": "Swipe",
             "param": {
@@ -50,7 +111,6 @@
         },
         "post_delay": 1000
     },
-    "迦门-修炼场选择": {},
     "迦门-先上滑到最上面": {
         "action": {
             "type": "Swipe",
@@ -78,6 +138,24 @@
             "迦门-种火副本选择"
         ]
     },
+    "迦门-种火副本选择": {
+        "next": [
+            "迦门-种火-选择职介和等级",
+            "[JumpBack]迦门-不匹配下滑",
+            "迦门-副本未找到"
+        ]
+    },
+    "迦门-副本未找到": {
+        "max_hit": 1,
+        "focus": {
+            "Node.Recognition.Starting": "未找到副本，重新查找"
+        },
+        "next": [
+            "迦门-先上滑到最上面"
+        ]
+    },
+    "迦门-修炼场选择": {},
+    "迦门-QP本选择": {},
     "迦门-先上滑到最上面_副本2": {
         "action": {
             "type": "Swipe",
@@ -116,84 +194,6 @@
         },
         "next": [
             "迦门-先上滑到最上面"
-        ]
-    },
-    "迦门-副本未找到": {
-        "max_hit": 1,
-        "focus": {
-            "Node.Recognition.Starting": "未找到副本，重新查找"
-        },
-        "next": [
-            "迦门-先上滑到最上面"
-        ]
-    },
-    "迦门-副本选择完毕": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "template": [
-                    "助战选择界面标记.png"
-                ]
-            }
-        },
-        "focus": {
-            "Node.Recognition.Starting": "已选择副本"
-        }
-    },
-    "迦门-日常副本": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "template": [
-                    "chaldea_gate/日常副本.png"
-                ]
-            }
-        },
-        "action": {
-            "type": "Click"
-        },
-        "post_delay": 2000,
-        "next": [
-            "迦门-前往顶部"
-        ]
-    },
-    "迦门-种火-选择职介和等级": {
-        "max_hit": 5,
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "template": [
-                    "chaldea_gate/弓80.png"
-                ],
-                "green_mask": true,
-                "threshold": [
-                    0.71
-                ]
-            }
-        },
-        "action": {
-            "type": "Click",
-            "param": {
-                "target_offset": [
-                    0,
-                    0,
-                    -30,
-                    -30
-                ]
-            }
-        },
-        "post_delay": 2000,
-        "next": [
-            "迦门-副本选择完毕",
-            "[JumpBack]全局-战前吃体力",
-            "迦门-种火-选择职介和等级"
-        ]
-    },
-    "迦门-种火副本选择": {
-        "next": [
-            "迦门-种火-选择职介和等级",
-            "[JumpBack]迦门-不匹配下滑",
-            "迦门-副本未找到"
         ]
     }
 }
