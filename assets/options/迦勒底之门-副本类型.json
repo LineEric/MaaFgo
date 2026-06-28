@@ -66,12 +66,11 @@
                 "type": "TemplateMatch",
                 "param": {
                   "template": [
-                    "chaldea_gate/弓术60.png"
+                    "chaldea_gate/种火-弓术副本.png"
                   ],
                   "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
+                    0.8
+                  ]
                 }
               }
             }
@@ -86,12 +85,11 @@
                 "type": "TemplateMatch",
                 "param": {
                   "template": [
-                    "chaldea_gate/剑骑60.png"
+                    "chaldea_gate/种火-剑骑副本.png"
                   ],
                   "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
+                    0.8
+                  ]
                 }
               }
             }
@@ -99,19 +97,18 @@
         },
         {
           "name": "骑剑60",
-          "label": "骑剑60",
+          "label": "骑剑60（可能不准）",
           "pipeline_override": {
             "迦门-种火-选择职介和等级": {
               "recognition": {
                 "type": "TemplateMatch",
                 "param": {
                   "template": [
-                    "chaldea_gate/骑剑60.png"
+                    "chaldea_gate/种火-剑骑副本.png"
                   ],
                   "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
+                    0.8
+                  ]
                 }
               }
             }
@@ -126,12 +123,11 @@
                 "type": "TemplateMatch",
                 "param": {
                   "template": [
-                    "chaldea_gate/枪杀60.png"
+                    "chaldea_gate/种火-枪杀副本.png"
                   ],
                   "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
+                    0.8
+                  ]
                 }
               }
             }
@@ -139,19 +135,18 @@
         },
         {
           "name": "杀枪60",
-          "label": "杀枪60",
+          "label": "杀枪60(可能不准)",
           "pipeline_override": {
             "迦门-种火-选择职介和等级": {
               "recognition": {
                 "type": "TemplateMatch",
                 "param": {
                   "template": [
-                    "chaldea_gate/杀枪60.png"
+                    "chaldea_gate/种火-枪杀副本.png"
                   ],
                   "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
+                    0.8
+                  ]
                 }
               }
             }
@@ -159,19 +154,18 @@
         },
         {
           "name": "术弓60",
-          "label": "术弓60",
+          "label": "术弓60（可能不准）",
           "pipeline_override": {
             "迦门-种火-选择职介和等级": {
               "recognition": {
                 "type": "TemplateMatch",
                 "param": {
                   "template": [
-                    "chaldea_gate/术弓60.png"
+                    "chaldea_gate/种火-弓术副本.png"
                   ],
                   "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
+                    0.8
+                  ]
                 }
               }
             }
@@ -186,12 +180,11 @@
                 "type": "TemplateMatch",
                 "param": {
                   "template": [
-                    "chaldea_gate/问号60.png"
+                    "chaldea_gate/种火-问号副本.png"
                   ],
                   "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
+                    0.8
+                  ]
                 }
               }
             }
@@ -355,19 +348,8 @@
           "name": "LV60",
           "label": "LV60",
           "pipeline_override": {
-            "迦门-种火-选择职介和等级": {
-              "recognition": {
-                "type": "TemplateMatch",
-                "param": {
-                  "template": [
-                    "chaldea_gate/QP60.png"
-                  ],
-                  "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
-                }
-              }
+            "迦门-先上滑到最上面": {
+              "next": "迦门-QP本选择"
             }
           }
         }
