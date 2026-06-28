@@ -355,19 +355,8 @@
           "name": "LV60",
           "label": "LV60",
           "pipeline_override": {
-            "迦门-种火-选择职介和等级": {
-              "recognition": {
-                "type": "TemplateMatch",
-                "param": {
-                  "template": [
-                    "chaldea_gate/QP60.png"
-                  ],
-                  "threshold": [
-                    0.72
-                  ],
-                  "green_mask": true
-                }
-              }
+            "迦门-种火副本选择": {
+              "next": "迦门-QP本选择"
             }
           }
         }

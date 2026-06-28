@@ -1,4 +1,91 @@
 {
+    "迦门-前往底部": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    1248,
+                    546,
+                    20,
+                    37
+                ]
+            }
+        },
+        "next": [
+            "迦门-QP本划到最下面"
+        ]
+    },
+    "迦门-QP本划到最下面": {
+        "action": {
+            "type": "Swipe",
+            "param": {
+                "begin": [
+                    892,
+                    537,
+                    79,
+                    38
+                ],
+                "end": [
+                    [
+                        883,
+                        196,
+                        82,
+                        29
+                    ]
+                ]
+            }
+        },
+        "repeat": 2,
+        "post_delay": 3000,
+        "focus": {
+            "Node.Action.Succeeded": "滑到底部"
+        },
+        "next": [
+            "迦门-识别QP本"
+        ]
+    },
+    "迦门-识别QP本": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "chaldea_gate/QP副本.png"
+                ]
+            }
+        },
+        "next": [
+            "迦门-QP本识别等级"
+        ]
+    },
+    "迦门-QP本识别等级": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    1103,
+                    88,
+                    82,
+                    136
+                ],
+                "expected": [
+                    "60"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "focus": {
+            "Node.Recognition.Failed": "未识别到副本"
+        },
+        "next": [
+            "迦门-副本选择完毕",
+            "[JumpBack]全局-战前吃体力"
+        ],
+        "on_error": [
+            "迦门-QP本划到最下面"
+        ]
+    },
     "迦勒底之门-开始": {
         "next": [
             "迦勒底之门进入",
@@ -155,7 +242,11 @@
         ]
     },
     "迦门-修炼场选择": {},
-    "迦门-QP本选择": {},
+    "迦门-QP本选择": {
+        "next": [
+            "迦门-前往底部"
+        ]
+    },
     "迦门-先上滑到最上面_副本2": {
         "action": {
             "type": "Swipe",
