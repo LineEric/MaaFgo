@@ -50,6 +50,9 @@
             "param": {
                 "template": [
                     "chaldea_gate/QP副本.png"
+                ],
+                "threshold": [
+                    0.8
                 ]
             }
         },
@@ -58,6 +61,7 @@
         ]
     },
     "迦门-QP本识别等级": {
+        "max_hit": 5,
         "recognition": {
             "type": "OCR",
             "param": {
@@ -75,15 +79,43 @@
         "action": {
             "type": "Click"
         },
+        "post_delay": 2000,
         "focus": {
             "Node.Recognition.Failed": "未识别到副本"
         },
         "next": [
             "迦门-副本选择完毕",
-            "[JumpBack]全局-战前吃体力"
+            "[JumpBack]全局-战前吃体力",
+            "迦门-QP本识别等级"
         ],
         "on_error": [
             "迦门-QP本划到最下面"
+        ]
+    },
+    "迦门-种火-识别等级": {
+        "max_hit": 3,
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    1113,
+                    453,
+                    68,
+                    150
+                ],
+                "expected": [
+                    "60"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 2000,
+        "next": [
+            "迦门-副本选择完毕",
+            "[JumpBack]全局-战前吃体力",
+            "迦门-种火-识别等级"
         ]
     },
     "迦勒底之门-开始": {
@@ -128,35 +160,20 @@
         ]
     },
     "迦门-种火-选择职介和等级": {
-        "max_hit": 5,
         "recognition": {
             "type": "TemplateMatch",
             "param": {
                 "template": [
-                    "chaldea_gate/弓80.png"
+                    "chaldea_gate/种火-剑骑副本.png"
                 ],
-                "green_mask": true,
                 "threshold": [
-                    0.72
+                    0.8
                 ]
             }
         },
-        "action": {
-            "type": "Click",
-            "param": {
-                "target_offset": [
-                    0,
-                    0,
-                    -30,
-                    -30
-                ]
-            }
-        },
-        "post_delay": 2000,
         "next": [
-            "迦门-副本选择完毕",
-            "[JumpBack]全局-战前吃体力",
-            "迦门-种火-选择职介和等级"
+            "迦门-种火-识别等级",
+            "[JumpBack]迦门-不匹配下滑"
         ]
     },
     "迦门-副本选择完毕": {
@@ -173,20 +190,20 @@
         }
     },
     "迦门-不匹配下滑": {
-        "max_hit": 35,
+        "max_hit": 100,
         "action": {
             "type": "Swipe",
             "param": {
                 "begin": [
-                    1014,
-                    602,
+                    941,
+                    307,
                     1,
                     1
                 ],
                 "end": [
                     [
-                        1010,
-                        212,
+                        948,
+                        119,
                         1,
                         1
                     ]

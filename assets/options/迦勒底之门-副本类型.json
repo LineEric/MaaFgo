@@ -355,7 +355,7 @@
           "name": "LV60",
           "label": "LV60",
           "pipeline_override": {
-            "迦门-种火副本选择": {
+            "迦门-先上滑到最上面": {
               "next": "迦门-QP本选择"
             }
           }
