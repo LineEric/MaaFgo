@@ -1,4 +1,12 @@
 {
+    "全局-体力不足": {
+        "action": {
+            "type": "StopTask"
+        },
+        "focus": {
+            "Node.Action.Succeeded": "体力不足，任务结束"
+        }
+    },
     "Global_Null": {
         "doc": "【全局默认空on_error覆盖】Jumpback链路崩毁默认节点",
         "pre_delay": 0,
@@ -60,7 +68,10 @@
         },
         "focus": {
             "Node.Recognition.Succeeded": "处于吃体力界面"
-        }
+        },
+        "next": [
+            "全局-体力不足"
+        ]
     },
     "全局-吃体力选择石头": {
         "recognition": {
