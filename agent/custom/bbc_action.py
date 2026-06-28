@@ -589,7 +589,7 @@ class ExecuteBbcTask(CustomAction):
             
             # 处理其他单按钮弹窗 (showwarning/showerror/showinfo 类型，BBC Server自动关闭)
             elif any(keyword in popup_title for keyword in ['正在结束任务', '其他任务运行中']):
-                mfaalog.info(f"[Callback] 检测到提示弹窗: {popup_title}")
+                mfaalog.info(f"[Callback] 检测到提示弹窗: {popup_title}:{popup_message}")
                 
                 state['finished'] = True
                 state['popup_title'] = popup_title
@@ -599,7 +599,7 @@ class ExecuteBbcTask(CustomAction):
             
             # 处理未知弹窗（兜底）
             else:
-                mfaalog.warning(f"[Callback] 未知弹窗: {popup_title}")
+                mfaalog.warning(f"[Callback] 未知弹窗: {popup_title}:{popup_message}")
                 # BBC Server 会自动关闭，标记为结束
                 state['finished'] = True
                 state['popup_title'] = popup_title
