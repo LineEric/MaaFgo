@@ -470,5 +470,6 @@
     "preset.default.label": "默认设置",
     "preset.default.description": "基础预设，可以参照这个顺序来配置",
     "preset.setting.label": "bbc队伍导入",
-    "preset.setting.description": "初次运行或者更新队伍配置时，需要执行一次导入操作"
+    "preset.setting.description": "初次运行或者更新队伍配置时，需要执行一次导入操作",
+    "副本类型": "副本类型"
 }

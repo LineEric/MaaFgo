@@ -1,0 +1,122 @@
+{
+    "通用小活动-开始": {
+        "focus": {
+            "Node.Recognition.Starting": "开始通用大活动"
+        },
+        "next": [
+            "[JumpBack]通用小活动-判断是否要回主界面",
+            "通用小活动-主界面入口进入"
+        ]
+    },
+    "通用小活动-判断是否要回主界面": {
+        "max_hit": 1,
+        "next": [
+            "主界面判断-main-ui"
+        ]
+    },
+    "通用小活动-主界面入口进入": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    908,
+                    369,
+                    32,
+                    20
+                ]
+            }
+        },
+        "post_delay": 2000,
+        "next": [
+            "通用小活动-先下滑到最下面"
+        ]
+    },
+    "通用小活动-先下滑到最下面": {
+        "action": {
+            "type": "Swipe",
+            "param": {
+                "begin": [
+                    929,
+                    583,
+                    1,
+                    1
+                ],
+                "end": [
+                    [
+                        929,
+                        100,
+                        1,
+                        1
+                    ]
+                ]
+            }
+        },
+        "repeat": 5,
+        "post_delay": 5000,
+        "next": [
+            "通用小活动-上回挑战卡片",
+            "[JumpBack]通用小活动-不匹配上滑"
+        ]
+    },
+    "通用小活动-上回挑战卡片": {
+        "max_hit": 3,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "event/卡片上回挑战.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    99,
+                    0,
+                    -1,
+                    -1
+                ]
+            }
+        },
+        "post_delay": 3000,
+        "next": [
+            "通用小活动-助战确认",
+            "[JumpBack]全局-战前吃体力",
+            "通用小活动-上回挑战卡片"
+        ]
+    },
+    "通用小活动-不匹配上滑": {
+        "max_hit": 15,
+        "action": {
+            "type": "Swipe",
+            "param": {
+                "begin": [
+                    1014,
+                    212,
+                    1,
+                    1
+                ],
+                "end": [
+                    [
+                        1010,
+                        402,
+                        1,
+                        1
+                    ]
+                ],
+                "duration": 1000
+            }
+        }
+    },
+    "通用小活动-助战确认": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "助战选择界面标记.png"
+                ]
+            }
+        }
+    }
+}

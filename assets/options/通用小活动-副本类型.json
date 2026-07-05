@@ -1,0 +1,15 @@
+{
+  "option": {
+    "通用小活动-副本类型": {
+      "label": "$副本类型",
+      "default": "副本类型",
+      "type": "select",
+      "description": "无描述",
+      "cases": [
+        {
+          "name": "上次挑战"
+        }
+      ]
+    }
+  }
+}

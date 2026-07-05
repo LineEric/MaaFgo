@@ -1,0 +1,96 @@
+{
+    "通用大活动-开始": {
+        "focus": {
+            "Node.Recognition.Starting": "开始通用大活动"
+        },
+        "next": [
+            "[JumpBack]通用大活动-判断是否要回主界面",
+            "通用大活动-主界面入口进入"
+        ]
+    },
+    "通用大活动-判断是否要回主界面": {
+        "max_hit": 1,
+        "next": [
+            "主界面判断-main-ui"
+        ]
+    },
+    "通用大活动-主界面入口进入": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    908,
+                    369,
+                    32,
+                    20
+                ]
+            }
+        },
+        "post_delay": 2000,
+        "next": [
+            "通用大活动-地图查找上回副本"
+        ]
+    },
+    "通用大活动-地图查找上回副本": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "event/地图上次挑战标记.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    -100,
+                    -19,
+                    -1,
+                    -1
+                ]
+            }
+        },
+        "next": [
+            "通用大活动-上回挑战卡片"
+        ]
+    },
+    "通用大活动-上回挑战卡片": {
+        "max_hit": 3,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "event/卡片上回挑战.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    99,
+                    0,
+                    -1,
+                    -1
+                ]
+            }
+        },
+        "post_delay": 3000,
+        "next": [
+            "通用大活动-助战确认",
+            "[JumpBack]全局-战前吃体力",
+            "通用大活动-上回挑战卡片"
+        ]
+    },
+    "通用大活动-助战确认": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "助战选择界面标记.png"
+                ]
+            }
+        }
+    }
+}
