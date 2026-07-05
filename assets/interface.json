@@ -48,6 +48,8 @@
     "tasks/冠位戴冠战.json",
     "tasks/迦勒底之门.json",
     "tasks/直接战斗.json",
+    "tasks/通用大活动.json",
+    "tasks/通用小活动.json",
     "options/选择队伍配置.json",
     "options/chaldea_team_config.json",
     "options/chapter.json",
@@ -97,7 +99,9 @@
     "options/选择冠位职介.json",
     "options/迦勒底之门-副本类型.json",
     "options/战前吃苹果.json",
-    "options/包名填写.json"
+    "options/包名填写.json",
+    "options/通用大活动-副本类型.json",
+    "options/通用小活动-副本类型.json"
   ],
   "agent": {
     "child_exec": "python",
