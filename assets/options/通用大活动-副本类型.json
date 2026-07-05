@@ -2,7 +2,7 @@
   "option": {
     "通用大活动-副本类型": {
       "label": "$副本类型",
-      "default": "副本类型",
+      "default": "上次挑战",
       "type": "select",
       "description": "目前仅支持挑战上次的副本",
       "cases": [
