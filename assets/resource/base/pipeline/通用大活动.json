@@ -37,6 +37,10 @@
             "param": {
                 "template": [
                     "event/地图上次挑战标记.png"
+                ],
+                "green_mask": true,
+                "threshold": [
+                    0.5
                 ]
             }
         },
