@@ -80,6 +80,9 @@
             }
         },
         "post_delay": 3000,
+        "focus": {
+            "Node.Action.Failed": "<span style=\"color: #FF0000;\">【提示】没有找到有上次执行标签的副本，识别失败！</span>"
+        },
         "next": [
             "通用小活动-助战确认",
             "[JumpBack]全局-战前吃体力",

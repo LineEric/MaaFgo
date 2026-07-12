@@ -16,6 +16,22 @@
                                     "package": "com.bilibili.fatego"
                                 }
                             }
+                        },
+                        "关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.bilibili.fatego"
+                                }
+                            }
+                        },
+                        "登录-关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.bilibili.fatego"
+                                }
+                            }
                         }
                     }
                 },
@@ -26,6 +42,22 @@
                         "打开游戏": {
                             "action": {
                                 "type": "StartApp",
+                                "param": {
+                                    "package": "com.bilibili.fatego.sharejoy"
+                                }
+                            }
+                        },
+                        "关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.bilibili.fatego.sharejoy"
+                                }
+                            }
+                        },
+                        "登录-关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
                                 "param": {
                                     "package": "com.bilibili.fatego.sharejoy"
                                 }
@@ -44,6 +76,22 @@
                                     "package": "com.tencent.tmgp.fgo"
                                 }
                             }
+                        },
+                        "关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.tencent.tmgp.fgo"
+                                }
+                            }
+                        },
+                        "登录-关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.tencent.tmgp.fgo"
+                                }
+                            }
                         }
                     }
                 },
@@ -56,6 +104,52 @@
                                 "type": "StartApp",
                                 "param": {
                                     "package": "com.aniplex.fategrandorder"
+                                }
+                            }
+                        },
+                        "关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.aniplex.fategrandorder"
+                                }
+                            }
+                        },
+                        "登录-关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.aniplex.fategrandorder"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "小米服",
+                    "label": "小米服",
+                    "pipeline_override": {
+                        "打开游戏": {
+                            "action": {
+                                "type": "StartApp",
+                                "param": {
+                                    "package": "com.bilibili.fgo.mi"
+                                }
+                            }
+                        },
+                        "关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.bilibili.fgo.mi"
+                                }
+                            }
+                        },
+                        "登录-关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.bilibili.fgo.mi"
                                 }
                             }
                         }
