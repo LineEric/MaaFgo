@@ -11,5 +11,13 @@
         ],
         "recognition": "DirectHit",
         "package": "com.aniplex.fategrandorder"
+    },
+    "登录-关闭游戏": {
+        "action": {
+            "type": "StopApp",
+            "param": {
+                "package": "com.bilibili.fatego"
+            }
+        }
     }
 }
