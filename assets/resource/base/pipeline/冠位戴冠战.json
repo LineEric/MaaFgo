@@ -1,13 +1,39 @@
 {
-    "冠位戴冠战-助战确认": {
+    "冠位戴冠战-没有下滑按钮上划": {
         "recognition": {
             "type": "TemplateMatch",
             "param": {
                 "template": [
-                    "助战选择界面标记.png"
-                ]
+                    "grand/grand_up.png"
+                ],
+                "green_mask": true
             }
-        }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "未找到下滑按钮，开始上划查找"
+        },
+        "next": [
+            "冠位戴冠战-职介",
+            "[JumpBack]冠位戴冠战-查找职介上滑"
+        ],
+        "on_error": [
+            "未找到戴冠战入口2"
+        ]
+    },
+    "冠位戴冠战-查找职介上滑": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "grand/grand_up.png"
+                ],
+                "green_mask": true
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 3000
     },
     "冠位戴冠战-开始": {
         "focus": {
@@ -32,7 +58,7 @@
         "action": {
             "type": "Click"
         },
-        "post_delay": 2000
+        "post_delay": 3000
     },
     "冠位戴冠战-职介": {
         "recognition": {
@@ -47,10 +73,11 @@
         ]
     },
     "冠位戴冠战-职介开始": {
-        "post_delay": 3000,
+        "post_delay": 4000,
         "next": [
             "冠位戴冠战-职介",
-            "[JumpBack]冠位戴冠战-查找职介"
+            "[JumpBack]冠位戴冠战-查找职介",
+            "冠位戴冠战-没有下滑按钮上划"
         ],
         "on_error": [
             "未找到戴冠战入口2"
@@ -285,7 +312,7 @@
     "未找到戴冠战入口2": {
         "max_hit": 10,
         "focus": {
-            "Node.Recognition.Starting": "未找到对应职介！脚本中止"
+            "Node.Recognition.Starting": "未找到对应职介！"
         }
     },
     "戴冠战-确定弹窗有打开": {
@@ -320,5 +347,15 @@
         "next": [
             "全局-战前吃体力"
         ]
+    },
+    "冠位戴冠战-助战确认": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "助战选择界面标记.png"
+                ]
+            }
+        }
     }
 }
