@@ -26,7 +26,8 @@
             "param": {
                 "template": [
                     "grand/grand_up.png"
-                ]
+                ],
+                "green_mask": true
             }
         },
         "action": {
