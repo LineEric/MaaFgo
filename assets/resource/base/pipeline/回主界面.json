@@ -68,6 +68,28 @@
             "[JumpBack]主界面判断-返回"
         ]
     },
+    "回主界面的指引": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    1197,
+                    0,
+                    84,
+                    88
+                ],
+                "template": [
+                    "errorcode/cnerror1.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "回主界面"
+        ]
+    },
     "无弹窗": {
         "recognition": {
             "type": "TemplateMatch",
@@ -99,27 +121,5 @@
             }
         },
         "post_wait_freezes": 500
-    },
-    "回主界面的指引": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "roi": [
-                    1197,
-                    0,
-                    84,
-                    88
-                ],
-                "template": [
-                    "errorcode/cnerror1.png"
-                ]
-            }
-        },
-        "action": {
-            "type": "Click"
-        },
-        "next": [
-            "回主界面"
-        ]
     }
 }
