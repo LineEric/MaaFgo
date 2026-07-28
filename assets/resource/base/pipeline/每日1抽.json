@@ -75,12 +75,12 @@
                 ]
             }
         },
-        "action": {
-            "type": "StopTask"
-        },
         "focus": {
             "Node.Action.Succeeded": "石头不足，任务中止！"
-        }
+        },
+        "next": [
+            "回主界面"
+        ]
     },
     "每日1抽-决定": {
         "recognition": {
@@ -189,12 +189,12 @@
                 ]
             }
         },
-        "action": {
-            "type": "StopTask"
-        },
         "focus": {
             "Node.Action.Succeeded": "每日1抽完成"
-        }
+        },
+        "next": [
+            "回主界面"
+        ]
     },
     "每日1抽-断网重连": {
         "recognition": {
@@ -219,12 +219,12 @@
                 ]
             }
         },
-        "action": {
-            "type": "StopTask"
-        },
         "focus": {
             "Node.Action.Succeeded": "每日1抽完成"
-        }
+        },
+        "next": [
+            "回主界面"
+        ]
     },
     "每日1抽-空节点跳过": {
         "doc": "防止报错重开的时候一开始就结束了",

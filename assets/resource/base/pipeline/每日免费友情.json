@@ -1,0 +1,202 @@
+{
+    "每日免费友情-下一个卡池": {
+        "max_hit": 99,
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    5,
+                    329,
+                    33,
+                    66
+                ]
+            }
+        },
+        "post_delay": 2000,
+        "focus": {
+            "Node.Action.Starting": "选择下一个卡池（最多找99次）"
+        },
+        "next": [
+            "每日免费友情-完成",
+            "每日免费友情-空节点跳过2"
+        ]
+    },
+    "每日免费友情-决定": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    700,
+                    462,
+                    330,
+                    179
+                ],
+                "template": [
+                    "决定.png"
+                ],
+                "threshold": [
+                    0.5
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "每日免费友情-等待抽卡完成",
+            "[JumpBack]每日免费友情-断网重连",
+            "[JumpBack]每日免费友情-点击空白"
+        ]
+    },
+    "每日免费友情-召唤": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "召唤.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 3000,
+        "next": [
+            "[JumpBack]每日免费友情-寻找友情图标",
+            "[JumpBack]每日免费友情-下一个卡池",
+            "每日免费友情-完成"
+        ]
+    },
+    "每日免费友情-完成": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    316,
+                    481,
+                    179,
+                    78
+                ],
+                "template": [
+                    "友情池1抽.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Action.Succeeded": "每日免费友情完成"
+        },
+        "next": [
+            "回主界面"
+        ]
+    },
+    "每日免费友情-寻找友情图标": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "免费友情池.png"
+                ],
+                "threshold": [
+                    0.9
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000,
+        "focus": {
+            "Node.Recognition.Starting": "寻找友情免费召唤"
+        },
+        "next": [
+            "每日免费友情-决定",
+            "每日免费友情-石头不足"
+        ]
+    },
+    "每日免费友情-断网重连": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "断网重连.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000
+    },
+    "每日免费友情-点击空白": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    1058,
+                    94,
+                    61,
+                    52
+                ]
+            }
+        },
+        "post_delay": 1000
+    },
+    "每日免费友情-石头不足": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "石头不足.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Action.Succeeded": "石头不足，任务中止！"
+        },
+        "next": [
+            "回主界面"
+        ]
+    },
+    "每日免费友情-空节点跳过2": {},
+    "每日免费友情-等待抽卡完成": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "抽卡-强化.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "等待抽卡完成"
+        },
+        "next": [
+            "回主界面"
+        ]
+    },
+    "每日免费友情-菜单": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "菜单.png"
+                ],
+                "green_mask": true
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "每日免费友情-召唤"
+        ]
+    },
+    "每日免费友情开始": {
+        "focus": {
+            "Node.Recognition.Starting": "开始每日免费友情"
+        },
+        "next": [
+            "每日免费友情-菜单"
+        ]
+    }
+}
