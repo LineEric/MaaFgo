@@ -1,9 +1,23 @@
 {
+    "每日1抽-开始召唤流程": {
+        "max_hit": 1,
+        "next": [
+            "[JumpBack]每日1抽-寻找1石图标",
+            "[JumpBack]每日1抽-下一个卡池"
+        ]
+    },
+    "每日1抽-先回主界面": {
+        "max_hit": 1,
+        "next": [
+            "回主界面"
+        ]
+    },
     "每日1抽开始": {
         "focus": {
             "Node.Recognition.Starting": "开始每日1抽"
         },
         "next": [
+            "[JumpBack]每日1抽-先回主界面",
             "每日1抽-菜单"
         ]
     },
@@ -38,8 +52,7 @@
         },
         "post_delay": 3000,
         "next": [
-            "[JumpBack]每日1抽-寻找1石图标",
-            "[JumpBack]每日1抽-下一个卡池"
+            "[JumpBack]每日1抽-开始召唤流程"
         ]
     },
     "每日1抽-寻找1石图标": {
@@ -75,12 +88,12 @@
                 ]
             }
         },
+        "action": {
+            "type": "StopTask"
+        },
         "focus": {
             "Node.Action.Succeeded": "石头不足，任务中止！"
-        },
-        "next": [
-            "回主界面"
-        ]
+        }
     },
     "每日1抽-决定": {
         "recognition": {
@@ -189,12 +202,12 @@
                 ]
             }
         },
+        "action": {
+            "type": "StopTask"
+        },
         "focus": {
             "Node.Action.Succeeded": "每日1抽完成"
-        },
-        "next": [
-            "回主界面"
-        ]
+        }
     },
     "每日1抽-断网重连": {
         "recognition": {
@@ -219,12 +232,12 @@
                 ]
             }
         },
+        "action": {
+            "type": "StopTask"
+        },
         "focus": {
             "Node.Action.Succeeded": "每日1抽完成"
-        },
-        "next": [
-            "回主界面"
-        ]
+        }
     },
     "每日1抽-空节点跳过": {
         "doc": "防止报错重开的时候一开始就结束了",
