@@ -17,6 +17,12 @@
             "Node.Action.Starting": "选择下一个卡池（最多找99次）"
         }
     },
+    "每日免费友情-先回主界面": {
+        "max_hit": 1,
+        "next": [
+            "回主界面"
+        ]
+    },
     "每日免费友情-决定": {
         "recognition": {
             "type": "TemplateMatch",
@@ -187,7 +193,10 @@
                 "template": [
                     "菜单.png"
                 ],
-                "green_mask": true
+                "green_mask": true,
+                "threshold": [
+                    0.6
+                ]
             }
         },
         "action": {
@@ -204,12 +213,6 @@
         "next": [
             "[JumpBack]每日免费友情-先回主界面",
             "每日免费友情-菜单"
-        ]
-    },
-    "每日免费友情-先回主界面": {
-        "max_hit": 1,
-        "next": [
-            "回主界面"
         ]
     }
 }
