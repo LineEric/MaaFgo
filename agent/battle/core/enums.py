@@ -3,8 +3,9 @@ from enum import Enum
 
 
 class Scene(str, Enum):
-    COMMAND_SELECTION = "command_selection"
-    ANIMATION = "animation"
+    MAIN_BATTLE = "main_battle"           # 主界面：从者技能 + 御主技能 + 攻击钮
+    COMMAND_SELECTION = "command_selection"  # 选卡界面：5 面卡 + 0~3 宝具卡
+    ANIMATION = "animation"               # 攻击/技能动画（20~40s）
     VICTORY = "victory"
     DEFEAT = "defeat"
     DIALOG = "dialog"

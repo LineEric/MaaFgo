@@ -21,14 +21,19 @@ from . import config
 
 def build(context, img, screenshot_id: str = "") -> BattleState:
     scene, sconf = _detect_scene(context, img)
-    cards = tuple(_detect_card(context, img, i) for i in range(1, 6))
-    np_cards = tuple(c for c in (_detect_np(context, img, s) for s in config.FRONTLINE_SLOTS) if c)
-    enemies = _detect_enemies(context, img)
 
+    # 只有选卡界面才需要解析卡牌；主界面/动画等无卡可读
+    cards: Tuple[CommandCard, ...] = ()
+    np_cards: Tuple[NpCard, ...] = ()
     unknown: List[str] = []
-    for c in cards:
-        if not c.confidence.passes(config.MIN_CARD_CONFIDENCE):
-            unknown.append(f"card[{c.ui_slot}]")
+    if scene is Scene.COMMAND_SELECTION:
+        cards = tuple(_detect_card(context, img, i) for i in range(1, 6))
+        np_cards = tuple(c for c in (_detect_np(context, img, s) for s in config.FRONTLINE_SLOTS) if c)
+        for c in cards:
+            if not c.confidence.passes(config.MIN_CARD_CONFIDENCE):
+                unknown.append(f"card[{c.ui_slot}]")
+
+    enemies = _detect_enemies(context, img)
 
     return BattleState(
         scene=scene,

@@ -12,9 +12,10 @@ TODO(校准)：在 assets/resource/base/pipeline/ 下新建战斗识别节点：
 """
 from __future__ import annotations
 
-# 场景检测节点
+# 场景检测节点（按序尝试，先命中者定场景）
 SCENE_NODES = {
-    "command_selection": "战斗_选卡场景",
+    "command_selection": "战斗_选卡场景",   # TemplateMatch：选卡界面特征（如卡区/返回钮）
+    "main_battle": "战斗_主界面",            # TemplateMatch：主界面攻击钮
     "victory": "战斗_胜利",
     "defeat": "战斗_失败",
     "dialog": "战斗_未知弹窗",

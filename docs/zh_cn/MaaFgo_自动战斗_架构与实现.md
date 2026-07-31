@@ -86,27 +86,26 @@ tests/battle/test_core.py            ✅ 已写，尚未运行
 
 ## 4. 一个回合的调用链
 
+真实流程是**两屏**：主界面（有攻击钮）→ 点攻击 → 选卡界面 → 选 3 张 → **选完第 3 张自动发动** → 20~40s 攻击动画 → 回主界面/胜利。
+
 `AutoBattleRuntime.run()` 主循环（`turns < max_turns`）：
 
 ```
-controller.post_screencap().wait().get()            # 截图
-  → perception.build(context, img) -> BattleState    # 一帧多识别
-  → 场景分支:
-       VICTORY                         -> BattleResult.success
-       DEFEAT/DIALOG/UNKNOWN           -> BattleResult.fail(unsafe_scene:…)
-       非 COMMAND_SELECTION            -> wait_freezes(300)，累计等待，超 60 次判 stuck
-       COMMAND_SELECTION               -> 继续
-  → decider.decide(state) -> BattleAction
-  → validate(action, state, profile) -> Verdict       # 不通过即 fail
-  → _execute_turn(action):                            # 逐原子动作 + 后置确认
-       select_enemy(target)   （若有）
-       for pick: select_np / select_card
-       attack
-       任一确认失败 -> False -> BattleResult.fail(execution_confirm_failed)
-  → turns += 1
+state = observe()   # post_screencap -> perception.build
+场景分支：
+  VICTORY                 -> success
+  DEFEAT                  -> fail(defeat)
+  DIALOG                  -> fail(unexpected_dialog)
+  MAIN_BATTLE             -> executor.open_command_cards()（点攻击开卡）；失败 fail(open_cards_failed)
+  COMMAND_SELECTION       -> decide -> validate（拒绝 fail(action_rejected:*)）
+                             -> _execute_selection：逐 pick 选卡（前后 ROI 差确认）
+                                任一失败 fail(selection_confirm_failed)
+                             -> _wait_turn_settled()：等动画结束（轮询到主界面/胜利，超时 fail(stuck_after_attack)）
+                             -> turns += 1
+  UNKNOWN / ANIMATION      -> 有界等待到已知场景（超时 fail(stuck_unknown_scene)）
 ```
 
-任何一步失败都停止（fail-closed），不盲目重试。
+**关键**：攻击动画期间画面读成 UNKNOWN，属"宽容等待"（`_wait_turn_settled`，超时 60s），**不**当异常停止；只有决策/确认失败或真正卡死超时才停。选卡为自动发动，**没有独立的攻击确认点击**。
 
 ---
 
@@ -179,11 +178,12 @@ controller.post_screencap().wait().get()            # 截图
 
 `Executor(context)`：`controller = context.tasker.controller`。
 
-- 原子动作：`select_enemy` / `select_card` / `select_np` / `attack`，各为"点击坐标 + 后置确认识别节点"。
-- **硬禁区**：类中**故意不提供** 令咒/圣晶石复活/氪金/抽卡/补 AP 入口——决策层无法触及。
-- 后置确认：点击后重新截图跑确认节点，`hit` 为真才算成功；失败返回 False（上层停止），不盲点。
+- `open_command_cards()`：主界面点攻击钮开卡，确认已进入选卡界面（`run_recognition("战斗_选卡场景")` 命中）。
+- `select_card(ui_slot)` / `select_np(servant_slot)`：**点击前后对同一卡 ROI 做 numpy 像素差**（`mean(abs(after-before)) > _DIFF_THRESHOLD`）→ 卡出现"行动N"徽标/高亮即视为选中成功。不依赖"已选中"模板。
+- `select_enemy(slot)`：保留接口，**V1b 暂不主动调用**（用默认目标）。
+- **无 `attack()`**：选完第 3 张自动发动。**硬禁区**：不提供 令咒/圣晶石/氪金/抽卡/补 AP 入口。
 
-**现状**：`coords.py` 坐标全为 `(0,0)` 占位、确认节点名（`战斗_已选卡计数变化` 等）尚未创建，均待截图标定。选卡确认目前是"命中某节点"，真实实现可能需比较点击前后已选卡计数（已在注释标注）。
+**现状**：`coords.py` 卡片改为 ROI 框、其余为点，数值全占位；`_DIFF_THRESHOLD` 与确认节点 `战斗_选卡场景` 待截图标定。执行层用 numpy（集成层允许，core 不允许）。
 
 ---
 
@@ -191,12 +191,13 @@ controller.post_screencap().wait().get()            # 截图
 
 `AutoBattleRuntime(context, decider, profile)`，`run() -> BattleResult`。
 
-- 场景收敛：VICTORY→success；DEFEAT/DIALOG/UNKNOWN→fail(`unsafe_scene:*`)。
-- 非选卡场景：`context.wait_freezes(300)` 等稳，连续超过 `_MAX_NONCOMMAND_WAITS=60` 次→fail(`stuck_non_command`)。
-- 每回合：decide→validate（拒绝→fail(`action_rejected:*`)）→`_execute_turn`（确认失败→fail(`execution_confirm_failed`)）→`turns++`。
+- VICTORY→success；DEFEAT→fail(`defeat`)；DIALOG→fail(`unexpected_dialog`)。
+- MAIN_BATTLE→`open_command_cards()`（失败 fail(`open_cards_failed`)）。
+- COMMAND_SELECTION→decide→validate（拒绝 fail(`action_rejected:*`)）→`_execute_selection`（确认失败 fail(`selection_confirm_failed`)）→`_wait_turn_settled()` 等动画（超时 fail(`stuck_after_attack`)）→`turns++`。
+- UNKNOWN/ANIMATION→有界等待到已知场景（超时 fail(`stuck_unknown_scene`)）。
 - 超过 `profile.max_turns`→fail(`max_turns_exceeded`)。
 
-`BattleResult(ok, reason, turns)`，含 `success()/fail()` 便捷构造。
+等待常量：`_ANIMATION_TIMEOUT_S=60`（等 20~40s 攻击动画）、`_UNKNOWN_TIMEOUT_S=15`、`_POLL_FREEZE_MS=500`。`BattleResult(ok, reason, turns)` 含 `success()/fail()`。
 
 ---
 
@@ -215,9 +216,9 @@ controller.post_screencap().wait().get()            # 截图
 **可用（无需设备）**：`core` 全套（契约/决策/校验），逻辑完整。
 
 **待真实 1280×720 截图标定后才能跑通**：
-- `perception/config.py` 的识别节点 ROI/阈值 + 在 resource 创建对应节点；
-- `execution/coords.py` 的点击坐标；
-- 执行确认节点。
+- `perception/config.py` 的识别节点 ROI/阈值（含 `战斗_主界面`/`战斗_选卡场景`）+ 在 resource 创建对应节点；
+- `execution/coords.py` 的卡片 ROI 框 / 攻击钮坐标；
+- 选卡像素差阈值 `_DIFF_THRESHOLD`（`executor.py`）。
 
 **其它 TODO**：
 - `auto_battle_action.py` 的 `save_evidence`（失败存证据）未实现；
