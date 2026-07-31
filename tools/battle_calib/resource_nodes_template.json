@@ -1,0 +1,39 @@
+{
+  "战斗_卡1_B": { "recognition": "ColorMatch", "method": 40, "lower": [0, 100, 100], "upper": [10, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡1_A": { "recognition": "ColorMatch", "method": 40, "lower": [95, 80, 80], "upper": [130, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡1_Q": { "recognition": "ColorMatch", "method": 40, "lower": [40, 80, 80], "upper": [85, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+
+  "战斗_卡2_B": { "recognition": "ColorMatch", "method": 40, "lower": [0, 100, 100], "upper": [10, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡2_A": { "recognition": "ColorMatch", "method": 40, "lower": [95, 80, 80], "upper": [130, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡2_Q": { "recognition": "ColorMatch", "method": 40, "lower": [40, 80, 80], "upper": [85, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+
+  "战斗_卡3_B": { "recognition": "ColorMatch", "method": 40, "lower": [0, 100, 100], "upper": [10, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡3_A": { "recognition": "ColorMatch", "method": 40, "lower": [95, 80, 80], "upper": [130, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡3_Q": { "recognition": "ColorMatch", "method": 40, "lower": [40, 80, 80], "upper": [85, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+
+  "战斗_卡4_B": { "recognition": "ColorMatch", "method": 40, "lower": [0, 100, 100], "upper": [10, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡4_A": { "recognition": "ColorMatch", "method": 40, "lower": [95, 80, 80], "upper": [130, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡4_Q": { "recognition": "ColorMatch", "method": 40, "lower": [40, 80, 80], "upper": [85, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+
+  "战斗_卡5_B": { "recognition": "ColorMatch", "method": 40, "lower": [0, 100, 100], "upper": [10, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡5_A": { "recognition": "ColorMatch", "method": 40, "lower": [95, 80, 80], "upper": [130, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+  "战斗_卡5_Q": { "recognition": "ColorMatch", "method": 40, "lower": [40, 80, 80], "upper": [85, 255, 255], "roi": [0, 0, 0, 0], "count": 50 },
+
+  "战斗_主界面":   { "recognition": "TemplateMatch", "template": "battle/TODO_attack_btn.png",   "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_选卡场景": { "recognition": "TemplateMatch", "template": "battle/TODO_command_scene.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_胜利":     { "recognition": "TemplateMatch", "template": "battle/TODO_victory.png",       "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_失败":     { "recognition": "TemplateMatch", "template": "battle/TODO_defeat.png",        "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_未知弹窗": { "recognition": "TemplateMatch", "template": "battle/TODO_dialog.png",        "roi": [0, 0, 0, 0], "threshold": 0.8 },
+
+  "战斗_NP卡1": { "recognition": "TemplateMatch", "template": "battle/TODO_np_frame.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_NP卡2": { "recognition": "TemplateMatch", "template": "battle/TODO_np_frame.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_NP卡3": { "recognition": "TemplateMatch", "template": "battle/TODO_np_frame.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+
+  "战斗_敌人1": { "recognition": "TemplateMatch", "template": "battle/TODO_enemy_slot.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_敌人2": { "recognition": "TemplateMatch", "template": "battle/TODO_enemy_slot.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_敌人3": { "recognition": "TemplateMatch", "template": "battle/TODO_enemy_slot.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+
+  "战斗_敌人1_选中": { "recognition": "TemplateMatch", "template": "battle/TODO_enemy_targeted.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_敌人2_选中": { "recognition": "TemplateMatch", "template": "battle/TODO_enemy_targeted.png", "roi": [0, 0, 0, 0], "threshold": 0.8 },
+  "战斗_敌人3_选中": { "recognition": "TemplateMatch", "template": "battle/TODO_enemy_targeted.png", "roi": [0, 0, 0, 0], "threshold": 0.8 }
+}
