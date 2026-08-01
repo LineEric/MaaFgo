@@ -1,7 +1,8 @@
 # MaaFgo 自动战斗技术方案（整合版）
 
-> **版本**：v2.0（整合稿）
-> **日期**：2026-07-31
+> **版本**：v2.2（整合稿）
+> **日期**：2026-08-01
+> **V1b 状态**：✅ 已通过真机验证。
 > **目标项目**：[MaaFgo](https://github.com/xlxyvergil/MaaFgo)（基于 MaaFramework，简称 MFW）
 > **性质**：整合并取代前三份文档，落定当前实际技术路线。
 
@@ -194,42 +195,43 @@ class PrimitiveAction:              # 不含 x/y，坐标只在 Executor
 ### 6.1 方法：一帧多识别
 截一次图 → 在同一帧上跑多个**在 resource JSON 定义好的识别节点** → 拼成 `BattleState`。这样 ROI/阈值/模板全在资源里，可调、可视化调试、可对静态截图单测。
 
-```python
-# API 已按 MaaFw 5.12.2 源码核对
-def build(context, img) -> BattleState:
-    scene = _scene(context, img)
-    cards = tuple(_card(context, img, i) for i in range(1, 6))
-    np_cards = tuple(c for c in (_np_card(context, img, s) for s in (1,2,3)) if c)
-    enemies = _enemies(context, img)
-    return BattleState(1, scene, ..., cards, np_cards, enemies, screenshot_id=...)
+> **实现注记**：设计稿原定卡色用 ColorMatch（HSV 像素计数 argmax），实际实现改用 **OCR 文字识别**（力击/迅击/技击 → B/A/Q），因 OCR 文字比 HSV 色彩更鲁棒。NP 卡检测也从 TemplateMatch 改为 OCR 数值识别（≥100%）。识别节点已创建于 `assets/resource/base/pipeline/自动战斗_感知.json`，ROI 已填入实际 1280×720 坐标值并**通过真机验证**。
 
-def _card(context, img, ui_slot) -> CommandCard:
-    # 对该卡 ROI 跑 B/A/Q 三个 ColorMatch 节点，比命中像素数取最大
-    counts = {}
-    for color in ("B", "A", "Q"):
-        reco = context.run_recognition(f"卡{ui_slot}_{color}", img)   # -> RecognitionDetail
-        counts[color] = reco.best_result.count if (reco and reco.hit) else 0  # ColorMatch => .count
-    best = max(counts, key=counts.get)
-    conf = counts[best] / max(1, sum(counts.values()))
-    return CommandCard(ui_slot, CardColor(best), owner_slot=None, confidence=Confidence(conf, "colormatch"))
+```python
+# 实际实现（perception.py）
+def build(context, img, screenshot_id="") -> BattleState:
+    scene, sconf = _detect_scene(context, img)
+    cards = tuple(_detect_card(context, img, i) for i in range(1, 6))   # OCR -> 力击/迅击/技击
+    np_cards = tuple(c for c in (_detect_np(context, img, s) for s in (1,2,3)) if c)  # OCR -> NP数值≥100
+    enemies = _detect_enemies(context, img)
+    return BattleState(scene, Confidence(sconf, "scene"), cards, np_cards, enemies, screenshot_id=screenshot_id)
+
+def _detect_card(context, img, ui_slot) -> CommandCard:
+    node = config.CARD_NODE.format(ui_slot=ui_slot)   # "战斗_卡{ui_slot}" OCR 节点
+    r = context.run_recognition(node, img)
+    text = r.best_result.text if (r and r.hit and r.best_result) else ""
+    color = _CARD_TEXT_MAP.get(text.strip())   # 力击->B, 技击->A, 迅击->Q
+    score = r.best_result.score if (r and r.best_result) else 0.0
+    return CommandCard(ui_slot, color or CardColor.BUSTER, None, Confidence(float(score), "ocr"))
 ```
 
 ### 6.2 字段 ↔ MFW 识别节点映射（720p）
 
 | BattleState 字段 | 识别类型 | 备注 |
 |---|---|---|
-| `scene==选卡` | `TemplateMatch`（攻击按钮） | 命中=选卡界面 |
-| 面卡 `color` ×5 | `ColorMatch`（HSV，method=40） | 每卡 ROI 跑 B/A/Q，取最强；后续可换 `NeuralNetworkClassify` |
-| `np_cards` | `TemplateMatch`（上排 3 个 NP 卡框 ROI） | 命中=该从者宝具卡在场 |
-| 敌人 `alive`/`targeted` | `TemplateMatch`/`ColorMatch`（敌方槽位） | |
-| 场景 `victory/defeat/dialog` | `TemplateMatch` + `OCR` | 收敛与停止用 |
+| `scene==选卡` | `TemplateMatch`（选卡界面特征） | 命中=选卡界面 |
+| `scene==主界面` | `TemplateMatch`（攻击钮） | 命中=主界面 |
+| 面卡 `color` ×5 | `OCR`（力击/迅击/技击） | 每卡 ROI 跑 OCR，文字映射 B/A/Q |
+| `np_cards` | `OCR`（NP 数值 ≥100%） | 上排 3 个 NP 卡 ROI，OCR 提取数字 |
+| 敌人 `alive`/`targeted` | `TemplateMatch`/`ColorMatch`（敌方槽位） | 当前 resource 中为 `DoNothing` 占位，待标定 |
+| 场景 `victory/defeat` | `OCR` + `TemplateMatch` | 收敛与停止用 |
 | `owner_slot` | —（V1 为 None） | V2 用头像/边框模板，见 6.4 |
 
-> 所有 ROI 坐标为占位，需用截图集**校准**后写入 resource。
+> 识别节点已创建于 `assets/resource/base/pipeline/自动战斗_感知.json`，ROI 已填入实际 1280×720 坐标值并**通过真机验证**。场景模板图片已制作并验证。
 
 ### 6.3 置信度门控
 - 选卡/结算场景判断阈值 0.95，不足 → 重新截图等待稳定，仍失败 → 停止；
-- 卡色阈值 0.90，不足 → 标 `unknown_fields`；
+- 卡色阈值当前设为 0.50（`StrategyProfile.min_card_confidence`），低于此 → 标 `unknown_fields`；
 - **低置信度是状态的一部分，不是"凑合继续决策"**。
 
 ### 6.4 卡归属（owner_slot）降级策略
@@ -248,17 +250,27 @@ def _card(context, img, ui_slot) -> CommandCard:
 ### 7.1 封装 controller + 后置确认
 原子动作 = 720p 坐标点击 + 立即重跑识别确认状态变化。**不盲目重点**。
 
+> **实现注记**：设计稿描述的后置确认（numpy 像素差 / run_recognition 确认）当前未实现——所有原子操作点击后直接返回 `True`，以 `time.sleep` 间隔代替。真机验证表明此方案在正常条件下可稳定运行。坐标已填入实际值并验证通过。
+
 ```python
+# 实际实现（executor.py）
 class Executor:
-    def __init__(self, context): self.ctx = context; self.c = context.tasker.controller
+    def __init__(self, context, controller=None):
+        self.ctx = context
+        self.controller = controller or context.tasker.controller
+
+    def open_command_cards(self) -> bool:
+        self._click(coords.ATTACK_BTN)   # (1136, 601)
+        return True                        # 无后置确认
+
     def select_card(self, ui_slot: int) -> bool:
-        x, y = CARD_COORD_720P[ui_slot]              # 直接 720p 坐标
-        self.c.post_click(x, y).wait()
-        img = self.c.post_screencap().wait().get()
-        return bool(self.ctx.run_recognition("已选卡计数变化", img))   # 后置确认
-    def select_np(self, servant_slot: int) -> bool: ...
-    def select_enemy(self, slot: int) -> bool: ...
-    def attack(self) -> bool: ...
+        self._click(coords.center(coords.CARD_ROI[ui_slot]))  # ROI 中心点
+        return True                        # 无后置确认
+
+    def select_np(self, servant_slot: int) -> bool:
+        self._click(coords.NP_CLICK[servant_slot])
+        return True                        # 无后置确认
+
     # 不提供 command_spell / sq_revive / gacha / ap_refill —— 硬禁区
 ```
 
@@ -273,12 +285,21 @@ class Executor:
 
 确认失败统一处理：**重新观测 → 记录 → 停止**。
 
-### 7.3 坐标表（占位，待校准）
+### 7.3 坐标表（已填入并验证）
 ```python
-CARD_COORD_720P = {1:(x1,y1), 2:(...), 3:(...), 4:(...), 5:(...)}   # 下排 5 面卡
-NP_COORD_720P   = {1:(...), 2:(...), 3:(...)}                        # 上排 3 宝具卡
-ATTACK_BTN_720P = (xa, ya)
-ENEMY_SLOT_720P = {1:(...), 2:(...), 3:(...)}
+# execution/coords.py（1280×720）
+CARD_ROI = {   # 下排 5 面卡 ROI 框 (x, y, w, h)
+    1: (75, 529, 138, 98), 2: (320, 529, 136, 98), 3: (578, 529, 136, 98),
+    4: (842, 529, 127, 98), 5: (1097, 529, 129, 98),
+}
+NP_ROI = {     # 上排 3 宝具卡 ROI 框（OCR 检测 NP 数值）
+    1: (222, 656, 83, 26), 2: (540, 657, 83, 24), 3: (865, 655, 73, 25),
+}
+NP_CLICK = {   # 宝具卡点击位置
+    1: (410, 138), 2: (640, 138), 3: (875, 138),
+}
+ATTACK_BTN = (1136, 601)           # 主界面攻击钮
+ENEMY_POINT = {1: (0,0), 2: (0,0), 3: (0,0)}  # 敌方槽位，仍为占位
 ```
 
 ---
@@ -346,7 +367,9 @@ OBSERVE → 判场景
 import auto_battle_action   # 新增，与 bbc_action 并列 import
 ```
 
-### 10.2 Pipeline 节点（assets/resource/base/pipeline/自动战斗.json）
+### 10.2 Pipeline 节点
+
+**入口节点**（`assets/resource/base/pipeline/自动战斗.json`）**尚未创建**，计划结构：
 ```jsonc
 {
   "自动战斗": {
@@ -364,7 +387,16 @@ import auto_battle_action   # 新增，与 bbc_action 并列 import
   }
 }
 ```
-识别节点（卡色/场景/NP 卡等）单独放一个 resource JSON，供 `context.run_recognition` 按名调用。
+
+**识别节点**已创建于 `assets/resource/base/pipeline/自动战斗_感知.json`，包含：
+- `战斗_卡{1..5}`：OCR 识别力击/迅击/技击，ROI 已填入；
+- `战斗_NP卡{1..3}`：OCR 识别 NP 数值，ROI 已填入；
+- `战斗_选卡场景` / `战斗_主界面`：TemplateMatch，ROI 已填入，模板图片待制作；
+- `战斗_胜利`：OCR 识别"战斗结果"；
+- `战斗_失败`：TemplateMatch，模板图片待制作；
+- `战斗_敌人{1..3}` / `战斗_敌人{1..3}_选中`：`DoNothing` 占位，待标定。
+
+供 `context.run_recognition` 按名调用。
 
 ### 10.3 与 BBC 并存
 不替换 `执行BBC任务`。默认仍走 BBC；`自动战斗` 作为可选后端，先只暴露开发者开关，避免普通用户误用。
