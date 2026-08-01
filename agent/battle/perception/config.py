@@ -1,13 +1,14 @@
 """感知配置：识别节点名与阈值。
 
-约定：真正的 ROI/HSV 阈值写在 MFW resource 的识别节点里（1280x720 下标定），
-本文件只保存"节点名模板"和门控阈值。节点尚未在 resource 中定义，需用真实截图标定后创建。
+约定：真正的 ROI/阈值写在 MFW resource 的识别节点里（1280x720 下标定），
+本文件只保存"节点名模板"和门控阈值。
 
-TODO(校准)：在 assets/resource/base/pipeline/ 下新建战斗识别节点：
-  - 战斗_选卡场景        TemplateMatch（攻击按钮）
-  - 战斗_胜利 / 战斗_失败 / 战斗_未知弹窗   TemplateMatch(+OCR)
-  - 战斗_卡{1..5}_{B|A|Q} ColorMatch(HSV) —— 每卡 ROI 三色
-  - 战斗_NP卡{1..3}       TemplateMatch（上排宝具卡框）
+识别节点定义在 assets/resource/base/pipeline/自动战斗_感知.json：
+  - 战斗_选卡场景        TemplateMatch（选卡界面特征）
+  - 战斗_主界面          TemplateMatch（主界面攻击钮）
+  - 战斗_胜利 / 战斗_失败   OCR / TemplateMatch
+  - 战斗_卡{1..5}        OCR（识别「力击/迅击/技击」）
+  - 战斗_NP卡{1..3}      OCR（识别 NP 数值，≥100% 可用）
   - 战斗_敌人{1..3} / 战斗_敌人{1..3}_选中
 """
 from __future__ import annotations
