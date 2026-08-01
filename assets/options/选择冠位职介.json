@@ -115,6 +115,12 @@
               "recognition": {
                 "type": "TemplateMatch",
                 "param": {
+                  "roi": [
+                    97,
+                    357,
+                    27,
+                    34
+                  ],
                   "template": [
                     "grand/grand_ex1.png"
                   ]
@@ -130,6 +136,12 @@
               "recognition": {
                 "type": "TemplateMatch",
                 "param": {
+                  "roi": [
+                    97,
+                    357,
+                    27,
+                    34
+                  ],
                   "template": [
                     "grand/grand_ex2.png"
                   ]
