@@ -79,11 +79,18 @@ def _detect_card(context, img, ui_slot: int) -> CommandCard:
 
 
 def _detect_np(context, img, servant_slot: int) -> Optional[NpCard]:
+    import re
     node = config.NP_CARD_NODE.format(servant_slot=servant_slot)
     r = _reco(context, node, img)
     if r and r.hit:
-        score = getattr(getattr(r, "best_result", None), "score", 1.0) or 1.0
-        return NpCard(servant_slot, Confidence(float(score), "template"))
+        text = getattr(getattr(r, "best_result", None), "text", "")
+        if text:
+            nums = re.findall(r'\d+', text)
+            if nums:
+                val = int(nums[0])
+                if val >= 100:
+                    score = getattr(getattr(r, "best_result", None), "score", 1.0) or 1.0
+                    return NpCard(servant_slot, Confidence(float(score), "ocr"))
     return None
 
 

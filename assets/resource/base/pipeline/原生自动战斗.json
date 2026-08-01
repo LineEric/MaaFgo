@@ -1,0 +1,10 @@
+{
+  "原生自动战斗入口": {
+    "action": "Custom",
+    "custom_action": "auto_battle",
+    "custom_action_param": {
+      "strategy_profile": "farm-safe-v1",
+      "max_turns": 20
+    }
+  }
+}

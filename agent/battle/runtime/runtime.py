@@ -74,11 +74,19 @@ class AutoBattleRuntime:
                 continue
 
             if scene is Scene.COMMAND_SELECTION:
+                print(f"[AutoBattle] ========== Turn {turns+1} ==========")
+                print(f"[AutoBattle] State: {state}")
                 action = self.decider.decide(state)
+                print(f"[AutoBattle] Decided Action: {action}")
+                
                 verdict = validate(action, state, self.profile)
                 if not verdict.ok:
+                    print(f"[AutoBattle] Action rejected by validator! Reason: {verdict.reason}")
                     return BattleResult.fail(f"action_rejected:{verdict.reason}", turns)
+                    
+                print(f"[AutoBattle] Executing picks...")
                 if not self._execute_selection(action):
+                    print(f"[AutoBattle] Execution failed (confirmation error).")
                     return BattleResult.fail("selection_confirm_failed", turns)
                 # 选完第 3 张自动发动 -> 等动画结束
                 if not self._wait_turn_settled():
