@@ -79,7 +79,9 @@ class AutoBattleRuntime:
                 if not self.executor.open_command_cards():
                     mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
                     return BattleResult.fail("open_cards_failed", turns)
-                mfaalog.info("[AutoBattle] command cards opened, continuing")
+                mfaalog.info("[AutoBattle] command cards opened, waiting for card animation...")
+                time.sleep(2)
+                mfaalog.info("[AutoBattle] continuing after card animation wait")
                 continue
 
             if scene is Scene.COMMAND_SELECTION:
@@ -138,6 +140,7 @@ class AutoBattleRuntime:
             mfaalog.info(f"[AutoBattle] pick result: ok={ok}")
             if not ok:
                 return False
+            time.sleep(1)
         return True
 
     def _wait_turn_settled(self) -> bool:

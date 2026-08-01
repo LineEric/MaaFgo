@@ -1,103 +1,135 @@
 {
   "战斗_卡1": {
-    "recognition": "OCR",
-    "roi": [
-      75,
-      529,
-      138,
-      98
-    ],
-    "expected": [
-      "力击",
-      "迅击",
-      "技击"
-    ]
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          75,
+          529,
+          138,
+          98
+        ],
+        "expected": [
+          "力击",
+          "迅击",
+          "技击"
+        ]
+      }
+    }
   },
   "战斗_卡2": {
-    "recognition": "OCR",
-    "roi": [
-      329,
-      529,
-      118,
-      98
-    ],
-    "expected": [
-      "力击",
-      "迅击",
-      "技击"
-    ]
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          320,
+          529,
+          136,
+          98
+        ],
+        "expected": [
+          "力击",
+          "迅击",
+          "技击"
+        ]
+      }
+    }
   },
   "战斗_卡3": {
-    "recognition": "OCR",
-    "roi": [
-      578,
-      529,
-      136,
-      98
-    ],
-    "expected": [
-      "力击",
-      "迅击",
-      "技击"
-    ]
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          578,
+          529,
+          136,
+          98
+        ],
+        "expected": [
+          "力击",
+          "迅击",
+          "技击"
+        ]
+      }
+    }
   },
   "战斗_卡4": {
-    "recognition": "OCR",
-    "roi": [
-      842,
-      529,
-      127,
-      98
-    ],
-    "expected": [
-      "力击",
-      "迅击",
-      "技击"
-    ]
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          842,
+          529,
+          127,
+          98
+        ],
+        "expected": [
+          "力击",
+          "迅击",
+          "技击"
+        ]
+      }
+    }
   },
   "战斗_卡5": {
-    "recognition": "OCR",
-    "roi": [
-      1097,
-      529,
-      129,
-      98
-    ],
-    "expected": [
-      "力击",
-      "迅击",
-      "技击"
-    ]
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          1097,
+          529,
+          129,
+          98
+        ],
+        "expected": [
+          "力击",
+          "迅击",
+          "技击"
+        ]
+      }
+    }
   },
   "战斗_NP卡1": {
-    "recognition": "OCR",
-    "roi": [
-      225,
-      658,
-      76,
-      22
-    ],
-    "expected": "100"
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          222,
+          656,
+          83,
+          26
+        ],
+        "expected": "\\d+"
+      }
+    }
   },
   "战斗_NP卡2": {
-    "recognition": "OCR",
-    "roi": [
-      540,
-      659,
-      83,
-      20
-    ],
-    "expected": "100"
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          540,
+          657,
+          83,
+          24
+        ],
+        "expected": "\\d+"
+      }
+    }
   },
   "战斗_NP卡3": {
-    "recognition": "OCR",
-    "roi": [
-      865,
-      657,
-      73,
-      21
-    ],
-    "expected": "100"
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          865,
+          655,
+          73,
+          25
+        ],
+        "expected": "\\d+"
+      }
+    }
   },
   "战斗_选卡场景": {
     "recognition": "TemplateMatch",

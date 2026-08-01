@@ -90,9 +90,10 @@ def _detect_np(context, img, servant_slot: int) -> Optional[NpCard]:
     if r and r.hit:
         text = getattr(getattr(r, "best_result", None), "text", "")
         if text:
-            nums = re.findall(r'\d+', text)
-            if nums:
-                val = int(nums[0])
+            # OCR 可能把 "100%" 误识为 "1.0.0%" 等，去掉非数字字符后拼接
+            digits = re.sub(r'\D', '', text)
+            if digits:
+                val = int(digits)
                 if val >= 100:
                     score = getattr(getattr(r, "best_result", None), "score", 1.0) or 1.0
                     return NpCard(servant_slot, Confidence(float(score), "ocr"))

@@ -38,10 +38,12 @@ class Executor:
         return True
 
     def select_card(self, ui_slot: int) -> bool:
-        return self._select_with_diff(coords.CARD_ROI[ui_slot])
+        self._click(coords.center(coords.CARD_ROI[ui_slot]))
+        return True
 
     def select_np(self, servant_slot: int) -> bool:
-        return self._select_with_diff(coords.NP_ROI[servant_slot])
+        self._click(coords.NP_CLICK[servant_slot])
+        return True
 
     def select_enemy(self, slot: int) -> bool:
         # V1b 暂不主动选目标（用当前默认目标）；保留接口供以后使用
