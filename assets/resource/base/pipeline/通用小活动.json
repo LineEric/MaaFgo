@@ -144,7 +144,7 @@
             }
         },
         "repeat": 0,
-        "repeat_delay": 1000,
+        "repeat_delay": 1500,
         "next": [
             "通用小活动-点击进副本"
         ]

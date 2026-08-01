@@ -21,7 +21,7 @@
             }
         },
         "repeat": 0,
-        "repeat_delay": 1000,
+        "repeat_delay": 1500,
         "next": [
             "戴冠战-点击进副本"
         ]
