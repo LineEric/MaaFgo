@@ -1,39 +1,55 @@
 {
-    "冠位戴冠战-没有下滑按钮上划": {
-        "recognition": {
-            "type": "TemplateMatch",
+    "戴冠战-按次数上划": {
+        "action": {
+            "type": "Swipe",
             "param": {
-                "template": [
-                    "grand/grand_up.png"
+                "begin": [
+                    1014,
+                    212,
+                    1,
+                    1
                 ],
-                "green_mask": true
+                "end": [
+                    [
+                        1010,
+                        402,
+                        1,
+                        1
+                    ]
+                ],
+                "duration": 1000
             }
         },
-        "focus": {
-            "Node.Recognition.Starting": "未找到下滑按钮，开始上划查找"
-        },
+        "repeat": 0,
+        "repeat_delay": 1000,
         "next": [
-            "冠位戴冠战-职介",
-            "[JumpBack]冠位戴冠战-查找职介上滑"
-        ],
-        "on_error": [
-            "未找到戴冠战入口2"
+            "戴冠战-点击进副本"
         ]
     },
-    "冠位戴冠战-查找职介上滑": {
-        "recognition": {
-            "type": "TemplateMatch",
+    "戴冠战-按次数找副本": {
+        "next": [
+            "戴冠战-按次数上划"
+        ]
+    },
+    "戴冠战-点击进副本": {
+        "max_hit": 5,
+        "action": {
+            "type": "Click",
             "param": {
-                "template": [
-                    "grand/grand_up.png"
-                ],
-                "green_mask": true
+                "target": [
+                    909,
+                    157,
+                    71,
+                    46
+                ]
             }
         },
-        "action": {
-            "type": "Click"
-        },
-        "post_delay": 3000
+        "post_delay": 3000,
+        "next": [
+            "冠位戴冠战-进入1",
+            "[JumpBack]戴冠战-体力不足",
+            "戴冠战-点击进副本"
+        ]
     },
     "冠位戴冠战-开始": {
         "focus": {
@@ -64,7 +80,15 @@
         "recognition": {
             "type": "TemplateMatch",
             "param": {
-                "template": "grand/grand_lancer.png"
+                "roi": [
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "template": [
+                    "grand/grand_ex2.png"
+                ]
             }
         },
         "timeout": 2000,
@@ -357,5 +381,41 @@
                 ]
             }
         }
+    },
+    "冠位戴冠战-没有下滑按钮上划": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "grand/grand_up.png"
+                ],
+                "green_mask": true
+            }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "未找到下滑按钮，开始上划查找"
+        },
+        "next": [
+            "冠位戴冠战-职介",
+            "[JumpBack]冠位戴冠战-查找职介上滑"
+        ],
+        "on_error": [
+            "未找到戴冠战入口2"
+        ]
+    },
+    "冠位戴冠战-查找职介上滑": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "grand/grand_up.png"
+                ],
+                "green_mask": true
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 3000
     }
 }
