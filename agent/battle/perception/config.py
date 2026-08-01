@@ -18,11 +18,11 @@ SCENE_NODES = {
     "main_battle": "战斗_主界面",            # TemplateMatch：主界面攻击钮
     "victory": "战斗_胜利",
     "defeat": "战斗_失败",
-    "dialog": "战斗_未知弹窗",
+    # "dialog": "战斗_未知弹窗",
 }
 
 # 参数化节点名模板
-CARD_COLOR_NODE = "战斗_卡{ui_slot}_{color}"     # ColorMatch，取 best_result.count 比大小
+CARD_NODE = "战斗_卡{ui_slot}"               # OCR，识别 "力击"/"迅击"/"技击"
 NP_CARD_NODE = "战斗_NP卡{servant_slot}"          # TemplateMatch
 ENEMY_NODE = "战斗_敌人{slot}"                     # 存活/位置
 ENEMY_TARGET_NODE = "战斗_敌人{slot}_选中"         # 当前目标

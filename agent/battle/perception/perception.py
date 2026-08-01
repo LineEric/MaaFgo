@@ -61,21 +61,26 @@ def _detect_scene(context, img) -> Tuple[Scene, float]:
     return Scene.UNKNOWN, 0.0
 
 
+# OCR 文本 -> CardColor 映射
+_CARD_TEXT_MAP = {
+    "力击": CardColor.BUSTER,
+    "技击": CardColor.ARTS,
+    "迅击": CardColor.QUICK,
+}
+
+
 def _detect_card(context, img, ui_slot: int) -> CommandCard:
-    # 对该卡 ROI 跑 B/A/Q 三个 ColorMatch，比 count 取最大
-    counts = {}
-    for color in ("B", "A", "Q"):
-        node = config.CARD_COLOR_NODE.format(ui_slot=ui_slot, color=color)
-        r = _reco(context, node, img)
-        counts[color] = _count(r)
-    total = sum(counts.values())
-    if total <= 0:
-        # 全 0：识别失败，标未知（用 Buster 占位但置信度 0）
-        return CommandCard(ui_slot, CardColor.BUSTER, None, Confidence(0.0, "colormatch"))
-    best = max(counts, key=counts.get)
-    conf = counts[best] / total
-    return CommandCard(ui_slot, CardColor(best), owner_slot=None,
-                       confidence=Confidence(conf, "colormatch"))
+    # OCR 识别卡牌文字（力击/迅击/技击）
+    node = config.CARD_NODE.format(ui_slot=ui_slot)
+    r = _reco(context, node, img)
+    if not r or not r.hit or not r.best_result:
+        return CommandCard(ui_slot, CardColor.BUSTER, None, Confidence(0.0, "ocr"))
+    text = getattr(r.best_result, "text", "") or ""
+    score = getattr(r.best_result, "score", 1.0) or 1.0
+    color = _CARD_TEXT_MAP.get(text.strip())
+    if color is None:
+        return CommandCard(ui_slot, CardColor.BUSTER, None, Confidence(0.0, "ocr"))
+    return CommandCard(ui_slot, color, owner_slot=None, confidence=Confidence(float(score), "ocr"))
 
 
 def _detect_np(context, img, servant_slot: int) -> Optional[NpCard]:

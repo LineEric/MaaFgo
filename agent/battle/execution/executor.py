@@ -26,18 +26,16 @@ _DIFF_THRESHOLD = 12.0
 
 
 class Executor:
-    def __init__(self, context) -> None:
+    def __init__(self, context, controller=None) -> None:
         self.ctx = context
-        self.controller = context.tasker.controller
+        self.controller = controller or context.tasker.controller
 
     # ---- 原子动作（V1b）----
 
     def open_command_cards(self) -> bool:
-        """主界面点攻击钮 -> 进入选卡界面。"""
+        """主界面点攻击钮。"""
         self._click(coords.ATTACK_BTN)
-        img = self._screencap()
-        r = self.ctx.run_recognition(CONFIRM_COMMAND_SCENE, img)
-        return bool(r and r.hit)
+        return True
 
     def select_card(self, ui_slot: int) -> bool:
         return self._select_with_diff(coords.CARD_ROI[ui_slot])

@@ -33,14 +33,15 @@ class AutoBattleAction(CustomAction):
         except json.JSONDecodeError:
             param = {}
 
-        profile = StrategyProfile(
-            id=param.get("strategy_profile", "farm-safe-v1"),
-            max_turns=int(param.get("max_turns", 20)),
-        )
+        profile = StrategyProfile()
         decider = RuleDecider(CardPolicy())
 
+        # Agent 模式下，每次调用 context.tasker.controller 都会通过反向 IPC
+        # 获取一个新的 handle，只有第一次有效。因此在这里获取一次并传递下去。
+        controller = context.tasker.controller
+
         mfaalog.info(f"[auto_battle] start profile={profile.id} max_turns={profile.max_turns}")
-        result = AutoBattleRuntime(context, decider, profile).run()
+        result = AutoBattleRuntime(context, controller, decider, profile).run()
         mfaalog.info(f"[auto_battle] end ok={result.ok} reason={result.reason} turns={result.turns}")
 
         # TODO(save_evidence)：失败时保存截图/状态证据

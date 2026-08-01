@@ -19,6 +19,7 @@ from ..core.policy import StrategyProfile
 from ..core.validator import validate
 from ..execution.executor import Executor
 from ..perception import perception
+import mfaalog
 
 # 选完卡后等攻击动画结束（20~40s，留足余量）
 _ANIMATION_TIMEOUT_S = 60.0
@@ -47,82 +48,113 @@ class BattleResult:
 
 
 class AutoBattleRuntime:
-    def __init__(self, context, decider: Decider, profile: StrategyProfile) -> None:
+    def __init__(self, context, controller, decider: Decider, profile: StrategyProfile) -> None:
         self.ctx = context
-        self.controller = context.tasker.controller
+        self.controller = controller
         self.decider = decider
         self.profile = profile
-        self.executor = Executor(context)
+        self.executor = Executor(context, controller)
 
     def run(self) -> BattleResult:
+        mfaalog.info(f"[AutoBattle] run() start, max_turns={self.profile.max_turns}")
         turns = 0
         while turns < self.profile.max_turns:
             state = self._observe()
             scene = state.scene
+            mfaalog.info(f"[AutoBattle] Turn {turns+1} | scene={scene.name} | unknown={state.unknown_fields}")
 
             if scene is Scene.VICTORY:
+                mfaalog.info(f"[AutoBattle] Victory! turns={turns}")
                 return BattleResult.success(turns)
             if scene is Scene.DEFEAT:
+                mfaalog.info(f"[AutoBattle] Defeat. turns={turns}")
                 return BattleResult.fail("defeat", turns)
             if scene is Scene.DIALOG:
+                mfaalog.info(f"[AutoBattle] Unexpected dialog. turns={turns}")
                 return BattleResult.fail("unexpected_dialog", turns)
 
             if scene is Scene.MAIN_BATTLE:
                 # V1b：主界面只点攻击开卡，不放主动技能
+                mfaalog.info("[AutoBattle] MAIN_BATTLE -> opening command cards (click attack)")
                 if not self.executor.open_command_cards():
+                    mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
                     return BattleResult.fail("open_cards_failed", turns)
+                mfaalog.info("[AutoBattle] command cards opened, continuing")
                 continue
 
             if scene is Scene.COMMAND_SELECTION:
-                print(f"[AutoBattle] ========== Turn {turns+1} ==========")
-                print(f"[AutoBattle] State: {state}")
+                mfaalog.info(f"[AutoBattle] ========== Turn {turns+1} ==========")
+                mfaalog.info(f"[AutoBattle] State: {state}")
                 action = self.decider.decide(state)
-                print(f"[AutoBattle] Decided Action: {action}")
+                mfaalog.info(f"[AutoBattle] Decided Action: {action}")
                 
                 verdict = validate(action, state, self.profile)
                 if not verdict.ok:
-                    print(f"[AutoBattle] Action rejected by validator! Reason: {verdict.reason}")
+                    mfaalog.info(f"[AutoBattle] Action rejected by validator! Reason: {verdict.reason}")
                     return BattleResult.fail(f"action_rejected:{verdict.reason}", turns)
                     
-                print(f"[AutoBattle] Executing picks...")
+                mfaalog.info("[AutoBattle] Executing picks...")
                 if not self._execute_selection(action):
-                    print(f"[AutoBattle] Execution failed (confirmation error).")
+                    mfaalog.info("[AutoBattle] Execution failed (confirmation error).")
                     return BattleResult.fail("selection_confirm_failed", turns)
+                mfaalog.info("[AutoBattle] Picks executed, waiting for attack animation to settle...")
                 # 选完第 3 张自动发动 -> 等动画结束
                 if not self._wait_turn_settled():
+                    mfaalog.info(f"[AutoBattle] Stuck after attack (no scene change within {_ANIMATION_TIMEOUT_S}s). turns={turns}")
                     return BattleResult.fail("stuck_after_attack", turns)
+                mfaalog.info(f"[AutoBattle] Turn {turns+1} settled, advancing to turn {turns+2}")
                 turns += 1
                 continue
 
             # UNKNOWN / ANIMATION（非攻击后语境，如加载）：有界等待
+            mfaalog.info(f"[AutoBattle] Unknown scene, waiting up to {_UNKNOWN_TIMEOUT_S}s for known scene...")
             if not self._wait_until(_KNOWN_SCENES, _UNKNOWN_TIMEOUT_S):
+                mfaalog.info(f"[AutoBattle] Stuck in unknown scene for {_UNKNOWN_TIMEOUT_S}s. turns={turns}")
                 return BattleResult.fail("stuck_unknown_scene", turns)
+            mfaalog.info("[AutoBattle] Recovered from unknown scene, continuing")
 
+        mfaalog.info(f"[AutoBattle] Max turns ({self.profile.max_turns}) exceeded")
         return BattleResult.fail("max_turns_exceeded", turns)
 
     # ---- 内部 ----
 
     def _observe(self):
+        mfaalog.info("[AutoBattle] _observe() -> post_screencap")
         img = self.controller.post_screencap().wait().get()
-        return perception.build(self.ctx, img)
+        mfaalog.info(f"[AutoBattle] _observe() -> screencap done, shape={img.shape if img is not None else 'None'}")
+        result = perception.build(self.ctx, img)
+        mfaalog.info(f"[AutoBattle] _observe() -> perception built, scene={result.scene.name}")
+        return result
 
     def _execute_selection(self, action) -> bool:
+        mfaalog.info(f"[AutoBattle] _execute_selection() picks={action.picks}")
         for p in action.picks:
             if p.kind is PrimitiveKind.SELECT_NP:
+                mfaalog.info(f"[AutoBattle] select_np(slot={p.slot})")
                 ok = self.executor.select_np(p.slot)
             else:
+                mfaalog.info(f"[AutoBattle] select_card(slot={p.slot})")
                 ok = self.executor.select_card(p.slot)
+            mfaalog.info(f"[AutoBattle] pick result: ok={ok}")
             if not ok:
                 return False
         return True
 
     def _wait_turn_settled(self) -> bool:
-        return self._wait_until(_TERMINAL_OR_MAIN, _ANIMATION_TIMEOUT_S)
+        mfaalog.info(f"[AutoBattle] _wait_turn_settled() timeout={_ANIMATION_TIMEOUT_S}s")
+        result = self._wait_until(_TERMINAL_OR_MAIN, _ANIMATION_TIMEOUT_S)
+        mfaalog.info(f"[AutoBattle] _wait_turn_settled() result={result}")
+        return result
 
     def _wait_until(self, scenes, timeout_s: float) -> bool:
+        mfaalog.info(f"[AutoBattle] _wait_until() scenes={[s.name for s in scenes]} timeout={timeout_s}s")
         deadline = time.monotonic() + timeout_s
         while time.monotonic() < deadline:
-            if self._observe().scene in scenes:
+            state = self._observe()
+            if state.scene in scenes:
+                mfaalog.info(f"[AutoBattle] _wait_until() matched scene={state.scene.name}")
                 return True
+            mfaalog.info(f"[AutoBattle] _wait_until() scene={state.scene.name}, waiting freezes {_POLL_FREEZE_MS}ms")
             self.ctx.wait_freezes(_POLL_FREEZE_MS)
+        mfaalog.info(f"[AutoBattle] _wait_until() timed out")
         return False
