@@ -41,6 +41,19 @@ class NpCard:
 
 
 @dataclass(frozen=True)
+class SkillState:
+    available: bool
+    confidence: Confidence
+
+
+@dataclass(frozen=True)
+class ServantState:
+    slot: int
+    skills: Tuple[SkillState, SkillState, SkillState]
+    confidence: Confidence
+
+
+@dataclass(frozen=True)
 class EnemyState:
     slot: int
     alive: bool
@@ -55,6 +68,7 @@ class BattleState:
     cards: Tuple[CommandCard, ...]           # 期望 5 张
     np_cards: Tuple[NpCard, ...]             # 0..3 张
     enemies: Tuple[EnemyState, ...]
+    servants: Tuple[ServantState, ...] = ()
     screenshot_id: str = ""
     schema_version: int = SCHEMA_VERSION
     unknown_fields: Tuple[str, ...] = ()
@@ -74,11 +88,42 @@ class CardPick:
 
 
 @dataclass(frozen=True)
+class ServantSkillAction:
+    servant_slot: int             # 1..3
+    skill_index: int              # 1..3
+    target_ally: Optional[int] = None   # 1..3
+
+
+@dataclass(frozen=True)
+class MasterSkillAction:
+    skill_index: int              # 1..3
+    target_ally: Optional[int] = None   # 1..3
+
+
+@dataclass(frozen=True)
+class OrderChangeAction:
+    starting_member_idx: int      # 1..3
+    sub_member_idx: int           # 4..6
+
+
+@dataclass(frozen=True)
+class TurnPlan:
+    """单个回合的固定计划。"""
+    servant_skills: Tuple[ServantSkillAction, ...] = ()
+    master_skills: Tuple[MasterSkillAction, ...] = ()
+    order_change: Optional[OrderChangeAction] = None
+    np_order: Tuple[int, ...] = ()       # 希望释放的宝具（从者槽位，1..3）
+    target_enemy: Optional[int] = None   # 需要选中的敌人目标
+
+
+@dataclass(frozen=True)
 class BattleAction:
     target_enemy: Optional[int]
     picks: Tuple[CardPick, ...]      # 恰 3 个，含出卡顺序
+    servant_skills: Tuple[ServantSkillAction, ...] = ()
+    master_skills: Tuple[MasterSkillAction, ...] = ()
+    order_change: Optional[OrderChangeAction] = None
     rationale_tag: str = ""
-    # 预留（V1 不用）：servant_skills / master_skills / order_change
 
 
 @dataclass(frozen=True)
@@ -86,3 +131,7 @@ class PrimitiveAction:
     """执行层的受限原子动作，不含 x/y。"""
     kind: PrimitiveKind
     slot: Optional[int] = None
+    skill_index: Optional[int] = None
+    target_ally: Optional[int] = None
+    starting_member_idx: Optional[int] = None
+    sub_member_idx: Optional[int] = None

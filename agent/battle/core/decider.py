@@ -31,6 +31,19 @@ class RuleDecider:
     def decide(self, state: BattleState) -> BattleAction:
         target = _pick_target(state)
 
+        if state.scene is Scene.MAIN_BATTLE:
+            # TODO: 读取 TurnPlan 并填入需要释放的技能
+            # V2 暂时返回空的技能列表，由 runtime 触发进入下个阶段
+            return BattleAction(
+                target_enemy=target,
+                picks=(),
+                servant_skills=(),
+                master_skills=(),
+                order_change=None,
+                rationale_tag="v2:main_battle_placeholder"
+            )
+
+        # 选卡阶段
         np_picks: List[CardPick] = []
         if self.policy.np_first:
             np_picks = [CardPick(PrimitiveKind.SELECT_NP, c.servant_slot) for c in state.np_cards][:3]
@@ -42,8 +55,11 @@ class RuleDecider:
             face_picks = [CardPick(PrimitiveKind.SELECT_CARD, s) for s in slots]
 
         picks = tuple((np_picks + face_picks)[:3])
-        return BattleAction(target_enemy=target, picks=picks,
-                            rationale_tag=f"v1b:{self.policy.goal.value}")
+        return BattleAction(
+            target_enemy=target, 
+            picks=picks,
+            rationale_tag=f"v2:{self.policy.goal.value}"
+        )
 
 
 def _pick_target(state: BattleState):
