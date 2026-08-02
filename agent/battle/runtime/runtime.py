@@ -29,7 +29,7 @@ _UNKNOWN_TIMEOUT_S = 15.0
 _POLL_FREEZE_MS = 500
 
 _TERMINAL_OR_MAIN = (Scene.MAIN_BATTLE, Scene.VICTORY, Scene.DEFEAT)
-_KNOWN_SCENES = (Scene.MAIN_BATTLE, Scene.COMMAND_SELECTION, Scene.VICTORY, Scene.DEFEAT)
+_KNOWN_SCENES = (Scene.MAIN_BATTLE, Scene.COMMAND_SELECTION, Scene.SKILL_TARGET_SELECTION, Scene.ORDER_CHANGE, Scene.VICTORY, Scene.DEFEAT)
 
 
 @dataclass(frozen=True)
@@ -74,7 +74,17 @@ class AutoBattleRuntime:
                 return BattleResult.fail("unexpected_dialog", turns)
 
             if scene is Scene.MAIN_BATTLE:
-                # V1b：主界面只点攻击开卡，不放主动技能
+                mfaalog.info("[AutoBattle] MAIN_BATTLE -> deciding skills...")
+                action = self.decider.decide(state)
+
+                if action.target_enemy is not None:
+                    mfaalog.info(f"[AutoBattle] selecting enemy target {action.target_enemy}")
+                    self.executor.select_enemy(action.target_enemy)
+                    time.sleep(0.5)
+
+                if not self._execute_skills(action):
+                    return BattleResult.fail("skill_execution_failed", turns)
+
                 mfaalog.info("[AutoBattle] MAIN_BATTLE -> opening command cards (click attack)")
                 if not self.executor.open_command_cards():
                     mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
@@ -83,6 +93,11 @@ class AutoBattleRuntime:
                 time.sleep(2)
                 mfaalog.info("[AutoBattle] continuing after card animation wait")
                 continue
+
+            if scene is Scene.ORDER_CHANGE:
+                # 换人界面：不应在主循环顶层出现，说明 _execute_skills 没处理完
+                mfaalog.info(f"[AutoBattle] Unexpected ORDER_CHANGE scene in main loop. turns={turns}")
+                return BattleResult.fail("unexpected_order_change_scene", turns)
 
             if scene is Scene.COMMAND_SELECTION:
                 mfaalog.info(f"[AutoBattle] ========== Turn {turns+1} ==========")
@@ -141,6 +156,58 @@ class AutoBattleRuntime:
             if not ok:
                 return False
             time.sleep(1)
+        return True
+
+    def _execute_skills(self, action) -> bool:
+        for sk in action.servant_skills:
+            mfaalog.info(f"[AutoBattle] cast_servant_skill(slot={sk.servant_slot}, idx={sk.skill_index})")
+            self.executor.cast_servant_skill(sk.servant_slot, sk.skill_index)
+            if sk.target_ally is not None:
+                mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
+                if self._wait_until((Scene.SKILL_TARGET_SELECTION,), 5.0):
+                    mfaalog.info(f"[AutoBattle] selecting skill target ally={sk.target_ally}")
+                    self.executor.select_skill_target(sk.target_ally)
+                else:
+                    mfaalog.info("[AutoBattle] failed to see skill target sub-screen!")
+                    return False
+            # Wait for animation to finish and return to MAIN_BATTLE
+            if not self._wait_until((Scene.MAIN_BATTLE,), 15.0):
+                return False
+
+        for sk in action.master_skills:
+            mfaalog.info(f"[AutoBattle] cast_master_skill(idx={sk.skill_index})")
+            self.executor.cast_master_skill(sk.skill_index)
+            if sk.target_ally is not None:
+                mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
+                if self._wait_until((Scene.SKILL_TARGET_SELECTION,), 5.0):
+                    mfaalog.info(f"[AutoBattle] selecting skill target ally={sk.target_ally}")
+                    self.executor.select_skill_target(sk.target_ally)
+                else:
+                    return False
+            # 御主技能可能是换人技能 → 进入 ORDER_CHANGE 场景
+            # 也可能直接回 MAIN_BATTLE（普通技能）
+            if action.order_change is not None:
+                # 换人技能：等 ORDER_CHANGE 场景，由后面的 order_change 逻辑处理
+                if not self._wait_until((Scene.ORDER_CHANGE, Scene.MAIN_BATTLE), 10.0):
+                    return False
+            else:
+                if not self._wait_until((Scene.MAIN_BATTLE,), 15.0):
+                    return False
+
+        if action.order_change is not None:
+            oc = action.order_change
+            mfaalog.info(f"[AutoBattle] order_change(starting={oc.starting_member_idx}, sub={oc.sub_member_idx})")
+            # 换人技能已由前面的 master_skills 触发（御主换人服技能）
+            # 等待换人界面出现
+            if not self._wait_until((Scene.ORDER_CHANGE,), 10.0):
+                mfaalog.info("[AutoBattle] failed to see order change screen!")
+                return False
+            # 在换人界面选择首发成员和候补成员
+            self.executor.order_change(oc.starting_member_idx, oc.sub_member_idx)
+            # 等待回到主界面
+            if not self._wait_until((Scene.MAIN_BATTLE,), 25.0):
+                return False
+
         return True
 
     def _wait_turn_settled(self) -> bool:
