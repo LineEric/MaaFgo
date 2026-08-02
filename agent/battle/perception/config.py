@@ -16,6 +16,8 @@ from __future__ import annotations
 # 场景检测节点（按序尝试，先命中者定场景）
 SCENE_NODES = {
     "command_selection": "战斗_选卡场景",   # TemplateMatch：选卡界面特征（如卡区/返回钮）
+    "skill_target_selection": "战斗_技能目标子屏",  # OCR："请选择对象"
+    "order_change": "战斗_换人界面",          # OCR："请从首发成员和候补成员中"
     "main_battle": "战斗_主界面",            # TemplateMatch：主界面攻击钮
     "victory": "战斗_胜利",
     "defeat": "战斗_失败",
@@ -27,6 +29,14 @@ CARD_NODE = "战斗_卡{ui_slot}"               # OCR，识别 "力击"/"迅击"
 NP_CARD_NODE = "战斗_NP卡{servant_slot}"          # TemplateMatch
 ENEMY_NODE = "战斗_敌人{slot}"                     # 存活/位置
 ENEMY_TARGET_NODE = "战斗_敌人{slot}_选中"         # 当前目标
+
+# 从者技能 CD/可用识别节点名模板 (servant_slot 1..3, skill_index 1..3)
+SERVANT_SKILL_NODE = "战斗_从者{servant_slot}技能{skill_index}"
+SERVANT_SKILL_CD_NODE = "战斗_从者{servant_slot}技能{skill_index}_CD"
+
+# 御主技能可用识别节点名模板 (skill_index 1..3)
+MASTER_SKILL_NODE = "战斗_御主技能{skill_index}"
+MASTER_SKILL_CD_NODE = "战斗_御主技能{skill_index}_CD"
 
 # 门控阈值
 MIN_SCENE_CONFIDENCE = 0.95

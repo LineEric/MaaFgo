@@ -131,6 +131,38 @@
       }
     }
   },
+  "战斗_技能目标子屏": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          564,
+          170,
+          161,
+          48
+        ],
+        "expected": [
+          "请选择对象"
+        ]
+      }
+    }
+  },
+  "战斗_换人界面": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          339,
+          134,
+          625,
+          63
+        ],
+        "expected": [
+          "请从首发成员和候补成员中"
+        ]
+      }
+    }
+  },
   "战斗_选卡场景": {
     "recognition": "TemplateMatch",
     "roi": [
@@ -177,20 +209,254 @@
   "战斗_未知弹窗": {
     "action": "DoNothing"
   },
+  "战斗_从者1技能1": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [41, 546, 67, 67],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者1技能1_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [41, 546, 67, 67],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_从者1技能2": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [129, 546, 67, 67],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者1技能2_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [129, 546, 67, 67],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_从者1技能3": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [218, 546, 66, 66],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者1技能3_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [218, 546, 66, 66],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_从者2技能1": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [357, 544, 68, 69],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者2技能1_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [357, 544, 68, 69],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_从者2技能2": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [445, 544, 68, 69],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者2技能2_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [445, 544, 68, 69],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_从者2技能3": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [534, 544, 66, 66],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者2技能3_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [534, 544, 66, 66],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_从者3技能1": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [675, 545, 69, 69],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者3技能1_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [675, 545, 69, 69],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_从者3技能2": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [764, 545, 67, 67],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者3技能2_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [764, 545, 67, 67],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_从者3技能3": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [853, 545, 66, 66],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_从者3技能3_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [853, 545, 66, 66],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_御主技能1": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [871, 277, 71, 71],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_御主技能1_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [863, 317, 81, 30],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_御主技能2": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [959, 277, 73, 71],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_御主技能2_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [951, 317, 81, 30],
+        "expected": ["剩余"]
+      }
+    }
+  },
+  "战斗_御主技能3": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [1049, 276, 71, 72],
+        "expected": "\\d+"
+      }
+    }
+  },
+  "战斗_御主技能3_CD": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [1041, 317, 81, 30],
+        "expected": ["剩余"]
+      }
+    }
+  },
   "战斗_敌人1": {
-    "action": "DoNothing"
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [7, 2, 242, 89],
+        "expected": "\\d+"
+      }
+    }
   },
   "战斗_敌人1_选中": {
     "action": "DoNothing"
   },
   "战斗_敌人2": {
-    "action": "DoNothing"
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [257, 1, 242, 90],
+        "expected": "\\d+"
+      }
+    }
   },
   "战斗_敌人2_选中": {
     "action": "DoNothing"
   },
   "战斗_敌人3": {
-    "action": "DoNothing"
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [499, 0, 242, 89],
+        "expected": "\\d+"
+      }
+    }
   },
   "战斗_敌人3_选中": {
     "action": "DoNothing"

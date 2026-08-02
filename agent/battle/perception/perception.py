@@ -15,7 +15,7 @@ from typing import List, Optional, Tuple
 
 from ..core.enums import CardColor, Scene
 from ..core.models import (BattleState, CommandCard, Confidence, EnemyState,
-                           NpCard)
+                           NpCard, ServantState, SkillState)
 from . import config
 
 
@@ -25,6 +25,7 @@ def build(context, img, screenshot_id: str = "") -> BattleState:
     # 只有选卡界面才需要解析卡牌；主界面/动画等无卡可读
     cards: Tuple[CommandCard, ...] = ()
     np_cards: Tuple[NpCard, ...] = ()
+    servants: Tuple[ServantState, ...] = ()
     unknown: List[str] = []
     if scene is Scene.COMMAND_SELECTION:
         cards = tuple(_detect_card(context, img, i) for i in range(1, 6))
@@ -32,6 +33,11 @@ def build(context, img, screenshot_id: str = "") -> BattleState:
         for c in cards:
             if not c.confidence.passes(config.MIN_CARD_CONFIDENCE):
                 unknown.append(f"card[{c.ui_slot}]")
+    elif scene in (Scene.MAIN_BATTLE, Scene.SKILL_TARGET_SELECTION):
+        servants = _detect_servants(context, img)
+    elif scene is Scene.ORDER_CHANGE:
+        # 换人界面：检测从者技能状态无意义，只识别场景即可
+        pass
 
     enemies = _detect_enemies(context, img)
 
@@ -41,6 +47,7 @@ def build(context, img, screenshot_id: str = "") -> BattleState:
         cards=cards,
         np_cards=np_cards,
         enemies=enemies,
+        servants=servants,
         screenshot_id=screenshot_id,
         unknown_fields=tuple(unknown),
     )
@@ -107,10 +114,10 @@ def _detect_enemies(context, img) -> Tuple[EnemyState, ...]:
         alive = bool(alive_r and alive_r.hit)
         if not alive:
             continue
-        tgt_r = _reco(context, config.ENEMY_TARGET_NODE.format(slot=slot), img)
-        targeted = bool(tgt_r and tgt_r.hit)
+        # 选中检测暂未实现，默认 False
+        targeted = False
         score = getattr(getattr(alive_r, "best_result", None), "score", 1.0) or 1.0
-        out.append(EnemyState(slot, True, targeted, Confidence(float(score), "template")))
+        out.append(EnemyState(slot, True, targeted, Confidence(float(score), "ocr")))
     return tuple(out)
 
 
@@ -119,3 +126,26 @@ def _count(reco) -> int:
         return 0
     best = getattr(reco, "best_result", None)
     return int(getattr(best, "count", 0) or 0)
+
+
+def _detect_servants(context, img) -> Tuple[ServantState, ...]:
+    """检测前排从者的技能可用性。
+
+    识别逻辑：OCR 读取技能 CD 节点，若命中"剩余"文字则技能在 CD 中不可用，
+    否则视为可用。confidence 来自 OCR score。
+    """
+    out: List[ServantState] = []
+    for slot in config.FRONTLINE_SLOTS:
+        skills: List[SkillState] = []
+        for idx in range(1, 4):
+            cd_node = config.SERVANT_SKILL_CD_NODE.format(servant_slot=slot, skill_index=idx)
+            r = _reco(context, cd_node, img)
+            if r and r.hit:
+                # OCR 命中"剩余" → 技能在 CD 中
+                score = getattr(getattr(r, "best_result", None), "score", 1.0) or 1.0
+                skills.append(SkillState(False, Confidence(float(score), "ocr:cd")))
+            else:
+                # 未命中"剩余" → 技能可用
+                skills.append(SkillState(True, Confidence(0.5, "ocr:available")))
+        out.append(ServantState(slot, tuple(skills), Confidence(1.0, "composite")))
+    return tuple(out)
