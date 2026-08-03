@@ -63,6 +63,13 @@ class Executor:
         self._click(coords.ORDER_CHANGE_CANCEL_BTN)
         return True
 
+    def tap_settlement_continue(self) -> bool:
+        """结算屏点"继续/下一步"。未标定坐标时返回 False（不盲点）。"""
+        if not coords.SETTLEMENT_CALIBRATED:
+            return False
+        self._click(coords.SETTLEMENT_CONTINUE)
+        return True
+
     # 注意：无 attack()——选完第 3 张卡自动发动；也没有令咒/圣晶石/氪金/抽卡入口
 
     def _click(self, xy) -> None:

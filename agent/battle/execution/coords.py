@@ -113,3 +113,11 @@ ORDER_CHANGE_CONFIRM_ROI = (559, 592, 151, 58)
 ORDER_CHANGE_CONFIRM_BTN = center(ORDER_CHANGE_CONFIRM_ROI)
 ORDER_CHANGE_CANCEL_BTN = center((1203, 123, 30, 24))
 
+# ---- 战斗结算流程（胜利后：掉落/羁绊/结果多屏点击直到回关卡列表）----
+# 标定护栏：未真机标定前保持 False；runtime 在未标定时不会盲点，仍按"识别到胜利即返回成功"处理。
+SETTLEMENT_CALIBRATED = False
+# TODO(标定): 结算各屏"继续/下一步"的安全点击点（1280x720）。
+#   ⚠ 标定注意：该点必须只推进结算，绝不能落在"连续出击/继续出击"的确认钮上，
+#     否则会误触发下一场战斗（违背安全边界）。若结算含连续出击弹窗，需另标一个"取消连续出击"节点+坐标。
+SETTLEMENT_CONTINUE = (0, 0)  # 占位，未标定
+

@@ -27,6 +27,8 @@ _ANIMATION_TIMEOUT_S = 60.0
 _UNKNOWN_TIMEOUT_S = 15.0
 # 每次轮询之间等画面静止的窗口（ms）
 _POLL_FREEZE_MS = 500
+# 胜利后结算点击流（掉落/羁绊/结果多屏）的最大耗时
+_SETTLEMENT_TIMEOUT_S = 90.0
 
 _TERMINAL_OR_MAIN = (Scene.MAIN_BATTLE, Scene.VICTORY, Scene.DEFEAT)
 _KNOWN_SCENES = (Scene.MAIN_BATTLE, Scene.COMMAND_SELECTION, Scene.SKILL_TARGET_SELECTION, Scene.ORDER_CHANGE, Scene.VICTORY, Scene.DEFEAT)
@@ -64,8 +66,8 @@ class AutoBattleRuntime:
             mfaalog.info(f"[AutoBattle] Turn {turns+1} | scene={scene.name} | unknown={state.unknown_fields}")
 
             if scene is Scene.VICTORY:
-                mfaalog.info(f"[AutoBattle] Victory! turns={turns}")
-                return BattleResult.success(turns)
+                mfaalog.info(f"[AutoBattle] Victory! turns={turns} -> driving settlement")
+                return self._drive_settlement(turns)
             if scene is Scene.DEFEAT:
                 mfaalog.info(f"[AutoBattle] Defeat. turns={turns}")
                 return BattleResult.fail("defeat", turns)
@@ -209,6 +211,26 @@ class AutoBattleRuntime:
                 return False
 
         return True
+
+    def _drive_settlement(self, turns: int) -> BattleResult:
+        """胜利后点击穿过结算多屏（掉落/羁绊/结果）直到回关卡列表/主界面。
+
+        标定护栏：坐标未标定时（executor.tap_settlement_continue 返回 False），
+        不盲点，直接按现有行为返回胜利（战斗已赢，只是暂不能自动点回主界面）。
+        """
+        mfaalog.info(f"[AutoBattle] _drive_settlement() timeout={_SETTLEMENT_TIMEOUT_S}s")
+        deadline = time.monotonic() + _SETTLEMENT_TIMEOUT_S
+        while time.monotonic() < deadline:
+            img = self.controller.post_screencap().wait().get()
+            if perception.reached_post_battle(self.ctx, img):
+                mfaalog.info("[AutoBattle] settlement done -> back to quest list")
+                return BattleResult.success(turns)
+            if not self.executor.tap_settlement_continue():
+                mfaalog.info("[AutoBattle] settlement not calibrated -> reporting victory without click-through")
+                return BattleResult.success(turns)
+            self.ctx.wait_freezes(_POLL_FREEZE_MS)
+        mfaalog.info(f"[AutoBattle] settlement did not finish within {_SETTLEMENT_TIMEOUT_S}s")
+        return BattleResult.fail("settlement_timeout", turns)
 
     def _wait_turn_settled(self) -> bool:
         mfaalog.info(f"[AutoBattle] _wait_turn_settled() timeout={_ANIMATION_TIMEOUT_S}s")

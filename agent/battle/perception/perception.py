@@ -58,6 +58,12 @@ def _reco(context, node: str, img):
     return context.run_recognition(node, img)
 
 
+def reached_post_battle(context, img) -> bool:
+    """结算点击流是否已走完（回到关卡列表/主界面）。依赖 SETTLEMENT_DONE_NODE（待标定）。"""
+    r = _reco(context, config.SETTLEMENT_DONE_NODE, img)
+    return bool(r and r.hit)
+
+
 def _detect_scene(context, img) -> Tuple[Scene, float]:
     # 命中哪个场景节点就是哪个；都不命中 -> UNKNOWN
     for scene_key, node in config.SCENE_NODES.items():
