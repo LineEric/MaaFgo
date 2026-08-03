@@ -33,8 +33,16 @@ def build(context, img, screenshot_id: str = "") -> BattleState:
         for c in cards:
             if not c.confidence.passes(config.MIN_CARD_CONFIDENCE):
                 unknown.append(f"card[{c.ui_slot}]")
+            if c.owner_slot is None:
+                unknown.append(f"card[{c.ui_slot}].owner_slot")
     elif scene in (Scene.MAIN_BATTLE, Scene.SKILL_TARGET_SELECTION):
         servants = _detect_servants(context, img)
+        for servant in servants:
+            for index, skill in enumerate(servant.skills, start=1):
+                if skill.available is None:
+                    unknown.append(
+                        f"servant[{servant.slot}].skill[{index}].available"
+                    )
     elif scene is Scene.ORDER_CHANGE:
         # 换人界面：检测从者技能状态无意义，只识别场景即可
         pass

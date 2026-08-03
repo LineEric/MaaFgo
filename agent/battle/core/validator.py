@@ -1,13 +1,13 @@
-"""独立校验器。任何来源（规则/以后 LLM/导入）的 BattleAction 都必须过这里。纯 stdlib。"""
+"""战斗动作的独立安全校验。纯 stdlib，不依赖设备或 MaaFramework。"""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
-from .enums import PrimitiveKind
+from .enums import PrimitiveKind, Scene
 from .models import BattleAction, BattleState
 from .policy import StrategyProfile
 
-# 选卡阶段只允许这两类 pick；其余（尤其高风险动作）一律拒绝
+
 _ALLOWED_PICK_KINDS = {PrimitiveKind.SELECT_CARD, PrimitiveKind.SELECT_NP}
 
 
@@ -17,29 +17,182 @@ class Verdict:
     reason: str = ""
 
 
-def validate(action: BattleAction, state: BattleState, profile: StrategyProfile) -> Verdict:
+def skip_unusable_servant_skills(
+    action: BattleAction,
+    state: BattleState,
+    profile: StrategyProfile,
+) -> tuple[BattleAction, tuple[str, ...]]:
+    """跳过无法确认可执行的从者技能，保留结构非法动作给 Validator 拒绝。"""
+    seen: set[tuple[int, int]] = set()
+    for skill in action.servant_skills:
+        if (
+            not _is_slot(skill.servant_slot, 1, 3)
+            or not _is_slot(skill.skill_index, 1, 3)
+            or (skill.target_ally is not None and not _is_slot(skill.target_ally, 1, 3))
+        ):
+            return action, ()
+        key = (skill.servant_slot, skill.skill_index)
+        if key in seen:
+            return action, ()
+        seen.add(key)
+
+    servants = {servant.slot: servant for servant in state.servants}
+    kept = []
+    skipped: list[str] = []
+    for skill in action.servant_skills:
+        field = f"servant[{skill.servant_slot}].skill[{skill.skill_index}].available"
+        servant = servants.get(skill.servant_slot)
+        if servant is None:
+            skipped.append(f"{field}:state_missing")
+            continue
+
+        skill_state = servant.skills[skill.skill_index - 1]
+        if skill_state.available is None:
+            skipped.append(f"{field}:unknown")
+            continue
+        if not skill_state.confidence.passes(profile.min_skill_confidence):
+            skipped.append(f"{field}:low_confidence")
+            continue
+        if skill_state.available is False:
+            skipped.append(f"{field}:cooldown")
+            continue
+        kept.append(skill)
+
+    if len(kept) == len(action.servant_skills):
+        return action, ()
+    return replace(action, servant_skills=tuple(kept)), tuple(skipped)
+
+
+def validate_main_action(
+    action: BattleAction,
+    state: BattleState,
+    profile: StrategyProfile,
+) -> Verdict:
+    """校验 MAIN_BATTLE 阶段的选敌、技能与换人动作。"""
+    if state.scene is not Scene.MAIN_BATTLE or not state.scene_confidence.passes(
+        profile.min_scene_confidence
+    ):
+        return Verdict(False, "scene_not_main_battle")
+    if action.picks:
+        return Verdict(False, "main_action_contains_card_picks")
+
+    target_verdict = _validate_enemy_target(action, state, profile)
+    if not target_verdict.ok:
+        return target_verdict
+
+    seen_servant_skills: set[tuple[int, int]] = set()
+    servants = {servant.slot: servant for servant in state.servants}
+    for skill in action.servant_skills:
+        if not _is_slot(skill.servant_slot, 1, 3) or not _is_slot(
+            skill.skill_index, 1, 3
+        ):
+            return Verdict(False, "invalid_servant_skill")
+        key = (skill.servant_slot, skill.skill_index)
+        if key in seen_servant_skills:
+            return Verdict(False, "duplicate_servant_skill")
+        seen_servant_skills.add(key)
+        if skill.target_ally is not None and not _is_slot(skill.target_ally, 1, 3):
+            return Verdict(False, "invalid_skill_target")
+
+        servant = servants.get(skill.servant_slot)
+        if servant is None:
+            return Verdict(False, "servant_state_missing")
+        skill_state = servant.skills[skill.skill_index - 1]
+        if skill_state.available is None:
+            return Verdict(False, "skill_state_unknown")
+        if not skill_state.confidence.passes(profile.min_skill_confidence):
+            return Verdict(False, "skill_state_not_confident")
+        if skill_state.available is False:
+            return Verdict(False, "skill_not_available")
+
+    seen_master_skills: set[int] = set()
+    for skill in action.master_skills:
+        if not _is_slot(skill.skill_index, 1, 3):
+            return Verdict(False, "invalid_master_skill")
+        if skill.skill_index in seen_master_skills:
+            return Verdict(False, "duplicate_master_skill")
+        seen_master_skills.add(skill.skill_index)
+        if skill.target_ally is not None and not _is_slot(skill.target_ally, 1, 3):
+            return Verdict(False, "invalid_skill_target")
+
+    if action.order_change is not None:
+        order_change = action.order_change
+        if not action.master_skills:
+            return Verdict(False, "order_change_without_master_skill")
+        if not _is_slot(order_change.starting_member_idx, 1, 3) or not _is_slot(
+            order_change.sub_member_idx, 4, 6
+        ):
+            return Verdict(False, "invalid_order_change_member")
+
+    return Verdict(True)
+
+
+def validate_card_action(
+    action: BattleAction,
+    state: BattleState,
+    profile: StrategyProfile,
+) -> Verdict:
+    """校验 COMMAND_SELECTION 阶段的三张卡及目标。"""
     if not state.command_ready(profile.min_scene_confidence):
         return Verdict(False, "scene_not_command_selection")
     if not state.cards_ready(profile.min_card_confidence):
         return Verdict(False, "cards_not_confident")
+    if action.servant_skills or action.master_skills or action.order_change is not None:
+        return Verdict(False, "card_action_contains_main_actions")
 
     if len(action.picks) != 3:
         return Verdict(False, "need_exactly_3_picks")
-    if len({(p.kind, p.slot) for p in action.picks}) != 3:
+    if len({(pick.kind, pick.slot) for pick in action.picks}) != 3:
         return Verdict(False, "duplicate_picks")
 
-    face_slots = {c.ui_slot for c in state.cards}
-    np_slots = {c.servant_slot for c in state.np_cards}
-    for p in action.picks:
-        if p.kind not in _ALLOWED_PICK_KINDS:
-            return Verdict(False, f"forbidden_pick_kind:{p.kind.value}")
-        if p.kind is PrimitiveKind.SELECT_CARD and p.slot not in face_slots:
+    face_slots = {card.ui_slot for card in state.cards}
+    np_slots = {card.servant_slot for card in state.np_cards}
+    for pick in action.picks:
+        if pick.kind not in _ALLOWED_PICK_KINDS:
+            return Verdict(False, f"forbidden_pick_kind:{pick.kind.value}")
+        if pick.kind is PrimitiveKind.SELECT_CARD and pick.slot not in face_slots:
             return Verdict(False, "card_not_present")
-        if p.kind is PrimitiveKind.SELECT_NP and p.slot not in np_slots:
+        if pick.kind is PrimitiveKind.SELECT_NP and pick.slot not in np_slots:
             return Verdict(False, "np_not_present")
 
-    alive = {e.slot for e in state.enemies if e.alive}
-    if action.target_enemy is not None and action.target_enemy not in alive:
-        return Verdict(False, "invalid_enemy_target")
-
+    target_verdict = _validate_enemy_target(action, state, profile)
+    if not target_verdict.ok:
+        return target_verdict
     return Verdict(True)
+
+
+def validate(
+    action: BattleAction,
+    state: BattleState,
+    profile: StrategyProfile,
+) -> Verdict:
+    """兼容旧调用；选卡阶段请逐步改用 validate_card_action。"""
+    return validate_card_action(action, state, profile)
+
+
+def _validate_enemy_target(
+    action: BattleAction,
+    state: BattleState,
+    profile: StrategyProfile,
+) -> Verdict:
+    if action.target_enemy is None:
+        return Verdict(True)
+    if not _is_slot(action.target_enemy, 1, 3):
+        return Verdict(False, "invalid_enemy_target")
+    enemy = next(
+        (
+            candidate
+            for candidate in state.enemies
+            if candidate.slot == action.target_enemy and candidate.alive
+        ),
+        None,
+    )
+    if enemy is None:
+        return Verdict(False, "invalid_enemy_target")
+    if not enemy.confidence.passes(profile.min_enemy_confidence):
+        return Verdict(False, "enemy_target_not_confident")
+    return Verdict(True)
+
+
+def _is_slot(value: object, low: int, high: int) -> bool:
+    return type(value) is int and low <= value <= high

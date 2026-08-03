@@ -16,9 +16,15 @@ from dataclasses import dataclass
 from ..core.decider import Decider
 from ..core.enums import PrimitiveKind, Scene
 from ..core.policy import StrategyProfile
-from ..core.validator import validate
+from ..core.validator import (
+    skip_unusable_servant_skills,
+    validate_card_action,
+    validate_main_action,
+)
 from ..execution.executor import Executor
 from ..perception import perception
+from ..vision.orchestrator import VisionOrchestrator, encode_png
+from ..vision.trigger import VisionRuntimeTracker
 import mfaalog
 
 # 选完卡后等攻击动画结束（20~40s，留足余量）
@@ -50,17 +56,21 @@ class BattleResult:
 
 
 class AutoBattleRuntime:
-    def __init__(self, context, controller, decider: Decider, profile: StrategyProfile) -> None:
+    def __init__(self, context, controller, decider: Decider, profile: StrategyProfile, vision_orchestrator: VisionOrchestrator | None = None, vision_tracker: VisionRuntimeTracker | None = None) -> None:
         self.ctx = context
         self.controller = controller
         self.decider = decider
         self.profile = profile
         self.executor = Executor(context, controller)
+        self.vision_orchestrator = vision_orchestrator
+        self.vision_tracker = vision_tracker or VisionRuntimeTracker()
+        self._turn_index = 0
 
     def run(self) -> BattleResult:
         mfaalog.info(f"[AutoBattle] run() start, max_turns={self.profile.max_turns}")
         turns = 0
         while turns < self.profile.max_turns:
+            self._turn_index = turns
             state = self._observe()
             scene = state.scene
             mfaalog.info(f"[AutoBattle] Turn {turns+1} | scene={scene.name} | unknown={state.unknown_fields}")
@@ -78,6 +88,21 @@ class AutoBattleRuntime:
             if scene is Scene.MAIN_BATTLE:
                 mfaalog.info("[AutoBattle] MAIN_BATTLE -> deciding skills...")
                 action = self.decider.decide(state, turn_index=turns)
+                action, skipped_skills = skip_unusable_servant_skills(
+                    action, state, self.profile
+                )
+                for skipped in skipped_skills:
+                    mfaalog.info(
+                        f"[AutoBattle] servant skill skipped safely: {skipped}"
+                    )
+                verdict = validate_main_action(action, state, self.profile)
+                if not verdict.ok:
+                    mfaalog.info(
+                        f"[AutoBattle] Main action rejected by validator: {verdict.reason}"
+                    )
+                    return BattleResult.fail(
+                        f"main_action_rejected:{verdict.reason}", turns
+                    )
 
                 if action.target_enemy is not None:
                     enemy = next(
@@ -101,6 +126,7 @@ class AutoBattleRuntime:
                         mfaalog.info(
                             f"[AutoBattle] selecting enemy target {action.target_enemy}"
                         )
+                        self._mark_action("select_enemy")
                         if not self.executor.select_enemy(action.target_enemy):
                             return BattleResult.fail("select_enemy_failed", turns)
                         if not self._wait_until_enemy_targeted(action.target_enemy):
@@ -110,6 +136,7 @@ class AutoBattleRuntime:
                     return BattleResult.fail("skill_execution_failed", turns)
 
                 mfaalog.info("[AutoBattle] MAIN_BATTLE -> opening command cards (click attack)")
+                self._mark_action("open_command_cards")
                 if not self.executor.open_command_cards():
                     mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
                     return BattleResult.fail("open_cards_failed", turns)
@@ -131,7 +158,7 @@ class AutoBattleRuntime:
                 action = self.decider.decide(state, turn_index=turns)
                 mfaalog.info(f"[AutoBattle] Decided Action: {action}")
                 
-                verdict = validate(action, state, self.profile)
+                verdict = validate_card_action(action, state, self.profile)
                 if not verdict.ok:
                     mfaalog.info(f"[AutoBattle] Action rejected by validator! Reason: {verdict.reason}")
                     return BattleResult.fail(f"action_rejected:{verdict.reason}", turns)
@@ -166,8 +193,27 @@ class AutoBattleRuntime:
         img = self.controller.post_screencap().wait().get()
         mfaalog.info(f"[AutoBattle] _observe() -> screencap done, shape={img.shape if img is not None else 'None'}")
         result = perception.build(self.ctx, img)
+        vision_result = None
         mfaalog.info(f"[AutoBattle] _observe() -> perception built, scene={result.scene.name}")
+        if self.vision_orchestrator is not None and img is not None:
+            image_bytes = encode_png(img)
+            tracked = self.vision_tracker.observe(result.scene, image_bytes, unknown_fields=result.unknown_fields)
+            vision_result = self.vision_orchestrator.analyze_state_if_needed(image_bytes, result, tracked.context, turn_index=self._turn_index)
+            if vision_result.call.response is not None:
+                response = vision_result.call.response
+                if response.observation is not None:
+                    mfaalog.info(f"[AutoBattle] vision supplement accepted model={response.model} conflicts={len(vision_result.conflicts)}")
+                elif response.error:
+                    mfaalog.info(f"[AutoBattle] vision supplement failed: {response.error}")
+            elif vision_result.call.skipped:
+                mfaalog.info(f"[AutoBattle] vision skipped: {vision_result.call.reason}")
+        if vision_result is not None and vision_result.effective_state is not None:
+            result = vision_result.effective_state
         return result
+
+    def _mark_action(self, action: str) -> None:
+        if self.vision_orchestrator is not None:
+            self.vision_tracker.mark_action(action)
 
     def _execute_selection(self, action) -> bool:
         mfaalog.info(f"[AutoBattle] _execute_selection() picks={action.picks}")
@@ -200,6 +246,7 @@ class AutoBattleRuntime:
     def _execute_skills(self, action) -> bool:
         for sk in action.servant_skills:
             mfaalog.info(f"[AutoBattle] cast_servant_skill(slot={sk.servant_slot}, idx={sk.skill_index})")
+            self._mark_action("cast_servant_skill")
             self.executor.cast_servant_skill(sk.servant_slot, sk.skill_index)
             if sk.target_ally is not None:
                 mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
@@ -215,6 +262,7 @@ class AutoBattleRuntime:
 
         for sk in action.master_skills:
             mfaalog.info(f"[AutoBattle] cast_master_skill(idx={sk.skill_index})")
+            self._mark_action("cast_master_skill")
             self.executor.cast_master_skill(sk.skill_index)
             if sk.target_ally is not None:
                 mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
@@ -242,6 +290,7 @@ class AutoBattleRuntime:
                 mfaalog.info("[AutoBattle] failed to see order change screen!")
                 return False
             # 在换人界面选择首发成员和候补成员
+            self._mark_action("order_change")
             self.executor.order_change(oc.starting_member_idx, oc.sub_member_idx)
             # 等待回到主界面
             if not self._wait_until((Scene.MAIN_BATTLE,), 25.0):

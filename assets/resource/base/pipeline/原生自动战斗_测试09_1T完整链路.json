@@ -1,0 +1,35 @@
+{
+  "原生自动战斗测试09入口": {
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "auto_battle",
+        "custom_action_param": {
+          "strategy_profile": "farm-safe-v1",
+          "max_turns": 3,
+          "plan": {
+            "turns": [
+              {
+                "servant_skills": [
+                  {"servant_slot": 1, "skill_index": 1},
+                  {"servant_slot": 1, "skill_index": 2},
+                  {"servant_slot": 1, "skill_index": 3},
+                  {"servant_slot": 2, "skill_index": 1},
+                  {"servant_slot": 2, "skill_index": 3, "target_ally": 1},
+                  {"servant_slot": 3, "skill_index": 1, "target_ally": 1},
+                  {"servant_slot": 3, "skill_index": 2},
+                  {"servant_slot": 3, "skill_index": 3, "target_ally": 1}
+                ],
+                "master_skills": [
+                  {"skill_index": 1, "target_ally": 1},
+                  {"skill_index": 2}
+                ],
+                "np_order": [1]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

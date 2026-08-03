@@ -59,29 +59,18 @@ class RuleDecider:
             )
 
         tp = self.plan.turn(turn_index)
-        # 计划中指定的敌人目标优先。只有明确识别为 CD 的从者技能才跳过；
-        # 没有技能状态时按计划执行。
+        # 计划中指定的敌人目标优先。技能状态过滤由 Runtime 的统一安全门处理，
+        # 保证 RuleDecider 与未来其他 Decider 使用同一套跳过策略。
         enemy = tp.target_enemy if tp.target_enemy is not None else target
-        servant_skills = tuple(
-            skill for skill in tp.servant_skills
-            if self._servant_skill_available(state, skill.servant_slot, skill.skill_index)
-        )
         return BattleAction(
             target_enemy=enemy,
             picks=(),
-            servant_skills=servant_skills,
+            servant_skills=tp.servant_skills,
             master_skills=tp.master_skills,
             order_change=tp.order_change,
             rationale_tag=f"v2:turn{turn_index}_skills"
         )
 
-    @staticmethod
-    def _servant_skill_available(state: BattleState, servant_slot: int, skill_index: int) -> bool:
-        """只有明确识别为 CD 时返回 False，其余情况按可执行处理。"""
-        servant = next((s for s in state.servants if s.slot == servant_slot), None)
-        if servant is None or not 1 <= skill_index <= len(servant.skills):
-            return True
-        return servant.skills[skill_index - 1].available is not False
 
     def _decide_command_selection(self, state: BattleState, turn_index: int,
                                   target) -> BattleAction:

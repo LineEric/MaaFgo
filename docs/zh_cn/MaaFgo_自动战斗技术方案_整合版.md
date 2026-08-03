@@ -1,8 +1,8 @@
 # MaaFgo 自动战斗技术方案（整合版）
 
-> **版本**：v2.2（整合稿）
-> **日期**：2026-08-01
-> **V1b 状态**：✅ 已通过真机验证。
+> **版本**：v2.3（当前实现同步稿）
+> **日期**：2026-08-03
+> **当前状态**：V1b/V2 已完成真机验证；V3 Vision 实验层已接线并完成首次架构瘦身，默认关闭。
 > **目标项目**：[MaaFgo](https://github.com/xlxyvergil/MaaFgo)（基于 MaaFramework，简称 MFW）
 > **性质**：整合并取代前三份文档，落定当前实际技术路线。
 
@@ -83,7 +83,7 @@ MWU/MXU 前端 → MFW Tasker + Pipeline(assets/resource/base/pipeline)
 2. **脏活优先，纯逻辑其次**。感知、原子操作耦合 MFW/设备/分辨率，藏着全部可靠性风险，**先搭稳、要能测**；决策层是纯逻辑，离线可测，可先用占位实现。
 3. **结构化契约**。视觉、决策、执行、日志都围绕 `BattleState` / `BattleAction`，各自独立演进。
 4. **用 MFW 原生能力**。识别用 Recognition 节点 + `context.run_recognition`；点击用 `controller`。不自建 CV/点击框架。
-5. **Fail-Closed**。场景不符、关键字段低置信度、未知弹窗、后置确认失败 → 保存证据并停止，绝不盲点。
+5. **按风险降级**。场景不符、未知弹窗、后置确认失败等无法继续安全执行的错误仍 fail-closed；单个从者技能若未知、低置信度、CD 或状态缺失，则跳过该技能并继续攻击，绝不盲点。
 6. **高风险硬禁区**。令咒、圣晶石复活、氪金货币、抽卡、账号操作**在原子操作层不提供入口**，决策层无法触及。
 
 ---
@@ -223,9 +223,9 @@ def _detect_card(context, img, ui_slot) -> CommandCard:
 | `scene==主界面` | `TemplateMatch`（攻击钮） | 命中=主界面 |
 | 面卡 `color` ×5 | `OCR`（力击/迅击/技击） | 每卡 ROI 跑 OCR，文字映射 B/A/Q |
 | `np_cards` | `OCR`（NP 数值 ≥100%） | 上排 3 个 NP 卡 ROI，OCR 提取数字 |
-| 敌人 `alive`/`targeted` | `TemplateMatch`/`ColorMatch`（敌方槽位） | 当前 resource 中为 `DoNothing` 占位，待标定 |
+| 敌人 `alive`/`targeted` | `OCR` / `ColorMatch`（敌方槽位） | 已标定并完成选敌真机验证 |
 | 场景 `victory/defeat` | `OCR` + `TemplateMatch` | 收敛与停止用 |
-| `owner_slot` | —（V1 为 None） | V2 用头像/边框模板，见 6.4 |
+| `owner_slot` | 本地感知尚未实现；Vision 可实验补充 | 当前默认 `None`，见 6.4 |
 
 > 识别节点已创建于 `assets/resource/base/pipeline/自动战斗_感知.json`，ROI 已填入实际 1280×720 坐标值并**通过真机验证**。场景模板图片已制作并验证。
 
@@ -237,11 +237,12 @@ def _detect_card(context, img, ui_slot) -> CommandCard:
 ### 6.4 卡归属（owner_slot）降级策略
 最难，V1 不做：
 1. **V1**：`owner_slot=None`，禁用 Brave/从者优先级，只按卡色选；
-2. **V2**：固定前排，预采头像/边框模板匹配；
-3. **V3**：轻量分类器 + 战斗状态追踪。
+2. **V2 当前**：仍为 `None`，固定 TurnPlan 不依赖面卡归属；
+3. **V3 Vision 实验层**：可按需请求多模态模型补充 `owner_slot`，但默认关闭，尚未完成真机与安全边界验收；
+4. **后续稳定方案**：优先本地头像/边框模板或轻量分类器，多模态仅作补充。
 
-### 6.5 证据
-每个关键字段可回溯到 `screenshot_id + ROI + 方法 + score`，便于区分"识别错"还是"决策错"。MFW 的识别命中框调试图可直接利用。
+### 6.5 证据（目标，尚未闭环）
+领域结构已保留 `screenshot_id` / confidence / source，Vision 也保留原始响应与冲突信息；但 `save_evidence` 尚未实现，失败截图、BattleState、模型响应、最终动作和 Validator 结果还不能自动打包保存。
 
 ---
 
@@ -299,7 +300,8 @@ NP_CLICK = {   # 宝具卡点击位置
     1: (410, 138), 2: (640, 138), 3: (875, 138),
 }
 ATTACK_BTN = (1136, 601)           # 主界面攻击钮
-ENEMY_POINT = {1: (0,0), 2: (0,0), 3: (0,0)}  # 敌方槽位，仍为占位
+ENEMY_ROI = {1: (53,43,11,11), 2: (289,42,7,9), 3: (538,40,6,4)}
+ENEMY_POINT = {slot: center(roi) for slot, roi in ENEMY_ROI.items()}  # 已标定并验证
 ```
 
 ---
@@ -330,11 +332,11 @@ def decide(self, state):
     return BattleAction(target, tuple(picks[:3]), rationale_tag="v1b_np_first")
 ```
 
-### 8.3 Validator（独立，永远兜底）
-无论 Action 来自规则、以后 LLM 还是导入，都必须过：
+### 8.3 Validator（第一版统一边界已接入）
+当前已接入 `skip_unusable_servant_skills()`、`validate_main_action()` 与 `validate_card_action()`：主界面的从者技能先经过统一安全门，未知、低置信度、CD 或状态缺失的技能会记录原因并跳过，然后选敌、剩余技能、御主技能、换人及选卡动作都会在 Executor 调用前校验。第一版覆盖：
 - `picks` 恰 3 个、无重复、引用的卡/NP 在 state 中存在；
 - `target_enemy` 在存活敌人集合；
-- （V2）技能/NP 可用性、目标类型合法；
+- 技能槽位、目标范围、重复技能、技能可用态/置信度、换人参数及换人必须伴随御主技能；正常 Runtime 对不可确认执行的从者技能采取“跳过后继续攻击”，Validator 保留拒绝兜底；
 - 命中硬禁区 → 拒绝。
 
 ---
@@ -344,19 +346,17 @@ def decide(self, state):
 ### 9.1 状态机
 ```
 OBSERVE → 判场景
-  ├ VICTORY → SUCCESS
-  ├ DEFEAT/DIALOG/UNKNOWN → STOP(save_evidence)
-  ├ ANIMATION/其他 → 等稳定后重新 OBSERVE
-  └ COMMAND_SELECTION →
-       PLAN(decide) → VALIDATE →
-       EXECUTE: select_enemy → select(np/card)×3 → attack
-       每步后置确认失败 → STOP
-       → OBSERVE
+  ├ VICTORY → 结算骨架 / SUCCESS
+  ├ DEFEAT/DIALOG → FAIL
+  ├ UNKNOWN/ANIMATION → 有界等待；超时 FAIL
+  ├ MAIN_BATTLE → decide → 选敌/技能/换人 → 打开选卡
+  └ COMMAND_SELECTION → decide → VALIDATE → select(np/card)×3
+       → 等攻击动画结束 → OBSERVE
 超过 max_turns → FAIL
 ```
 
 ### 9.2 停止条件（fail-closed）
-场景不符、关键字段低置信度、未知弹窗、计划与状态不一致、后置确认失败、超过每回合/每战斗重试上限、命中硬禁区 —— 一律停止并保存证据。
+当前对场景不符、卡牌低置信度、未知弹窗、结构非法动作及超时采取停止或有界等待；单个从者技能的未知、低置信度、CD 和状态缺失属于可降级错误，Runtime 会跳过该技能并继续攻击。原子选卡后置确认与自动 `save_evidence` 尚未实现，不能写成完整安全闭环已完成。
 
 ---
 
@@ -369,38 +369,40 @@ import auto_battle_action   # 新增，与 bbc_action 并列 import
 
 ### 10.2 Pipeline 节点
 
-**入口节点**（`assets/resource/base/pipeline/自动战斗.json`）**尚未创建**，计划结构：
-```jsonc
+**入口节点**已创建于 `assets/resource/base/pipeline/原生自动战斗.json`，并已进入 `assets/interface.json` 的任务列表：
+```json
 {
-  "自动战斗": {
-    "recognition": "DirectHit",
-    "action": "Custom",
-    "custom_action": "auto_battle",
-    "custom_action_param": {
-      "strategy_profile": "farm-safe-v1",
-      "max_turns": 20,
-      "save_evidence": true,
-      "fallback": "stop"
-    },
-    "next": ["战斗完成信息"],
-    "on_error": ["保存战斗证据并停止"]
+  "原生自动战斗入口": {
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "auto_battle"
+      }
+    }
   }
 }
 ```
 
+底层 Custom Action 已支持 `strategy_profile`、`max_turns`、`plan.turns` 与可选 `vision` JSON 参数；GUI 尚未提供自由结构 TurnPlan 编辑入口，`save_evidence` 仍未实现。
+
 **识别节点**已创建于 `assets/resource/base/pipeline/自动战斗_感知.json`，包含：
 - `战斗_卡{1..5}`：OCR 识别力击/迅击/技击，ROI 已填入；
 - `战斗_NP卡{1..3}`：OCR 识别 NP 数值，ROI 已填入；
-- `战斗_选卡场景` / `战斗_主界面`：TemplateMatch，ROI 已填入，模板图片待制作；
+- `战斗_选卡场景` / `战斗_主界面`：TemplateMatch，ROI 与模板已制作并通过真机验证；
 - `战斗_胜利`：OCR 识别"战斗结果"；
-- `战斗_失败`：TemplateMatch，模板图片待制作；
-- `战斗_敌人{1..3}` / `战斗_敌人{1..3}_选中`：`DoNothing` 占位，待标定。
+- `战斗_失败`：TemplateMatch；失败/撤退完整处理仍待补；
+- `战斗_敌人{1..3}` / `战斗_敌人{1..3}_选中`：OCR + ColorMatch，已标定并通过选敌真机验证。
 
 供 `context.run_recognition` 按名调用。
 
 ### 10.3 与 BBC 并存
 不替换 `执行BBC任务`。默认仍走 BBC；`自动战斗` 作为可选后端，先只暴露开发者开关，避免普通用户误用。
 
+### 10.4 V3 Vision 实验层（默认关闭）
+
+当前工作树已接入多模态感知补充层，瘦身后为 8 个核心文件。它只在触发条件满足时请求远程 Provider，并将达到阈值且位于 `requested_fields` 范围内的字段补丁应用到 `BattleState`；不直接点击设备，也不等同于 `LLMDecider`。
+
+当前已具备：严格 JSON 解析、Fake/Replay/OpenAI-compatible Provider、每回合限流、截图去重、动作上下文、字段作用域与冲突记录。尚未完成：真机验证、完整截图外发策略、同步远程调用的时间预算、场景升级安全约束，以及 Runtime+Vision 整局状态机测试。
 ---
 
 ## 11. 标注与测试
@@ -456,7 +458,7 @@ MFW 集成                       指定模拟器+版本，少量、受控
 6. 标注 + 黄金集 + 指标                                   —— 贯穿
 ```
 
-后续演进：V2 加主动技能/NP 计划（需从者数据）→ V3 pipeline 集成 & 文本模型支持 → V4 `LLMDecider` 替换决策层实现"各种场合"通用。**2、3 稳定后，升级决策器不动感知/执行。**
+当前演进：V2 主动技能/NP TurnPlan 已落地并完成真机验证 → 本地技能未知字段传播与“跳过后继续攻击”安全门已接入 → 第一版统一 Action Validator 已接入 → V3 Vision 实验层保持默认关闭并暂不作为当前阶段依赖 → 下一步补 Runtime 整局测试与后置确认，再进入 PartyBinding/身份与技能语义。
 
 ---
 

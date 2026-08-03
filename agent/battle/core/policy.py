@@ -26,6 +26,8 @@ class StrategyProfile:
     id: str = "farm-safe-v1"
     min_scene_confidence: float = 0.95
     min_card_confidence: float = 0.50
+    min_enemy_confidence: float = 0.80
+    min_skill_confidence: float = 0.80
     max_turns: int = 20
     # 高风险开关：V1 全部关闭，且执行层根本不提供入口
     allow_command_spell: bool = False

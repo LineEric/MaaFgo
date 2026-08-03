@@ -1,6 +1,6 @@
 # MaaFgo 自动战斗：路线图
 
-> **版本**：v1.3
+> **版本**：v1.5
 > **日期**：2026-08-03
 > **分支**：`feat/auto-battle-planner`
 > **配套文档**：`MaaFgo_自动战斗技术方案_整合版.md`（设计）、`MaaFgo_自动战斗_架构与实现.md`（代码现状）
@@ -9,14 +9,25 @@
 
 ## 现状小结
 
-**V1b 最小闭环已真机验证**（主界面→开卡→选3张→等动画→下一回合→胜利）。核心契约/决策器/校验器（纯逻辑）稳定，13/13 单测通过。
+**V1b 最小闭环已真机验证**（主界面→开卡→选3张→等动画→下一回合→胜利）。核心契约、参数解析、本地感知、Vision 与统一安全门/Validator 测试现为 68 项全通过。
 
-**本次会话新增（代码层，多数未真机验证）**：
+**当前工作树状态**：
+- **统一技能安全门与 Action Validator 已接入**：主界面技能若未知、低置信度、CD 或状态缺失，会记录原因并跳过该技能后继续攻击；重复技能、非法槽位/目标、非法换人及选卡错误仍在 Executor 前拒绝。
 - 修复 `decider` 的 `Scene` 未导入回归（曾导致 `decide()` 必崩）。
-- **TurnPlan 接线完成**：`RuleDecider` 现按每回合固定计划产出技能/换人/选敌，`auto_battle_action` 从 `custom_action_param.turn_plans` 解析。原先不可达的技能/换人/目标子屏执行链路**首次可达**。
+- **TurnPlan 接线完成**：`RuleDecider` 现按每回合固定计划产出技能/换人/选敌，`auto_battle_action` 从 `custom_action_param.plan.turns` 解析。原先不可达的技能/换人/目标子屏执行链路**首次可达**。
 - **胜利结算点击流骨架**：VICTORY 后 `_drive_settlement` 点击穿过掉落/羁绊/结果多屏；带「未标定不盲点」安全护栏。
 
-> ⚠ **重要未验证清单**：技能感知（CD OCR）、`cast_servant_skill/master_skill/order_change`、技能目标子屏、换人、结算点击流——**代码 + 坐标都在，但因 decider 此前从不产出技能动作，这些从未真机跑过一次**。今天接线后它们「上线」了，时序等待（各处 sleep/timeout）均为估值，需真机校准。
+> ✅ **真机验证完成（2026-08-03）**：8 个测试任务全部通过——
+> - 测试01：从者技能（无目标）✅
+> - 测试02：从者技能（有目标，技能目标子屏）✅
+> - 测试03：御主技能（菜单展开→技能点击→返回主界面）✅
+> - 测试04：选敌（敌方槽位点击+选中确认）✅
+> - 测试05：换人（御主换人技能→换人界面→首发/候补选择→确认）✅
+> - 测试06：技能→宝具→选卡（同一回合先技能再宝具选卡）✅
+> - 测试07：两回合连续 TurnPlan（跨回合计划消费）✅
+> - 测试08：胜利结算 ✅
+>
+> 技能/换人/选敌/结算全链路**首次真机验证通过**，时序参数（各处 sleep/timeout）在正常条件下稳定可用。
 
 ---
 
@@ -25,10 +36,11 @@
 | 阶段 | 一句话目标 | 能打什么 | 主要阻塞 |
 |---|---|---|---|
 | **V1** ✅ | 平A + 无脑宝具跑通最小闭环 | 不叠 buff 也能清的本 | 已完成并验证 |
-| **V2** 🟡 | 按固定攻略打真正的三回合周回本 | 绝大多数周回本 | 代码已落地，**待真机验证 + 从者身份接入** |
-| **V2 补充** | Chaldea 配队/攻略导入 | 免手写攻略 | 复用现有 chaldea 模块，需调研数据 |
+| **V2** ✅ | 按固定攻略打真正的三回合周回本 | 绝大多数周回本 | 代码已落地并**已真机验证**；从者身份接入待做 |
+| **V2 补充** | Chaldea 配队/攻略导入 | 免手写攻略 | 已确认存在 actions 转 BBC 逻辑，待直转 BattlePlan |
 | **集成/鲁棒（并行）** | 无人值守连刷 | — | 结算/弹窗需截图标定 |
-| **V3+** | LLM 决策 | 高难/未知本 | 需从者身份进入结构化 state（见下） |
+| **V3 Vision** 🟡 | 多模态补充结构化状态 | 异常场景/缺失字段实验 | 已接线并瘦身，安全与真机验收待做 |
+| **V3+ LLM** | LLM 决策 | 高难/未知本 | 第一版 Validator 已完成；仍需身份、技能语义与候选动作 |
 
 ---
 
@@ -38,32 +50,32 @@
 
 ---
 
-## V2：按固定攻略打周回本（代码已落地，待真机验证）
+## V2：按固定攻略打周回本（代码已落地并完成真机验证）
 
 **主题**：从「平A+宝具」升级到「按攻略放技能三宝具清场」。
 
-### A. 主动技能（从者 + 御主）—— 代码已落地 🟡
+### A. 主动技能（从者 + 御主）—— ✅ 已真机验证
 - 感知：技能 CD OCR、技能目标子屏、御主技能、换人界面 —— 节点/坐标已标定。
-- 执行：`cast_servant_skill / cast_master_skill / select_skill_target / order_change` —— 已实现。
-- **待验证**：全链路真机未跑过；御主技能「先点菜单再点技能」两步、目标子屏 5s 等待、换人 25s 等待等时序需校准。
+- 执行：`cast_servant_skill / cast_master_skill / select_skill_target / order_change` —— 已实现并验证。
+- **已验证**：从者技能（有/无目标）、御主技能（菜单两步点击）、技能目标子屏、换人全链路均真机通过。
 
 ### B. 固定回合计划 TurnPlan —— ✅ 逻辑完成
-- `RuleDecider(turn_plans=...)` 按回合消费；`auto_battle_action` 从 param 解析（文件头有 JSON 示例）。
+- `RuleDecider(plan=BattlePlan)` 按回合消费；`auto_battle_action` 从 `custom_action_param.plan.turns` 解析。
 - 用固定计划则**无需理解技能效果**——策略由计划编码，程序按计划点。
-- 待补（小）：`TurnPlan.np_order` 尚未接入选卡（当前 NP 走 `np_first` 策略）。
+- `TurnPlan.np_order` 已接入选卡；无计划时回退到 `np_first` 策略。
 
 ### C. 按角色（owner_slot 卡归属）—— 未做，见「从者身份」章
 - 每回合 5 面卡从 15 张牌库洗出，位置≠从者，需逐卡识别卡面头像（三选一分类）。
 - 解锁：Brave chain、把卡喂给指定从者。**是选卡微操的前置，不是技能规划的前置。**
 
-### D. 选目标 / 换人 —— 代码已落地 🟡
-- 选敌 `select_enemy`、换人 `order_change` 已实现并标定，待真机验证。
+### D. 选目标 / 换人 —— ✅ 已真机验证
+- 选敌 `select_enemy`、换人 `order_change` 已实现并标定，真机验证通过。
 
 ### 待补的代码项（不需截图，本次未做）
 - **选卡后置确认（像素差）**：`executor.select_card/select_np` 目前点完无脑返回 True，缺失安全确认；实现后可覆盖「宝具封印 NP 卡点不动→安全中止」。
-- **参数解析补全**：`max_turns / strategy_profile / save_evidence` 尚未从 param 覆盖。
+- **参数入口完善**：`max_turns / strategy_profile / plan / vision` 已接入；GUI 自由结构 TurnPlan 与 `save_evidence` 仍待补。
 - **save_evidence**：失败存截图 + BattleState。
-- **runtime 可测性改造**：`import mfaalog` 降级 + Fake context 整局测试（可防今天那类回归）。
+- **runtime 可测性改造**：当前 68 项离线测试已覆盖 core/参数/本地技能未知字段/Vision/统一安全门与 Validator；仍需 Fake perception/executor 的整局状态机测试。
 
 ---
 
@@ -90,9 +102,9 @@
 4. **一次性定死喂 Decider 的结构化事实 schema**（servants[身份+np+skills] / cards[color+owner_slot+is_np] / enemies），`RuleDecider` 与未来 `LLMDecider` 共用同一 `BattleState`——LLM 只换 `decide()` 实现，视觉→文本模型切换干净。
 5. **owner_slot 先留 None**，LLM 先在「身份+技能+NP」上决策；要选卡微操再补感知。
 
-**调研待办（决定 ① 能否喂饱 LLM）**：
-- `agent/chaldea/chaldea_client.py` / `game_data.py` 导出的数据里，是否含**技能语义**（每技能效果/目标类型），还是只有名单（svt_id/等级/几宝）？技能语义是 LLM 推理关键，名单不一定带。
-- Chaldea 数据是否含「操作序列」（→ 可直接转 `TurnPlan`，免手写攻略）。
+**已确认与剩余调研**：
+- `ServantInfo` 当前只有身份、等级、技能等级、宝具等级、礼装和编队位置，不含完整技能效果/目标语义；仍需独立 `ServantKnowledge` 数据源。
+- Chaldea 分享数据包含 `actions`，现有 `convert_actions_to_bbc_rounds()` 已能解析技能、目标、宝具与换人；下一步应直接增加 `actions → BattlePlan` 转换，避免重复手写攻略。
 
 ---
 
@@ -103,11 +115,13 @@
 - **进场动画 >15s**：首个未知等待超时可能误判卡死，需放宽/区分。
 - **开场攻略 / 关卡机制弹窗**：需「点一下继续」，当前会被当异常。
 - **宝具封印可用态识别**：封印时 NP 卡出现但点不动；需感知区分可用/封印态（需封印截图）。依赖上面的「选卡后置确认」。
-- **GUI 入口暴露 + turn_plans 传参**（架构待议）：`原生自动战斗.json` 已进 import，但 GUI `option` 是预定义下拉枚举，塞不进「每回合放哪些技能」这种自由结构。候选：(a) 一个 option 指外部 JSON 配置文件；(b) 复用 Chaldea 导入；(c) 先只暴露「无技能纯选卡」按钮。
+- **GUI 入口暴露 + TurnPlan 传参**：底层 `plan.turns` 已支持，但 GUI `option` 是预定义下拉枚举，仍无法直接编辑自由结构。优先方案是复用 Chaldea actions→BattlePlan，其次才是外部 JSON 配置文件。
 
 ---
 
 ## V3+：LLM（远期）
+
+> 当前工作树已存在实验性的 `battle/vision` 多模态感知补充层；它只补充结构化状态，不等同于本节规划的 `LLMDecider`。Vision 层已完成首次架构瘦身，默认关闭，尚未完成真机与安全边界验收。
 
 规则 + 固定计划的 V2 稳定、且**从者身份（①）已进结构化 state** 后引入：
 - `LLMDecider`：与 `RuleDecider` 同接口，在本地生成的合法候选中做高层取舍 / 解释 / 离线复盘。
@@ -123,10 +137,11 @@
 | TurnPlan 结构 + 决策器逻辑 | 否 | ✅ 已完成 |
 | 结算点击流骨架 | 否（逻辑） | ✅ 已完成 |
 | 结算继续点 + `战斗_结算完成` 节点 | 是 | ⬜ 待标定 |
-| 技能/换人全链路真机验证 | 需设备（非截图） | ⬜ 待验证 |
+| 技能/换人全链路真机验证 | 需设备（非截图） | ✅ 已验证 |
 | 选卡后置确认（像素差） | 否 | ⬜ 待补 |
-| 参数解析 / save_evidence / 可测性改造 | 否 | ⬜ 待补 |
-| 从者身份模型 + TeamSnapshot（先验） | 否（取决 Chaldea 数据） | ⬜ 调研中 |
+| 参数解析 | 否 | ✅ profile/max_turns/plan/vision 已接入 |
+| save_evidence / Runtime 整局 Fake 测试 | 否 | ⬜ 待补 |
+| 从者身份模型 + TeamSnapshot（先验） | 否 | ⬜ 数据来源已确认，领域接线待实现 |
 | owner_slot 卡归属识别 | 是（正常态；封印态另需封印图） | ⬜ 后置 |
 | 连续出击弹窗识别/取消 | 是 | ⬜ 待定 |
 
@@ -137,10 +152,12 @@
 | 模块 | 状态 |
 |---|---|
 | `core/models` | ✅ 契约完整、TurnPlan 已用；**待加从者身份 / TeamSnapshot，并让 ServantState/NpCard 挂身份** |
-| `core/decider` | ✅ 消费 TurnPlan；np_order 待接；LLMDecider 留待 V3 |
-| `perception` | 🟡 卡色/NP/场景已验证；技能 CD/目标子屏/换人**已写待验证**；owner_slot / 身份未做 |
-| `execution` | 🟡 选卡/技能/换人/选敌坐标已标定**待验证**；选卡后置确认待补；结算点待标定 |
-| `runtime` | 🟡 回合循环含技能/换人/结算分支，**技能与结算路径待真机验证**；可测性改造待做 |
-| `custom` | 🟡 turn_plans 解析已做；其余 param / save_evidence / GUI 入口待补 |
+| `core/validator` | ✅ 主界面技能安全跳过门与两阶段统一校验已接入；语义元数据校验待后续增强 |
+| `core/decider` | ✅ 消费 TurnPlan 与 np_order；LLMDecider 尚未实现 |
+| `perception` | ✅ 卡色/NP/场景/技能目标子屏/换人界面均已真机验证；技能未知状态已进入 `unknown_fields`，owner_slot / 身份未做 |
+| `execution` | ✅ 选卡/技能/换人/选敌坐标已标定并真机验证；选卡后置确认待补；结算点待标定 |
+| `runtime` | ✅ 回合循环含技能/换人/结算分支；未知/CD/低置信度技能会跳过并继续攻击，技能与结算路径均已真机验证；整局 Fake 测试待做 |
+| `vision` | 🟡 8 模块实验层已接线并通过离线测试；默认关闭，真机/安全验收待做 |
+| `custom` | 🟡 profile/max_turns/plan/vision 已接；save_evidence 与 GUI 自由配置待补 |
 | `data` | ⬜ 空；拟放从者/技能元数据、TeamSnapshot |
-| `chaldea` | 已有 `ServantInfo/TeamFormation`（配 BBC 用）；**待查是否含技能语义/操作序列**，再决定复用深度 |
+| `chaldea` | 已有身份模型与 actions→BBC 转换；不含完整技能语义，待增加 actions→BattlePlan |

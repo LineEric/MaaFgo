@@ -11,7 +11,12 @@ from battle.core.models import (BattleAction, BattlePlan, BattleState, CardPick,
                                  NpCard, OrderChangeAction, ServantSkillAction, SkillState, ServantState, TurnPlan)
 from battle.core.policy import CardPolicy, Goal, StrategyProfile
 from battle.core.decider import RuleDecider
-from battle.core.validator import validate
+from battle.core.validator import (
+    skip_unusable_servant_skills,
+    validate,
+    validate_card_action,
+    validate_main_action,
+)
 
 
 def _card(ui_slot, color, conf=0.95):
@@ -247,18 +252,19 @@ def test_battle_plan_turn_method():
     assert len(plan.turn(1).master_skills) == 1
     assert plan.turn(99).servant_skills == ()  # 越界返回空
 
-def test_main_battle_skips_servant_skill_on_cooldown():
+def test_main_battle_safety_gate_skips_unusable_servant_skills():
     plan = BattlePlan(turns=(
         TurnPlan(servant_skills=(
             ServantSkillAction(1, 1),
             ServantSkillAction(1, 2),
+            ServantSkillAction(1, 3),
         )),
     ))
     servants = (ServantState(
         slot=1,
         skills=(
             SkillState(False, Confidence(0.99, "ocr:cd")),
-            SkillState(True, Confidence(0.99, "ocr:available")),
+            SkillState(None, Confidence(0.0, "ocr:unknown")),
             SkillState(True, Confidence(0.99, "ocr:available")),
         ),
         confidence=Confidence(0.99, "composite"),
@@ -272,5 +278,202 @@ def test_main_battle_skips_servant_skill_on_cooldown():
         servants=servants,
         screenshot_id="t",
     )
-    action = RuleDecider(plan=plan).decide(state, turn_index=0)
-    assert [(s.servant_slot, s.skill_index) for s in action.servant_skills] == [(1, 2)]
+    planned = RuleDecider(plan=plan).decide(state, turn_index=0)
+    action, skipped = skip_unusable_servant_skills(planned, state, PROFILE)
+
+    assert [(s.servant_slot, s.skill_index) for s in planned.servant_skills] == [
+        (1, 1), (1, 2), (1, 3)
+    ]
+    assert [(s.servant_slot, s.skill_index) for s in action.servant_skills] == [(1, 3)]
+    assert skipped == (
+        "servant[1].skill[1].available:cooldown",
+        "servant[1].skill[2].available:unknown",
+    )
+
+
+def test_main_battle_safety_gate_skips_low_confidence_and_missing_state():
+    state = BattleState(
+        scene=Scene.MAIN_BATTLE,
+        scene_confidence=Confidence(0.97, "tpl"),
+        cards=(),
+        np_cards=(),
+        enemies=(EnemyState(1, True, True, Confidence(0.95, "t")),),
+        servants=(ServantState(
+            slot=1,
+            skills=(
+                SkillState(True, Confidence(0.4, "ocr:available")),
+                SkillState(True, Confidence(0.99, "ocr:available")),
+                SkillState(True, Confidence(0.99, "ocr:available")),
+            ),
+            confidence=Confidence(0.99, "composite"),
+        ),),
+    )
+    planned = _main_action(servant_skills=(
+        ServantSkillAction(1, 1),
+        ServantSkillAction(2, 1),
+    ))
+
+    action, skipped = skip_unusable_servant_skills(planned, state, PROFILE)
+
+    assert action.servant_skills == ()
+    assert skipped == (
+        "servant[1].skill[1].available:low_confidence",
+        "servant[2].skill[1].available:state_missing",
+    )
+# ---------- Unified Action Validator ----------
+
+def _main_action(
+    *,
+    target_enemy=1,
+    servant_skills=(),
+    master_skills=(),
+    order_change=None,
+    picks=(),
+):
+    return BattleAction(
+        target_enemy=target_enemy,
+        picks=tuple(picks),
+        servant_skills=tuple(servant_skills),
+        master_skills=tuple(master_skills),
+        order_change=order_change,
+    )
+
+
+def _main_state_with_skill(available, *, enemy_confidence=0.95):
+    return BattleState(
+        scene=Scene.MAIN_BATTLE,
+        scene_confidence=Confidence(0.97, "test"),
+        cards=(),
+        np_cards=(),
+        enemies=(EnemyState(1, True, True, Confidence(enemy_confidence, "test")),),
+        servants=(ServantState(
+            slot=1,
+            skills=(
+                SkillState(available, Confidence(0.99 if available is not None else 0.0, "test")),
+                SkillState(True, Confidence(0.99, "test")),
+                SkillState(True, Confidence(0.99, "test")),
+            ),
+            confidence=Confidence(0.99, "test"),
+        ),),
+        screenshot_id="validator-main",
+    )
+
+
+def test_validate_main_action_accepts_legal_skill_and_target():
+    state = _main_state_with_skill(True)
+    action = _main_action(
+        servant_skills=(ServantSkillAction(1, 1, target_ally=2),),
+        master_skills=(MasterSkillAction(1),),
+    )
+    assert validate_main_action(action, state, PROFILE).ok
+
+
+def test_validate_main_action_rejects_wrong_scene():
+    state = make_state([_card(i, "B") for i in range(1, 6)])
+    verdict = validate_main_action(_main_action(), state, PROFILE)
+    assert verdict.reason == "scene_not_main_battle"
+
+
+def test_validate_main_action_rejects_card_picks():
+    state = _main_state_with_skill(True)
+    action = _main_action(picks=(CardPick(PrimitiveKind.SELECT_CARD, 1),))
+    assert validate_main_action(action, state, PROFILE).reason == "main_action_contains_card_picks"
+
+
+def test_validate_main_action_rejects_unknown_skill_state():
+    state = _main_state_with_skill(None)
+    action = _main_action(servant_skills=(ServantSkillAction(1, 1),))
+    assert validate_main_action(action, state, PROFILE).reason == "skill_state_unknown"
+
+
+def test_validate_main_action_rejects_unavailable_skill():
+    state = _main_state_with_skill(False)
+    action = _main_action(servant_skills=(ServantSkillAction(1, 1),))
+    assert validate_main_action(action, state, PROFILE).reason == "skill_not_available"
+
+
+def test_validate_main_action_rejects_low_confidence_skill():
+    state = BattleState(
+        scene=Scene.MAIN_BATTLE,
+        scene_confidence=Confidence(0.97, "test"),
+        cards=(),
+        np_cards=(),
+        enemies=(EnemyState(1, True, True, Confidence(0.95, "test")),),
+        servants=(ServantState(
+            slot=1,
+            skills=(
+                SkillState(True, Confidence(0.5, "test")),
+                SkillState(True, Confidence(0.99, "test")),
+                SkillState(True, Confidence(0.99, "test")),
+            ),
+            confidence=Confidence(0.99, "test"),
+        ),),
+    )
+    action = _main_action(servant_skills=(ServantSkillAction(1, 1),))
+    assert validate_main_action(action, state, PROFILE).reason == "skill_state_not_confident"
+
+def test_validate_main_action_rejects_missing_servant_state():
+    state = _main_state_with_skill(True)
+    action = _main_action(servant_skills=(ServantSkillAction(2, 1),))
+    assert validate_main_action(action, state, PROFILE).reason == "servant_state_missing"
+
+
+def test_validate_main_action_rejects_duplicate_servant_skill():
+    state = _main_state_with_skill(True)
+    skill = ServantSkillAction(1, 1)
+    action = _main_action(servant_skills=(skill, skill))
+    filtered, skipped = skip_unusable_servant_skills(action, state, PROFILE)
+    assert filtered is action
+    assert skipped == ()
+    assert validate_main_action(filtered, state, PROFILE).reason == "duplicate_servant_skill"
+
+
+def test_validate_main_action_rejects_invalid_skill_target():
+    state = _main_state_with_skill(True)
+    action = _main_action(servant_skills=(ServantSkillAction(1, 1, target_ally=4),))
+    filtered, skipped = skip_unusable_servant_skills(action, state, PROFILE)
+    assert filtered is action
+    assert skipped == ()
+    assert validate_main_action(filtered, state, PROFILE).reason == "invalid_skill_target"
+
+
+def test_validate_main_action_rejects_duplicate_master_skill():
+    state = _main_state_with_skill(True)
+    skill = MasterSkillAction(1)
+    action = _main_action(master_skills=(skill, skill))
+    assert validate_main_action(action, state, PROFILE).reason == "duplicate_master_skill"
+
+
+def test_validate_main_action_rejects_order_change_without_master_skill():
+    state = _main_state_with_skill(True)
+    action = _main_action(order_change=OrderChangeAction(1, 4))
+    assert validate_main_action(action, state, PROFILE).reason == "order_change_without_master_skill"
+
+
+def test_validate_main_action_accepts_structurally_valid_order_change():
+    state = _main_state_with_skill(True)
+    action = _main_action(
+        master_skills=(MasterSkillAction(2),),
+        order_change=OrderChangeAction(1, 4),
+    )
+    assert validate_main_action(action, state, PROFILE).ok
+
+
+def test_validate_main_action_rejects_low_confidence_enemy_target():
+    state = _main_state_with_skill(True, enemy_confidence=0.5)
+    verdict = validate_main_action(_main_action(target_enemy=1), state, PROFILE)
+    assert verdict.reason == "enemy_target_not_confident"
+
+
+def test_validate_card_action_rejects_main_battle_actions():
+    state = make_state([_card(i, "B") for i in range(1, 6)])
+    action = BattleAction(
+        target_enemy=1,
+        picks=(
+            CardPick(PrimitiveKind.SELECT_CARD, 1),
+            CardPick(PrimitiveKind.SELECT_CARD, 2),
+            CardPick(PrimitiveKind.SELECT_CARD, 3),
+        ),
+        master_skills=(MasterSkillAction(1),),
+    )
+    assert validate_card_action(action, state, PROFILE).reason == "card_action_contains_main_actions"
