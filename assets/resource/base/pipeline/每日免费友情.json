@@ -55,7 +55,8 @@
             "type": "TemplateMatch",
             "param": {
                 "template": [
-                    "召唤.png"
+                    "召唤.png",
+                    "召唤2.png"
                 ]
             }
         },
@@ -107,7 +108,8 @@
             "type": "TemplateMatch",
             "param": {
                 "template": [
-                    "免费友情池.png"
+                    "免费友情池.png",
+                    "免费友情池2.png"
                 ],
                 "threshold": [
                     0.9

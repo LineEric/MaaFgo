@@ -55,7 +55,8 @@
             "type": "TemplateMatch",
             "param": {
                 "template": [
-                    "召唤.png"
+                    "召唤.png",
+                    "召唤2.png"
                 ]
             }
         },
