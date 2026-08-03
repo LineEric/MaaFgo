@@ -3,14 +3,20 @@
 纯逻辑，无设备/无网络/无 maa 依赖，可离线单测。
 V1b 策略：宝具卡优先出，剩余槽位用面卡按卡色枚举打分补齐，共 3 张。
 owner_slot 在 V1 为 None，故暂不计 Brave / 从者优先级。
+
+V2：支持 BattlePlan（固定回合计划）。有计划时：
+  - MAIN_BATTLE：按 turn_index 取 TurnPlan，输出技能序列 + 换人
+  - COMMAND_SELECTION：优先按 TurnPlan.np_order 选宝具，再按卡色补面卡
+无计划时退回 V1b 行为。
 """
 from __future__ import annotations
 
 from itertools import permutations
-from typing import List, Protocol, Tuple
+from typing import List, Optional, Protocol, Tuple
 
-from .enums import CardColor, PrimitiveKind
-from .models import BattleAction, BattleState, CardPick, CommandCard
+from .enums import CardColor, PrimitiveKind, Scene
+from .models import (BattleAction, BattlePlan, BattleState, CardPick,
+                     CommandCard, TurnPlan)
 from .policy import CardPolicy, Goal
 
 _GOAL_COLOR = {
@@ -21,33 +27,71 @@ _GOAL_COLOR = {
 
 
 class Decider(Protocol):
-    def decide(self, state: BattleState) -> BattleAction: ...
+    def decide(self, state: BattleState, turn_index: int = 0) -> BattleAction: ...
 
 
 class RuleDecider:
-    def __init__(self, policy: CardPolicy | None = None) -> None:
+    def __init__(self, policy: CardPolicy | None = None,
+                 plan: BattlePlan | None = None) -> None:
         self.policy = policy or CardPolicy()
+        self.plan = plan
 
-    def decide(self, state: BattleState) -> BattleAction:
+    def decide(self, state: BattleState, turn_index: int = 0) -> BattleAction:
         target = _pick_target(state)
 
         if state.scene is Scene.MAIN_BATTLE:
-            # TODO: 读取 TurnPlan 并填入需要释放的技能
-            # V2 暂时返回空的技能列表，由 runtime 触发进入下个阶段
+            return self._decide_main_battle(state, turn_index, target)
+
+        # 选卡阶段
+        return self._decide_command_selection(state, turn_index, target)
+
+    def _decide_main_battle(self, state: BattleState, turn_index: int,
+                            target) -> BattleAction:
+        if self.plan is None:
+            # 无计划：空技能，直接开卡
             return BattleAction(
                 target_enemy=target,
                 picks=(),
                 servant_skills=(),
                 master_skills=(),
                 order_change=None,
-                rationale_tag="v2:main_battle_placeholder"
+                rationale_tag="v2:main_battle_no_plan"
             )
 
-        # 选卡阶段
-        np_picks: List[CardPick] = []
-        if self.policy.np_first:
-            np_picks = [CardPick(PrimitiveKind.SELECT_NP, c.servant_slot) for c in state.np_cards][:3]
+        tp = self.plan.turn(turn_index)
+        # 计划中指定的敌人目标优先
+        enemy = tp.target_enemy if tp.target_enemy is not None else target
+        return BattleAction(
+            target_enemy=enemy,
+            picks=(),
+            servant_skills=tp.servant_skills,
+            master_skills=tp.master_skills,
+            order_change=tp.order_change,
+            rationale_tag=f"v2:turn{turn_index}_skills"
+        )
 
+    def _decide_command_selection(self, state: BattleState, turn_index: int,
+                                  target) -> BattleAction:
+        tp: Optional[TurnPlan] = None
+        if self.plan is not None:
+            tp = self.plan.turn(turn_index)
+
+        # ---- 宝具卡选择 ----
+        np_picks: List[CardPick] = []
+        available_np = {c.servant_slot: c for c in state.np_cards}
+
+        if tp is not None and tp.np_order:
+            # 按计划指定的宝具顺序选卡
+            for slot in tp.np_order:
+                if slot in available_np and len(np_picks) < 3:
+                    np_picks.append(CardPick(PrimitiveKind.SELECT_NP, slot))
+                    del available_np[slot]
+        elif self.policy.np_first:
+            # 无计划：有宝具就优先出
+            np_picks = [CardPick(PrimitiveKind.SELECT_NP, c.servant_slot)
+                        for c in state.np_cards][:3]
+
+        # ---- 面卡补齐 ----
         need = 3 - len(np_picks)
         face_picks: List[CardPick] = []
         if need > 0 and state.cards:
@@ -55,10 +99,15 @@ class RuleDecider:
             face_picks = [CardPick(PrimitiveKind.SELECT_CARD, s) for s in slots]
 
         picks = tuple((np_picks + face_picks)[:3])
+
+        # 计划中指定的敌人目标优先
+        enemy = tp.target_enemy if (tp is not None and tp.target_enemy is not None) else target
+
+        tag = f"v2:turn{turn_index}" if tp is not None else f"v2:{self.policy.goal.value}"
         return BattleAction(
-            target_enemy=target, 
+            target_enemy=enemy,
             picks=picks,
-            rationale_tag=f"v2:{self.policy.goal.value}"
+            rationale_tag=tag
         )
 
 

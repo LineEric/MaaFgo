@@ -75,7 +75,7 @@ class AutoBattleRuntime:
 
             if scene is Scene.MAIN_BATTLE:
                 mfaalog.info("[AutoBattle] MAIN_BATTLE -> deciding skills...")
-                action = self.decider.decide(state)
+                action = self.decider.decide(state, turn_index=turns)
 
                 if action.target_enemy is not None:
                     mfaalog.info(f"[AutoBattle] selecting enemy target {action.target_enemy}")
@@ -102,7 +102,7 @@ class AutoBattleRuntime:
             if scene is Scene.COMMAND_SELECTION:
                 mfaalog.info(f"[AutoBattle] ========== Turn {turns+1} ==========")
                 mfaalog.info(f"[AutoBattle] State: {state}")
-                action = self.decider.decide(state)
+                action = self.decider.decide(state, turn_index=turns)
                 mfaalog.info(f"[AutoBattle] Decided Action: {action}")
                 
                 verdict = validate(action, state, self.profile)

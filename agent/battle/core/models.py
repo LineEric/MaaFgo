@@ -117,6 +117,21 @@ class TurnPlan:
 
 
 @dataclass(frozen=True)
+class BattlePlan:
+    """整场战斗的固定计划：按回合索引取 TurnPlan。
+
+    turns 为 0-based 索引列表；超出长度时返回空 TurnPlan（平A/宝具兜底）。
+    """
+    turns: Tuple[TurnPlan, ...] = ()
+
+    def turn(self, index: int) -> TurnPlan:
+        """获取第 index 回合（0-based）的计划；越界返回空计划。"""
+        if 0 <= index < len(self.turns):
+            return self.turns[index]
+        return TurnPlan()
+
+
+@dataclass(frozen=True)
 class BattleAction:
     target_enemy: Optional[int]
     picks: Tuple[CardPick, ...]      # 恰 3 个，含出卡顺序

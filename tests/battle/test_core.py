@@ -6,8 +6,9 @@ AGENT = os.path.join(os.path.dirname(__file__), "..", "..", "agent")
 sys.path.insert(0, os.path.abspath(AGENT))
 
 from battle.core.enums import CardColor, PrimitiveKind, Scene
-from battle.core.models import (BattleAction, BattleState, CardPick, CommandCard,
-                                 Confidence, EnemyState, NpCard)
+from battle.core.models import (BattleAction, BattlePlan, BattleState, CardPick,
+                                 CommandCard, Confidence, EnemyState, MasterSkillAction,
+                                 NpCard, OrderChangeAction, ServantSkillAction, TurnPlan)
 from battle.core.policy import CardPolicy, Goal, StrategyProfile
 from battle.core.decider import RuleDecider
 from battle.core.validator import validate
@@ -124,3 +125,115 @@ def test_reject_invalid_enemy_target():
                               CardPick(PrimitiveKind.SELECT_CARD, 2),
                               CardPick(PrimitiveKind.SELECT_CARD, 3)))
     assert validate(action, state, PROFILE).reason == "invalid_enemy_target"
+
+
+# ---------- V2 TurnPlan / BattlePlan ----------
+
+def _main_battle_state(enemies=None):
+    if enemies is None:
+        enemies = (EnemyState(1, True, True, Confidence(0.95, "t")),)
+    return BattleState(
+        scene=Scene.MAIN_BATTLE,
+        scene_confidence=Confidence(0.97, "tpl"),
+        cards=(),
+        np_cards=(),
+        enemies=tuple(enemies),
+        screenshot_id="t",
+    )
+
+
+def test_main_battle_no_plan_returns_empty_skills():
+    state = _main_battle_state()
+    action = RuleDecider().decide(state, turn_index=0)
+    assert action.servant_skills == ()
+    assert action.master_skills == ()
+    assert action.order_change is None
+    assert action.picks == ()
+
+
+def test_main_battle_with_plan_returns_skills():
+    plan = BattlePlan(turns=(
+        TurnPlan(
+            servant_skills=(ServantSkillAction(1, 1, target_ally=2),),
+            master_skills=(MasterSkillAction(1),),
+        ),
+    ))
+    state = _main_battle_state()
+    action = RuleDecider(plan=plan).decide(state, turn_index=0)
+    assert len(action.servant_skills) == 1
+    assert action.servant_skills[0].servant_slot == 1
+    assert action.servant_skills[0].skill_index == 1
+    assert action.servant_skills[0].target_ally == 2
+    assert len(action.master_skills) == 1
+    assert action.master_skills[0].skill_index == 1
+
+
+def test_main_battle_with_order_change():
+    plan = BattlePlan(turns=(
+        TurnPlan(
+            master_skills=(MasterSkillAction(2),),
+            order_change=OrderChangeAction(starting_member_idx=1, sub_member_idx=4),
+        ),
+    ))
+    state = _main_battle_state()
+    action = RuleDecider(plan=plan).decide(state, turn_index=0)
+    assert action.order_change is not None
+    assert action.order_change.starting_member_idx == 1
+    assert action.order_change.sub_member_idx == 4
+
+
+def test_plan_turn_index_out_of_range_returns_empty():
+    plan = BattlePlan(turns=(
+        TurnPlan(servant_skills=(ServantSkillAction(1, 1),)),
+    ))
+    state = _main_battle_state()
+    action = RuleDecider(plan=plan).decide(state, turn_index=5)
+    assert action.servant_skills == ()
+    assert action.master_skills == ()
+
+
+def test_command_selection_plan_np_order():
+    plan = BattlePlan(turns=(
+        TurnPlan(np_order=(3, 1)),  # 先出从者3宝具，再出从者1宝具
+    ))
+    state = make_state(
+        cards=[_card(i, "A") for i in range(1, 6)],
+        np_cards=(1, 2, 3),
+    )
+    action = RuleDecider(plan=plan).decide(state, turn_index=0)
+    np_picks = [p for p in action.picks if p.kind is PrimitiveKind.SELECT_NP]
+    assert len(np_picks) == 2
+    assert np_picks[0].slot == 3   # 计划指定先出3
+    assert np_picks[1].slot == 1   # 再出1
+
+
+def test_command_selection_plan_target_enemy():
+    enemies = (EnemyState(1, True, False, Confidence(0.95, "t")),
+               EnemyState(2, True, False, Confidence(0.95, "t")),
+               EnemyState(3, True, True, Confidence(0.95, "t")))
+    plan = BattlePlan(turns=(
+        TurnPlan(target_enemy=1),  # 计划指定打敌人1，即使敌人3被选中
+    ))
+    state = make_state([_card(i, "B") for i in range(1, 6)], enemies=enemies)
+    action = RuleDecider(plan=plan).decide(state, turn_index=0)
+    assert action.target_enemy == 1
+
+
+def test_command_selection_no_plan_falls_back_to_np_first():
+    state = make_state(
+        cards=[_card(i, "A") for i in range(1, 6)],
+        np_cards=(1, 3),
+    )
+    action = RuleDecider().decide(state, turn_index=0)
+    np_picks = [p for p in action.picks if p.kind is PrimitiveKind.SELECT_NP]
+    assert {p.slot for p in np_picks} == {1, 3}
+
+
+def test_battle_plan_turn_method():
+    plan = BattlePlan(turns=(
+        TurnPlan(servant_skills=(ServantSkillAction(1, 1),)),
+        TurnPlan(master_skills=(MasterSkillAction(1),)),
+    ))
+    assert len(plan.turn(0).servant_skills) == 1
+    assert len(plan.turn(1).master_skills) == 1
+    assert plan.turn(99).servant_skills == ()  # 越界返回空
