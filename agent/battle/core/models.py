@@ -38,11 +38,13 @@ class NpCard:
     """上排宝具卡（某从者 NP 满时出现）。"""
     servant_slot: int                # 1..3，宝具卡的归属从者
     confidence: Confidence
+    percent: int | None = None       # OCR 读到的 NP 百分比；调试/审计用
 
 
 @dataclass(frozen=True)
 class SkillState:
-    available: bool
+    # True=明确可用，False=明确 CD，None=无法确认。
+    available: bool | None
     confidence: Confidence
 
 

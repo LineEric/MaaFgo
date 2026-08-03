@@ -80,9 +80,31 @@ class AutoBattleRuntime:
                 action = self.decider.decide(state, turn_index=turns)
 
                 if action.target_enemy is not None:
-                    mfaalog.info(f"[AutoBattle] selecting enemy target {action.target_enemy}")
-                    self.executor.select_enemy(action.target_enemy)
-                    time.sleep(0.5)
+                    enemy = next(
+                        (
+                            e for e in state.enemies
+                            if e.slot == action.target_enemy and e.alive
+                        ),
+                        None,
+                    )
+                    if enemy is None:
+                        mfaalog.info(
+                            f"[AutoBattle] target enemy {action.target_enemy} not detected"
+                        )
+                        return BattleResult.fail("target_enemy_not_detected", turns)
+
+                    if enemy.targeted:
+                        mfaalog.info(
+                            f"[AutoBattle] enemy {action.target_enemy} already targeted, skip click"
+                        )
+                    else:
+                        mfaalog.info(
+                            f"[AutoBattle] selecting enemy target {action.target_enemy}"
+                        )
+                        if not self.executor.select_enemy(action.target_enemy):
+                            return BattleResult.fail("select_enemy_failed", turns)
+                        if not self._wait_until_enemy_targeted(action.target_enemy):
+                            return BattleResult.fail("enemy_target_confirm_failed", turns)
 
                 if not self._execute_skills(action):
                     return BattleResult.fail("skill_execution_failed", turns)
@@ -91,9 +113,11 @@ class AutoBattleRuntime:
                 if not self.executor.open_command_cards():
                     mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
                     return BattleResult.fail("open_cards_failed", turns)
-                mfaalog.info("[AutoBattle] command cards opened, waiting for card animation...")
-                time.sleep(2)
-                mfaalog.info("[AutoBattle] continuing after card animation wait")
+                mfaalog.info("[AutoBattle] command cards clicked, confirming command selection scene...")
+                if not self._wait_until((Scene.COMMAND_SELECTION,), 5.0):
+                    mfaalog.info("[AutoBattle] command selection confirmation failed; stopping safely")
+                    return BattleResult.fail("open_cards_confirm_failed", turns)
+                mfaalog.info("[AutoBattle] command cards opened and confirmed")
                 continue
 
             if scene is Scene.ORDER_CHANGE:
@@ -159,6 +183,19 @@ class AutoBattleRuntime:
                 return False
             time.sleep(1)
         return True
+
+    def _wait_until_enemy_targeted(self, slot: int, timeout_s: float = 3.0) -> bool:
+        """点击敌人后确认职介框蓝色选中态已经出现。"""
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            state = self._observe()
+            enemy = next((e for e in state.enemies if e.slot == slot and e.alive), None)
+            if enemy is not None and enemy.targeted:
+                mfaalog.info(f"[AutoBattle] enemy {slot} target confirmed")
+                return True
+            self.ctx.wait_freezes(_POLL_FREEZE_MS)
+        mfaalog.info(f"[AutoBattle] enemy {slot} target confirmation timed out")
+        return False
 
     def _execute_skills(self, action) -> bool:
         for sk in action.servant_skills:

@@ -1,0 +1,17 @@
+{
+  "原生自动战斗测试08入口": {
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "auto_battle",
+        "custom_action_param": {
+          "plan": {
+            "turns": []
+          },
+          "max_turns": 20,
+          "save_evidence": true
+        }
+      }
+    }
+  }
+}

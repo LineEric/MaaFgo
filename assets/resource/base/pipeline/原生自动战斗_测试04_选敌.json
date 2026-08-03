@@ -1,0 +1,19 @@
+{
+  "原生自动战斗测试04入口": {
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "auto_battle",
+        "custom_action_param": {
+          "plan": {
+            "turns": [
+              {
+                "target_enemy": 2
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@
     "action": {
       "type": "Custom",
       "param": {
-        "custom_action": "auto_battle",
+        "custom_action": "auto_battle"
       }
     }
   }

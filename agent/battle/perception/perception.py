@@ -97,20 +97,48 @@ def _detect_card(context, img, ui_slot: int) -> CommandCard:
 
 
 def _detect_np(context, img, servant_slot: int) -> Optional[NpCard]:
-    import re
     node = config.NP_CARD_NODE.format(servant_slot=servant_slot)
     r = _reco(context, node, img)
-    if r and r.hit:
-        text = getattr(getattr(r, "best_result", None), "text", "")
-        if text:
-            # OCR 可能把 "100%" 误识为 "1.0.0%" 等，去掉非数字字符后拼接
-            digits = re.sub(r'\D', '', text)
-            if digits:
-                val = int(digits)
-                if val >= 100:
-                    score = getattr(getattr(r, "best_result", None), "score", 1.0) or 1.0
-                    return NpCard(servant_slot, Confidence(float(score), "ocr"))
-    return None
+    if not (r and r.hit):
+        return None
+
+    best = getattr(r, "best_result", None)
+    text = getattr(best, "text", "") or ""
+    score = float(getattr(best, "score", 0.0) or 0.0)
+    percent = _parse_np_percent(text)
+
+    # 只有高置信度、明确读到 100%~300% 才认为宝具卡可用。
+    # 低于 100% 或超过游戏上限 300% 的结果都不应进入 np_cards；
+    # 低置信度命中也必须 fail-closed。
+    if percent is None or not (100 <= percent <= 300) or score < config.MIN_NP_CONFIDENCE:
+        return None
+
+    return NpCard(
+        servant_slot,
+        Confidence(score, "ocr"),
+        percent=percent,
+    )
+
+
+def _parse_np_percent(text: str) -> Optional[int]:
+    """把 OCR 文本解析成 0..300 的 NP 百分比。
+
+    OCR 可能把 ``100%`` 读成 ``1.0.0%``，因此允许数字之间出现分隔符，
+    但最终必须得到一个合法的 0..300 数值；异常值一律丢弃。
+    """
+    import re
+
+    normalized = (text or "").replace("％", "%")
+    match = re.search(r"([0-9][0-9.\s]{0,8}[0-9]|[0-9])\s*%?", normalized)
+    if not match:
+        return None
+
+    digits = re.sub(r"\D", "", match.group(1))
+    if not digits:
+        return None
+
+    value = int(digits)
+    return value if 0 <= value <= 300 else None
 
 
 def _detect_enemies(context, img) -> Tuple[EnemyState, ...]:
@@ -120,8 +148,8 @@ def _detect_enemies(context, img) -> Tuple[EnemyState, ...]:
         alive = bool(alive_r and alive_r.hit)
         if not alive:
             continue
-        # 选中检测暂未实现，默认 False
-        targeted = False
+        target_r = _reco(context, config.ENEMY_TARGET_NODE.format(slot=slot), img)
+        targeted = bool(target_r and target_r.hit)
         score = getattr(getattr(alive_r, "best_result", None), "score", 1.0) or 1.0
         out.append(EnemyState(slot, True, targeted, Confidence(float(score), "ocr")))
     return tuple(out)
@@ -145,13 +173,22 @@ def _detect_servants(context, img) -> Tuple[ServantState, ...]:
         skills: List[SkillState] = []
         for idx in range(1, 4):
             cd_node = config.SERVANT_SKILL_CD_NODE.format(servant_slot=slot, skill_index=idx)
-            r = _reco(context, cd_node, img)
-            if r and r.hit:
-                # OCR 命中"剩余" → 技能在 CD 中
-                score = getattr(getattr(r, "best_result", None), "score", 1.0) or 1.0
+            cd_result = _reco(context, cd_node, img)
+            if cd_result and cd_result.hit:
+                # 明确命中 CD 特征 → 技能不可用。
+                score = getattr(getattr(cd_result, "best_result", None), "score", 1.0) or 1.0
                 skills.append(SkillState(False, Confidence(float(score), "ocr:cd")))
+                continue
+
+            available_node = config.SERVANT_SKILL_NODE.format(
+                servant_slot=slot, skill_index=idx
+            )
+            available_result = _reco(context, available_node, img)
+            if available_result and available_result.hit:
+                score = getattr(getattr(available_result, "best_result", None), "score", 0.0) or 0.0
+                skills.append(SkillState(True, Confidence(float(score), "ocr:available")))
             else:
-                # 未命中"剩余" → 技能可用
-                skills.append(SkillState(True, Confidence(0.5, "ocr:available")))
+                # CD 和可用状态都未确认，不能默认为可用，避免盲点。
+                skills.append(SkillState(None, Confidence(0.0, "ocr:unknown")))
         out.append(ServantState(slot, tuple(skills), Confidence(1.0, "composite")))
     return tuple(out)

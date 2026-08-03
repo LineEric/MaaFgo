@@ -1,0 +1,21 @@
+{
+  "原生自动战斗测试01入口": {
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "auto_battle",
+        "custom_action_param": {
+          "plan": {
+            "turns": [
+              {
+                "servant_skills": [
+                  {"servant_slot": 1, "skill_index": 1}
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

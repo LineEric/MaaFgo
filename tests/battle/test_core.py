@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath(AGENT))
 from battle.core.enums import CardColor, PrimitiveKind, Scene
 from battle.core.models import (BattleAction, BattlePlan, BattleState, CardPick,
                                  CommandCard, Confidence, EnemyState, MasterSkillAction,
-                                 NpCard, OrderChangeAction, ServantSkillAction, TurnPlan)
+                                 NpCard, OrderChangeAction, ServantSkillAction, SkillState, ServantState, TurnPlan)
 from battle.core.policy import CardPolicy, Goal, StrategyProfile
 from battle.core.decider import RuleDecider
 from battle.core.validator import validate
@@ -138,6 +138,15 @@ def _main_battle_state(enemies=None):
         cards=(),
         np_cards=(),
         enemies=tuple(enemies),
+        servants=(ServantState(
+            slot=1,
+            skills=(
+                SkillState(True, Confidence(0.99, "test")),
+                SkillState(True, Confidence(0.99, "test")),
+                SkillState(True, Confidence(0.99, "test")),
+            ),
+            confidence=Confidence(0.99, "test"),
+        ),),
         screenshot_id="t",
     )
 
@@ -237,3 +246,31 @@ def test_battle_plan_turn_method():
     assert len(plan.turn(0).servant_skills) == 1
     assert len(plan.turn(1).master_skills) == 1
     assert plan.turn(99).servant_skills == ()  # 越界返回空
+
+def test_main_battle_skips_servant_skill_on_cooldown():
+    plan = BattlePlan(turns=(
+        TurnPlan(servant_skills=(
+            ServantSkillAction(1, 1),
+            ServantSkillAction(1, 2),
+        )),
+    ))
+    servants = (ServantState(
+        slot=1,
+        skills=(
+            SkillState(False, Confidence(0.99, "ocr:cd")),
+            SkillState(True, Confidence(0.99, "ocr:available")),
+            SkillState(True, Confidence(0.99, "ocr:available")),
+        ),
+        confidence=Confidence(0.99, "composite"),
+    ),)
+    state = BattleState(
+        scene=Scene.MAIN_BATTLE,
+        scene_confidence=Confidence(0.97, "tpl"),
+        cards=(),
+        np_cards=(),
+        enemies=(EnemyState(1, True, True, Confidence(0.95, "t")),),
+        servants=servants,
+        screenshot_id="t",
+    )
+    action = RuleDecider(plan=plan).decide(state, turn_index=0)
+    assert [(s.servant_slot, s.skill_index) for s in action.servant_skills] == [(1, 2)]

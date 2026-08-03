@@ -45,6 +45,7 @@ SETTLEMENT_DONE_NODE = "战斗_结算完成"
 # 门控阈值
 MIN_SCENE_CONFIDENCE = 0.95
 MIN_CARD_CONFIDENCE = 0.90
+MIN_NP_CONFIDENCE = 0.80
 
 # V1 前排/敌方槽位数（先按最多算，实际存活由识别决定）
 FRONTLINE_SLOTS = (1, 2, 3)

@@ -1,0 +1,33 @@
+{
+  "原生自动战斗技能测试入口": {
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "auto_battle",
+        "custom_action_param": {
+          "plan": {
+            "turns": [
+              {
+                "servant_skills": [
+                  {
+                    "servant_slot": 1,
+                    "skill_index": 1
+                  },
+                  {
+                    "servant_slot": 3,
+                    "skill_index": 2,
+                    "target_ally": 1
+                  }
+                ],
+                "master_skills": [],
+                "np_order": [
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

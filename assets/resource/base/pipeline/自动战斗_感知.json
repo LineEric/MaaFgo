@@ -435,7 +435,16 @@
     }
   },
   "战斗_敌人1_选中": {
-    "action": "DoNothing"
+    "recognition": {
+      "type": "ColorMatch",
+      "param": {
+        "roi": [0, 0, 90, 95],
+        "method": 40,
+        "lower": [95, 80, 80],
+        "upper": [115, 255, 255],
+        "count": 100
+      }
+    }
   },
   "战斗_敌人2": {
     "recognition": {
@@ -447,7 +456,16 @@
     }
   },
   "战斗_敌人2_选中": {
-    "action": "DoNothing"
+    "recognition": {
+      "type": "ColorMatch",
+      "param": {
+        "roi": [245, 0, 100, 95],
+        "method": 40,
+        "lower": [95, 80, 80],
+        "upper": [115, 255, 255],
+        "count": 100
+      }
+    }
   },
   "战斗_敌人3": {
     "recognition": {
@@ -459,6 +477,15 @@
     }
   },
   "战斗_敌人3_选中": {
-    "action": "DoNothing"
+    "recognition": {
+      "type": "ColorMatch",
+      "param": {
+        "roi": [495, 0, 100, 95],
+        "method": 40,
+        "lower": [95, 80, 80],
+        "upper": [115, 255, 255],
+        "count": 100
+      }
+    }
   }
 }
