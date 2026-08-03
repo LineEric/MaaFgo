@@ -33,12 +33,15 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    216,
-                    522,
-                    174,
-                    174
+                    185,
+                    521,
+                    235,
+                    178
                 ],
-                "template": "team/编队.png"
+                "template": "team/编队.png",
+                "threshold": [
+                    0.66
+                ]
             }
         },
         "pre_wait_freezes": 1000,
