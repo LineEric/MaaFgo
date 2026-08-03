@@ -9,13 +9,13 @@
                     "name": "七座洞窟",
                     "label": "七座洞窟",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "奇科莫斯托克"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/七座洞窟.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-奇科莫斯托克"
+                            ]
                         }
                     }
                 },
@@ -23,13 +23,13 @@
                     "name": "咏星之丘",
                     "label": "咏星之丘",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "贤者的隐居之所"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/咏星之丘.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-贤者的隐居之所"
+                            ]
                         }
                     }
                 },
@@ -37,13 +37,13 @@
                     "name": "伟大太阳的恩惠",
                     "label": "伟大太阳的恩惠",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "玉米地"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/伟大太阳的恩惠.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-玉米地"
+                            ]
                         }
                     }
                 },
@@ -51,13 +51,13 @@
                     "name": "没有尽头之河",
                     "label": "没有尽头之河",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "特拉特拉乌基"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/没有尽头之河.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-特拉特拉乌基"
+                            ]
                         }
                     }
                 },
@@ -65,13 +65,13 @@
                     "name": "硕果之大平原",
                     "label": "硕果之大平原",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "大平原"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/硕果之大平原.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-大平原"
+                            ]
                         }
                     }
                 },
@@ -79,13 +79,13 @@
                     "name": "黄金都市",
                     "label": "黄金都市",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "奇琴伊察"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/黄金都市.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-奇琴伊察"
+                            ]
                         }
                     }
                 },
@@ -93,13 +93,13 @@
                     "name": "豹之力量",
                     "label": "豹之力量",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "坠机点"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/豹之力量.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-坠机点"
+                            ]
                         }
                     }
                 },
@@ -107,13 +107,13 @@
                     "name": "神话的王国",
                     "label": "神话的王国",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "卡恩的废墟"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/神话的王国.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-卡恩的废墟"
+                            ]
                         }
                     }
                 },
@@ -121,13 +121,13 @@
                     "name": "刃与风之谷",
                     "label": "刃与风之谷",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "伊斯塔乌基"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/刃与风之谷.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-伊斯塔乌基"
+                            ]
                         }
                     }
                 },
@@ -135,13 +135,13 @@
                     "name": "血与鸟之湖",
                     "label": "血与鸟之湖",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "墨西哥城"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/血与鸟之湖.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-墨西哥城"
+                            ]
                         }
                     }
                 },
@@ -149,13 +149,13 @@
                     "name": "神之肉",
                     "label": "神之肉",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "烤玉米地"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/神之肉.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-烤玉米地"
+                            ]
                         }
                     }
                 },
@@ -163,13 +163,13 @@
                     "name": "银河沙丘",
                     "label": "银河沙丘",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "索索亚乌基"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/银河沙丘.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-索索亚乌基"
+                            ]
                         }
                     }
                 },
@@ -177,13 +177,13 @@
                     "name": "歌唱的伊鲁维卡亚特尔",
                     "label": "歌唱的伊鲁维卡亚特尔",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "梅兹蒂特兰"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/歌唱的伊鲁维卡亚特尔.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-梅兹蒂特兰"
+                            ]
                         }
                     }
                 },
@@ -191,13 +191,13 @@
                     "name": "蝙蝠的宫殿",
                     "label": "蝙蝠的宫殿",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "蒂卡尔遗迹"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/蝙蝠的宫殿.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-蒂卡尔遗迹"
+                            ]
                         }
                     }
                 },
@@ -205,13 +205,13 @@
                     "name": "没有太阳的地底山脉",
                     "label": "没有太阳的地底山脉",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "亚亚乌基"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/没有太阳的地底山脉.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-亚亚乌基"
+                            ]
                         }
                     }
                 },
@@ -219,13 +219,13 @@
                     "name": "水之废都",
                     "label": "水之废都",
                     "pipeline_override": {
-                        "地图坐标导航": {
-                            "attach": {
-                                "quests": "卡拉克穆尔"
-                            }
-                        },
                         "关卡选择": {
                             "template": "map/Mictlan/水之废都.png"
+                        },
+                        "米克特兰-导航": {
+                            "next": [
+                                "米-卡拉克穆尔"
+                            ]
                         }
                     }
                 }

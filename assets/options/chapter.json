@@ -408,6 +408,11 @@
                             "template": [
                                 "CitLostbelt/阿纳斯塔西娅.png"
                             ]
+                        },
+                        "找到进入主线记录2.0章节": {
+                            "template": [
+                                "CitLostbelt/阿纳斯塔西娅.png"
+                            ]
                         }
                     }
                 },
@@ -427,6 +432,11 @@
                             }
                         },
                         "无主线记录通用识别": {
+                            "template": [
+                                "CitLostbelt/诸神黄昏.png"
+                            ]
+                        },
+                        "找到进入主线记录2.0章节": {
                             "template": [
                                 "CitLostbelt/诸神黄昏.png"
                             ]
@@ -452,6 +462,11 @@
                             "template": [
                                 "CitLostbelt/SIN.png"
                             ]
+                        },
+                        "找到进入主线记录2.0章节": {
+                            "template": [
+                                "CitLostbelt/SIN.png"
+                            ]
                         }
                     }
                 },
@@ -471,6 +486,11 @@
                             }
                         },
                         "无主线记录通用识别": {
+                            "template": [
+                                "CitLostbelt/由伽刹多罗.png"
+                            ]
+                        },
+                        "找到进入主线记录2.0章节": {
                             "template": [
                                 "CitLostbelt/由伽刹多罗.png"
                             ]
@@ -496,6 +516,11 @@
                             "template": [
                                 "CitLostbelt/亚特兰蒂斯.png"
                             ]
+                        },
+                        "找到进入主线记录2.0章节": {
+                            "template": [
+                                "CitLostbelt/亚特兰蒂斯.png"
+                            ]
                         }
                     }
                 },
@@ -515,6 +540,11 @@
                             }
                         },
                         "无主线记录通用识别": {
+                            "template": [
+                                "CitLostbelt/奥林波斯.png"
+                            ]
+                        },
+                        "找到进入主线记录2.0章节": {
                             "template": [
                                 "CitLostbelt/奥林波斯.png"
                             ]
@@ -540,6 +570,11 @@
                             "template": [
                                 "CitLostbelt/阿瓦隆勒菲.png"
                             ]
+                        },
+                        "找到进入主线记录2.0章节": {
+                            "template": [
+                                "CitLostbelt/阿瓦隆勒菲.png"
+                            ]
                         }
                     }
                 },
@@ -554,12 +589,17 @@
                             "next": "纳维米克特兰"
                         },
                         "地图坐标导航": {
-                            "action": "mictlan_navigation",
-                            "attach": {
-                                "chapter": "纳维米克特兰"
-                            }
+                            "action": "DoNothing",
+                            "next": [
+                                "米克特兰-导航"
+                            ]
                         },
                         "无主线记录通用识别": {
+                            "template": [
+                                "CitLostbelt/纳维米克特兰.png"
+                            ]
+                        },
+                        "找到进入主线记录2.0章节": {
                             "template": [
                                 "CitLostbelt/纳维米克特兰.png"
                             ]
@@ -667,6 +707,11 @@
                             "template": [
                                 "ordealcall/平面之月.png"
                             ]
+                        },
+                        "找到进入主线记录2.0章节": {
+                            "template": [
+                                "ordealcall/平面之月.png"
+                            ]
                         }
                     }
                 },
@@ -692,6 +737,11 @@
                             ]
                         },
                         "Ordeal二次点击": {
+                            "template": [
+                                "ordealcall/伊底.png"
+                            ]
+                        },
+                        "找到进入主线记录2.0章节": {
                             "template": [
                                 "ordealcall/伊底.png"
                             ]
@@ -723,6 +773,11 @@
                             "template": [
                                 "ordealcall/原型肇始.png"
                             ]
+                        },
+                        "找到进入主线记录2.0章节": {
+                            "template": [
+                                "ordealcall/原型肇始.png"
+                            ]
                         }
                     }
                 },
@@ -748,6 +803,11 @@
                             ]
                         },
                         "Ordeal二次点击": {
+                            "template": [
+                                "ordealcall/梅塔特洛尼俄斯.png"
+                            ]
+                        },
+                        "找到进入主线记录2.0章节": {
                             "template": [
                                 "ordealcall/梅塔特洛尼俄斯.png"
                             ]

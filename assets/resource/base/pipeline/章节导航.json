@@ -6,10 +6,10 @@
         "recognition": "DirectHit"
     },
     "SIN": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "Traum": {
         "next": [
@@ -33,10 +33,10 @@
         "recognition": "DirectHit"
     },
     "亚特兰蒂斯": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "伦敦": {
         "next": [
@@ -88,10 +88,10 @@
         "recognition": "DirectHit"
     },
     "奥林波斯": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "巴比伦尼亚": {
         "next": [
@@ -108,10 +108,10 @@
         "recognition": "DirectHit"
     },
     "平面之月": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "新宿": {
         "next": [
@@ -121,10 +121,10 @@
         "recognition": "DirectHit"
     },
     "由伽刹多罗": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "章节导航": {
         "next": [
@@ -133,28 +133,28 @@
         "recognition": "DirectHit"
     },
     "纳维米克特兰": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "诸神黄昏": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "阿瓦隆勒菲": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "阿纳斯塔西娅": {
+        "recognition": "DirectHit",
         "next": [
             "无主线记录通用导航"
-        ],
-        "recognition": "DirectHit"
+        ]
     },
     "雅戈泰": {
         "next": [
