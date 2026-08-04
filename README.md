@@ -81,7 +81,14 @@
 
 ### 1. 下载安装
 
-前往 [Releases](https://github.com/xlxyvergil/MaaFgo/releases) 下载最新版本，解压即可。
+前往 [Releases](https://github.com/xlxyvergil/MaaFgo/releases) 下载最新版本。提供两种版本：
+
+| 版本 | 文件名标识 | 说明 |
+|------|-----------|------|
+| **MXU**（推荐） | `MXU.zip` | 桌面客户端，原生窗口体验，启动更快，无需浏览器 |
+| MWU | `MWU.zip` | Web 界面版，通过浏览器访问，兼容性好 |
+
+> 推荐使用 MXU 桌面版，体验更流畅。
 
 ### 2. 安装 BBchannel
 
