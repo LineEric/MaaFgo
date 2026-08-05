@@ -137,13 +137,12 @@ MaaFgo/
 
 ### 开源项目
 
-| 项目 | 说明 |
-| :--- | :--- |
-| [MaaFramework](https://github.com/MaaXYZ/MaaFramework) | 图像识别自动化框架 |
-| [MWU](https://github.com/ravizhan/MWU) | Vue + FastAPI 轻量 WebUI |
-| [MXU](https://github.com/MistEO/MXU) | Tauri 2 + React 桌面客户端 |
-| [BBchannel](https://github.com/Meowcolm024/FGO-Automata) | FGO 自动化战斗核心 |
-| [FGO-py](https://github.com/hgjazhgj/FGO-py) | 地图导航图像匹配算法 |
+| 项目 | 描述 |
+|:---|:---|
+| [**MaaFramework**](https://github.com/MaaXYZ/MaaFramework) | 图像识别自动化框架 |
+| [**MWU**](https://github.com/ravizhan/MWU) | 基于 Vue + FastAPI 的轻量级跨平台通用 WebUI |
+| [**MXU**](https://github.com/MistEO/MXU) | 基于 Tauri 2 + React 的轻量级跨平台通用 GUI |
+| [**BBchannel**](https://github.com/Meowcolm024/FGO-Automata) | FGO 自动化战斗核心 |
 
 ### 开发者
 
@@ -159,4 +158,4 @@ FGO 版权归 TYPE-MOON / FGO PROJECT 所有，本项目与官方无关。
 
 ## 许可证
 
-[MIT License](./LICENSE)
+本项目基于 [AGPL-3.0 License](./LICENSE) 开源。
