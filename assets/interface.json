@@ -3,7 +3,7 @@
   "name": "MaaFgo",
   "description": "FGO自动战斗工具,模拟器需要强制为1280*720模式",
   "contact": "QQ群: 1102496882",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "welcome": "Announcement.md",
   "github": "https://github.com/xlxyvergil/MaaFgo",
   "icon": "resource/icon.png",
@@ -26,7 +26,8 @@
       "path": [
         "resource/base",
         "resource/cn"
-      ]
+      ],
+      "option": ["资源包类型-cn"]
     },
     {
       "name": "享游服",
@@ -34,14 +35,16 @@
         "resource/base",
         "resource/cn",
         "resource/channel/xiangyou"
-      ]
+      ],
+      "option": ["资源包类型-cn"]
     },
     {
       "name": "日服",
       "path": [
         "resource/base",
         "resource/jp"
-      ]
+      ],
+      "option": ["资源包类型-jp"]
     }
   ],
   "group": [
@@ -64,6 +67,7 @@
   "task": [],
   "option": {},
   "import": [
+    "options/资源包类型.json",
     "tasks/preset/default.json",
     "tasks/登录.json",
     "tasks/启动bbc.json",
