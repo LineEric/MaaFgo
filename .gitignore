@@ -460,3 +460,4 @@ assets/resource/mpe/
 debug
 
 venv/
+assets/config.json
