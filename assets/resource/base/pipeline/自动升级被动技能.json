@@ -1,0 +1,620 @@
+{
+    "自动强化从者被动技能": {
+        "next": [
+            "被动强化-判断是否在强化界面"
+        ],
+        "on_error": [
+            "被动强化-界面错误"
+        ]
+    },
+    "被动强化-全部完成": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/全部完成.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "StopTask"
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "该从者全部被动技能均已强化完成！"
+        }
+    },
+    "被动强化-判断是否在强化界面": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/强化界面识别.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "处于强化界面，强化开始"
+        },
+        "next": [
+            "[JumpBack]被动强化-技能1",
+            "[JumpBack]被动强化-技能2",
+            "[JumpBack]被动强化-技能3",
+            "[JumpBack]被动强化-技能4",
+            "[JumpBack]被动强化-技能5",
+            "被动强化-完成"
+        ]
+    },
+    "被动强化-回到强化界面": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/强化按钮.png",
+                    "从者技能强化/强化按钮2.png",
+                    "从者技能强化/强化等级已满.png",
+                    "从者技能强化/无法强化.png"
+                ]
+            }
+        }
+    },
+    "被动强化-完成": {
+        "focus": {
+            "Node.Recognition.Starting": "强化任务完成"
+        }
+    },
+    "被动强化-技能1": {
+        "max_hit": 1,
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    447,
+                    235,
+                    54,
+                    47
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "开始强化被动技能1"
+        },
+        "next": [
+            "被动强化-等级识别1-2",
+            "被动强化-等级识别-满级",
+            "[JumpBack]被动强化-点击强化按钮（通用）",
+            "[JumpBack]被动强化-需要先解放技能"
+        ]
+    },
+    "被动强化-技能2": {
+        "max_hit": 1,
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    627,
+                    242,
+                    39,
+                    38
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "开始强化被动技能2"
+        },
+        "next": [
+            "被动强化-等级识别2-2",
+            "被动强化-等级识别-满级",
+            "[JumpBack]被动强化-点击强化按钮（技能2）",
+            "[JumpBack]被动强化-需要先解放技能"
+        ]
+    },
+    "被动强化-技能3": {
+        "max_hit": 1,
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    803,
+                    241,
+                    45,
+                    37
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "开始强化被动技能3"
+        },
+        "next": [
+            "被动强化-等级识别3-2",
+            "被动强化-等级识别-满级",
+            "[JumpBack]被动强化-点击强化按钮（技能3）",
+            "[JumpBack]被动强化-需要先解放技能"
+        ]
+    },
+    "被动强化-技能4": {
+        "max_hit": 1,
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    978,
+                    240,
+                    50,
+                    48
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "开始强化被动技能4"
+        },
+        "next": [
+            "被动强化-等级识别4-2",
+            "被动强化-等级识别-满级",
+            "[JumpBack]被动强化-点击强化按钮（技能4）",
+            "[JumpBack]被动强化-需要先解放技能"
+        ]
+    },
+    "被动强化-技能5": {
+        "max_hit": 1,
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    1162,
+                    242,
+                    51,
+                    43
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Starting": "开始强化被动技能5"
+        },
+        "next": [
+            "被动强化-等级识别5-2",
+            "被动强化-等级识别-满级",
+            "[JumpBack]被动强化-点击强化按钮（技能5）",
+            "[JumpBack]被动强化-需要先解放技能"
+        ]
+    },
+    "被动强化-断网重连": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "断网重连.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000
+    },
+    "被动强化-点击强化按钮（技能2）": {
+        "max_hit": 10,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/强化按钮.png",
+                    "从者技能强化/强化按钮2.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000,
+        "next": [
+            "被动强化-等级识别2-1",
+            "被动强化-确定"
+        ]
+    },
+    "被动强化-点击强化按钮（技能3）": {
+        "max_hit": 10,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/强化按钮.png",
+                    "从者技能强化/强化按钮2.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000,
+        "next": [
+            "被动强化-等级识别3-1",
+            "被动强化-确定"
+        ]
+    },
+    "被动强化-点击强化按钮（技能4）": {
+        "max_hit": 10,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/强化按钮.png",
+                    "从者技能强化/强化按钮2.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000,
+        "next": [
+            "被动强化-等级识别4-1",
+            "被动强化-确定"
+        ]
+    },
+    "被动强化-点击强化按钮（技能5）": {
+        "max_hit": 10,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/强化按钮.png",
+                    "从者技能强化/强化按钮2.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000,
+        "next": [
+            "被动强化-等级识别5-1",
+            "被动强化-确定"
+        ]
+    },
+    "被动强化-点击强化按钮（通用）": {
+        "max_hit": 10,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/强化按钮.png",
+                    "从者技能强化/强化按钮2.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000,
+        "next": [
+            "被动强化-等级识别1-1",
+            "被动强化-确定"
+        ]
+    },
+    "被动强化-点击空白跳过": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    1202,
+                    92,
+                    60,
+                    55
+                ]
+            }
+        }
+    },
+    "被动强化-界面错误": {
+        "action": {
+            "type": "StopTask"
+        },
+        "focus": {
+            "Node.Recognition.Starting": "当前不属于强化界面，请到从者强化界面开始！！"
+        }
+    },
+    "被动强化-确定": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "决定.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 3000,
+        "next": [
+            "[JumpBack]被动强化-断网重连",
+            "被动强化-回到强化界面",
+            "[JumpBack]被动强化-点击空白跳过",
+            "被动强化-全部完成"
+        ]
+    },
+    "被动强化-等级识别-满级": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/强化等级已满.png",
+                    "从者技能强化/道具不足.png",
+                    "从者技能强化/硬币不足.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "等级已满或道具不足，无法强化"
+        }
+    },
+    "被动强化-等级识别1-1": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    535,
+                    254,
+                    69,
+                    65
+                ],
+                "expected": [
+                    "10"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    343,
+                    567,
+                    187,
+                    44
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能1强化完成（保底识别）"
+        }
+    },
+    "被动强化-等级识别1-2": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    453,
+                    293,
+                    75,
+                    21
+                ],
+                "expected": [
+                    "Lv. 10/10",
+                    "10/10"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能1强化完成"
+        }
+    },
+    "被动强化-等级识别2-1": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    535,
+                    254,
+                    69,
+                    65
+                ],
+                "expected": [
+                    "10"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    343,
+                    567,
+                    187,
+                    44
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能2强化完成（保底识别）"
+        }
+    },
+    "被动强化-等级识别2-2": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    646,
+                    292,
+                    58,
+                    22
+                ],
+                "expected": [
+                    "10/10",
+                    "10/10"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能2强化完成"
+        }
+    },
+    "被动强化-等级识别3-1": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    535,
+                    254,
+                    69,
+                    65
+                ],
+                "expected": [
+                    "10"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    343,
+                    567,
+                    187,
+                    44
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能3强化完成（保底识别）"
+        }
+    },
+    "被动强化-等级识别3-2": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    826,
+                    293,
+                    56,
+                    21
+                ],
+                "expected": [
+                    "10/10",
+                    "10/10"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能3强化完成"
+        }
+    },
+    "被动强化-等级识别4-1": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    535,
+                    254,
+                    69,
+                    65
+                ],
+                "expected": [
+                    "10"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    343,
+                    567,
+                    187,
+                    44
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能4强化完成（保底识别）"
+        }
+    },
+    "被动强化-等级识别4-2": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    999,
+                    293,
+                    60,
+                    20
+                ],
+                "expected": [
+                    "Lv. 10/10",
+                    "10/10"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能4强化完成"
+        }
+    },
+    "被动强化-等级识别5-1": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    535,
+                    254,
+                    69,
+                    65
+                ],
+                "expected": [
+                    "10"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    343,
+                    567,
+                    187,
+                    44
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能5强化完成（保底识别）"
+        }
+    },
+    "被动强化-等级识别5-2": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    1178,
+                    294,
+                    59,
+                    20
+                ],
+                "expected": [
+                    "10/10",
+                    "10/10"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "被动技能5强化完成"
+        }
+    },
+    "被动强化-需要先解放技能": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/解放按钮.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000,
+        "focus": {
+            "Node.Recognition.Succeeded": "需要先解放技能"
+        },
+        "next": [
+            "被动强化-确定"
+        ]
+    }
+}
