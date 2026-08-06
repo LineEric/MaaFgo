@@ -27,7 +27,9 @@
         "resource/base",
         "resource/cn"
       ],
-      "option": ["资源包类型-cn"]
+      "option": [
+        "资源包类型-cn"
+      ]
     },
     {
       "name": "享游服",
@@ -36,7 +38,9 @@
         "resource/cn",
         "resource/channel/xiangyou"
       ],
-      "option": ["资源包类型-cn"]
+      "option": [
+        "资源包类型-cn"
+      ]
     },
     {
       "name": "日服",
@@ -44,7 +48,9 @@
         "resource/base",
         "resource/jp"
       ],
-      "option": ["资源包类型-jp"]
+      "option": [
+        "资源包类型-jp"
+      ]
     }
   ],
   "group": [
@@ -83,7 +89,7 @@
     "tasks/每日免费友情.json",
     "tasks/常驻每日1抽.json",
     "tasks/从者技能强化.json",
-    "tasks/从者被动技能强化.json",
+    "tasks/从者追加技能强化.json",
     "options/选择队伍配置.json",
     "options/chaldea_team_config.json",
     "options/chapter.json",
@@ -137,7 +143,7 @@
     "options/通用大活动-副本类型.json",
     "options/通用小活动-副本类型.json",
     "options/从者技能强化.json",
-    "options/从者被动技能强化.json",
+    "options/从者追加技能强化.json",
     "options/抽卡截图.json"
   ],
   "agent": {
