@@ -182,6 +182,9 @@
                 ]
             }
         },
+        "action": {
+            "type": "Screencap"
+        },
         "focus": {
             "Node.Recognition.Starting": "等待抽卡完成"
         },

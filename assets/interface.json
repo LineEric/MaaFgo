@@ -135,7 +135,8 @@
     "options/包名填写.json",
     "options/通用大活动-副本类型.json",
     "options/通用小活动-副本类型.json",
-    "options/从者技能强化.json"
+    "options/从者技能强化.json",
+    "options/抽卡截图.json"
   ],
   "agent": {
     "child_exec": "python",

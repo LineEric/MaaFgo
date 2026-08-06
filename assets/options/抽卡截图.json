@@ -1,0 +1,44 @@
+{
+    "option": {
+        "每日1石-抽卡完后是否保存截图": {
+            "type": "select",
+            "label": "每日1石：抽卡完后是否保存截图",
+            "default": "no",
+            "cases": [
+                {
+                    "name": "yes",
+                    "label": "保存"
+                },
+                {
+                    "name": "no",
+                    "label": "不保存",
+                    "pipeline_override": {
+                        "每日1抽-等待抽卡完成": {
+                            "action": "DoNothing"
+                        }
+                    }
+                }
+            ]
+        },
+        "常驻每日1抽-抽卡完后是否保存截图": {
+            "type": "select",
+            "label": "常驻每日1抽：抽卡完后是否保存截图",
+            "default": "no",
+            "cases": [
+                {
+                    "name": "yes",
+                    "label": "保存"
+                },
+                {
+                    "name": "no",
+                    "label": "不保存",
+                    "pipeline_override": {
+                        "常驻每日1抽-等待抽卡完成": {
+                            "action": "DoNothing"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
