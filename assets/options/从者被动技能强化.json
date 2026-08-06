@@ -25,8 +25,20 @@
         "被动技能1等级": {
             "type": "select",
             "label": "被动技能1目标等级",
-            "default": "1",
+            "default": "no",
             "cases": [
+                {
+                    "name": "no",
+                    "label": "不解锁",
+                    "pipeline_override": {
+                        "被动强化-需要先解放技能": {
+                            "enabled": false
+                        },
+                        "被动强化-识别未解锁时不强化": {
+                            "enabled": true
+                        }
+                    }
+                },
                 {
                     "name": "1",
                     "label": "1",
@@ -372,8 +384,20 @@
         "被动技能2等级": {
             "type": "select",
             "label": "被动技能2目标等级",
-            "default": "1",
+            "default": "no",
             "cases": [
+                {
+                    "name": "no",
+                    "label": "不解锁",
+                    "pipeline_override": {
+                        "被动强化-需要先解放技能": {
+                            "enabled": false
+                        },
+                        "被动强化-识别未解锁时不强化": {
+                            "enabled": true
+                        }
+                    }
+                },
                 {
                     "name": "1",
                     "label": "1",
@@ -719,8 +743,20 @@
         "被动技能3等级": {
             "type": "select",
             "label": "被动技能3目标等级",
-            "default": "1",
+            "default": "no",
             "cases": [
+                {
+                    "name": "no",
+                    "label": "不解锁",
+                    "pipeline_override": {
+                        "被动强化-需要先解放技能": {
+                            "enabled": false
+                        },
+                        "被动强化-识别未解锁时不强化": {
+                            "enabled": true
+                        }
+                    }
+                },
                 {
                     "name": "1",
                     "label": "1",
@@ -1066,8 +1102,20 @@
         "被动技能4等级": {
             "type": "select",
             "label": "被动技能4目标等级",
-            "default": "1",
+            "default": "no",
             "cases": [
+                {
+                    "name": "no",
+                    "label": "不解锁",
+                    "pipeline_override": {
+                        "被动强化-需要先解放技能": {
+                            "enabled": false
+                        },
+                        "被动强化-识别未解锁时不强化": {
+                            "enabled": true
+                        }
+                    }
+                },
                 {
                     "name": "1",
                     "label": "1",
@@ -1413,8 +1461,20 @@
         "被动技能5等级": {
             "type": "select",
             "label": "被动技能5目标等级",
-            "default": "1",
+            "default": "no",
             "cases": [
+                {
+                    "name": "no",
+                    "label": "不解锁",
+                    "pipeline_override": {
+                        "被动强化-需要先解放技能": {
+                            "enabled": false
+                        },
+                        "被动强化-识别未解锁时不强化": {
+                            "enabled": true
+                        }
+                    }
+                },
                 {
                     "name": "1",
                     "label": "1",

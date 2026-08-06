@@ -79,6 +79,7 @@
             "Node.Recognition.Starting": "开始强化被动技能1"
         },
         "next": [
+            "被动强化-识别未解锁时不强化",
             "被动强化-等级识别1-2",
             "被动强化-等级识别-满级",
             "[JumpBack]被动强化-点击强化按钮（通用）",
@@ -102,6 +103,7 @@
             "Node.Recognition.Starting": "开始强化被动技能2"
         },
         "next": [
+            "被动强化-识别未解锁时不强化",
             "被动强化-等级识别2-2",
             "被动强化-等级识别-满级",
             "[JumpBack]被动强化-点击强化按钮（技能2）",
@@ -125,6 +127,7 @@
             "Node.Recognition.Starting": "开始强化被动技能3"
         },
         "next": [
+            "被动强化-识别未解锁时不强化",
             "被动强化-等级识别3-2",
             "被动强化-等级识别-满级",
             "[JumpBack]被动强化-点击强化按钮（技能3）",
@@ -148,6 +151,7 @@
             "Node.Recognition.Starting": "开始强化被动技能4"
         },
         "next": [
+            "被动强化-识别未解锁时不强化",
             "被动强化-等级识别4-2",
             "被动强化-等级识别-满级",
             "[JumpBack]被动强化-点击强化按钮（技能4）",
@@ -171,6 +175,7 @@
             "Node.Recognition.Starting": "开始强化被动技能5"
         },
         "next": [
+            "被动强化-识别未解锁时不强化",
             "被动强化-等级识别5-2",
             "被动强化-等级识别-满级",
             "[JumpBack]被动强化-点击强化按钮（技能5）",
@@ -597,7 +602,22 @@
             "Node.Recognition.Succeeded": "被动技能5强化完成"
         }
     },
+    "被动强化-识别未解锁时不强化": {
+        "enabled": false,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/解放按钮.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "技能未解锁，跳过强化"
+        }
+    },
     "被动强化-需要先解放技能": {
+        "enabled": true,
         "recognition": {
             "type": "TemplateMatch",
             "param": {
