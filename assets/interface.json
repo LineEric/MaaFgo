@@ -83,6 +83,7 @@
     "tasks/每日免费友情.json",
     "tasks/常驻每日1抽.json",
     "tasks/从者技能强化.json",
+    "tasks/从者被动技能强化.json",
     "options/选择队伍配置.json",
     "options/chaldea_team_config.json",
     "options/chapter.json",
@@ -136,6 +137,7 @@
     "options/通用大活动-副本类型.json",
     "options/通用小活动-副本类型.json",
     "options/从者技能强化.json",
+    "options/从者被动技能强化.json",
     "options/抽卡截图.json"
   ],
   "agent": {
