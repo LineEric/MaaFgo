@@ -43,20 +43,32 @@ from maa.context import Context
 import mfaalog
 
 # 检测参数
-MATCH_TH = 0.85           # 对比识别模板匹配阈值(0.85: 滤掉相似关卡名误识别, 正确匹配普遍>=0.90)
-MATCH_H = 20              # 统一匹配高度: 候选框与模板都缩放到此高度再匹配(消除尺度差异)
+PAD = 3                   # YOLO 框四周外扩像素(px): 吸收框位置抖动(±1-2px), 纯名称条内容匹配旧素材
+SIFT_TH = 0.30            # SIFT 匹配判定阈值: 原0.32 奥克尼等短名称条匹配波动差线, 0.20 过松误匹配风险, 折中 0.30
+
+# 坐标表辅助(方案A过渡): coords.json 按 x/y 过滤 SIFT 候选, 反推视角偏移, 缩小小尺寸匹配集
+SCREEN_H = 720            # 屏幕高度(统一 1280 宽坐标系, 720p)
+COORDS_X_TOL = 60         # 候选x容差(px): 缩放后名称条x固定且与全景x一致, 框中心误差<20px, 60 留余量
+COORDS_Y_MARGIN = 80      # 候选y容差(px): offset_y 反推误差余量(含框高/滑动漂移)
 
 # 滑动与循环参数
-SWIPE_DIST = 200          # 单次滑动距离(px), 手指上滑=看下方
+SWIPE_DIST = 100          # 单次滑动距离(px), 手指上滑=看下方; 200px 一次滑过会漏检处于画面带中的关卡(如原型肇始商务区), 改 100px 保证覆盖
 SWIPE_DURATION = 300
 MAX_ROUNDS = 30           # 最大滑动屏数
 EMPTY_SCREEN_LIMIT = 3    # 连续空屏(未识别到关卡)判定到底的阈值
 
+# 手势落点(避开关卡元素, 避免误点击关卡)
+ZOOM_FINGER_A = (72, 110)      # 双指捏合缩小: 指1落点(左上)
+ZOOM_FINGER_B = (1178, 546)    # 双指捏合缩小: 指2落点(右下)
+SWIPE_START = (46, 310)        # 上下滑动起始点(上滑=看下方)
+PULL_SWIPE_START = (670, 666)  # 特殊关卡向右微调滑动起始点
+
 # 缩放与归位参数(无归位按钮, 靠捏合缩小+反向滑动归位到左上角起点)
 ZOOM_ROUNDS = 3           # 双指捏合缩小轮数(建议3-4轮到最大可视范围)
-HOME_SWIPE_START = (300, 250)   # 归位滑动: 从左上角...
-HOME_SWIPE_END = (441, 391)     # ...向右下角(对角线约200px)
-HOME_SWIPE_ROUNDS = 3           # 归位滑动轮数
+HOME_SWIPE_START = (46, 310)    # 归位滑动: 从上下滑动起始点(与 SWIPE_START 一致, 避免左上角误触关卡)...
+HOME_SWIPE_END = (187, 451)     # ...向右下角(相对位移 141,141, 与 SWIPE_START 起点同源)
+HOME_SWIPE_ROUNDS = 2           # 归位滑动轮数
+HOME_RESET_ROUNDS = 2           # 二次置顶归位轮数(向下滑=手指下移=地图上滚=回顶部, 弥补归位未完全到位)
 ZOOM_PULL_UP = 50         # 特殊关卡放大后向上微调距离(px), 让被遮挡的关卡进入可视区
 ZOOM_PULL_RIGHT = 300     # 特殊关卡放大后向右微调总距离(px), 部分地图需再右移才能看到目标
 ZOOM_PULL_DURATION = 800  # 微调滑动持续时间(ms), 慢速拖拽避免被识别为 fling 导致位移不足
@@ -86,6 +98,7 @@ def load_quest_templates(quest_dir):
                                cv2.IMREAD_COLOR)
             if img is not None:
                 templates[name] = img
+    clear_sift_cache()   # 素材重载后清空模板描述符缓存
     return templates
 
 
@@ -102,49 +115,267 @@ def load_special_config(path):
     return {}
 
 
-def match_score(crop_bgr, template_bgr):
-    """统一高度模板匹配: 候选框与模板都缩放到 MATCH_H 高度, 消除尺度差异
-    模板比框宽时, 将框等比放大到模板宽度再匹配(避免宽度差几像素就整体放弃)"""
-    th, tw = template_bgr.shape[:2]
-    if th < 4 or tw < 4:
-        return 0.0
-    ch, cw = crop_bgr.shape[:2]
-    if ch < 4 or cw < 4:
-        return 0.0
-    crop_r = cv2.resize(crop_bgr, (max(4, int(cw * MATCH_H / ch)), MATCH_H))
-    tpl_r = cv2.resize(template_bgr, (max(4, int(tw * MATCH_H / th)), MATCH_H))
-    if tpl_r.shape[1] > crop_r.shape[1]:
-        # 模板比框宽: 框等比放大到模板宽度(不拉伸模板, 保持内容比例)
-        ratio = tpl_r.shape[1] / crop_r.shape[1]
-        crop_r = cv2.resize(crop_r, (tpl_r.shape[1], max(4, int(round(crop_r.shape[0] * ratio)))))
-    cg = cv2.cvtColor(crop_r, cv2.COLOR_BGR2GRAY)
-    tg = cv2.cvtColor(tpl_r, cv2.COLOR_BGR2GRAY)
-    res = cv2.matchTemplate(cg, tg, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, _ = cv2.minMaxLoc(res)
-    return float(max_val)
-
-
 def identify_quest(crop_bgr, templates):
-    """对比识别: 检测框内容 vs 素材库 -> (关卡名, 分数) 或 (None, 0)"""
+    """对比识别: YOLO框外扩PAD区域 vs 素材库 -> (关卡名, 分数) 或 (None, 0)
+
+    SIFT 特征匹配(无需缩放): 对缩放/位移/亮度鲁棒, 不依赖画面与素材严格同尺寸,
+    YOLO 框(23-28高)与 20 高名称条素材尺寸不一致也能匹配。
+    达标阈值 SIFT_TH(0.32)。"""
     if crop_bgr is None or crop_bgr.size == 0 or not templates:
         return None, 0.0
     best_name, best_score = None, 0.0
     for name, tpl in templates.items():
-        s = match_score(crop_bgr, tpl)
+        s = match_sift(crop_bgr, tpl)
         if s > best_score:
             best_score, best_name = s, name
-    if best_name is not None and best_score >= MATCH_TH:
+    if best_name is not None and best_score >= SIFT_TH:
         return best_name, best_score
     return None, best_score
 
 
+# ---- SIFT 性能优化(行为不变): 复用单例 SIFT/BFMatcher + 模板描述符缓存 ----
+# 原实现每次 match_sift 都新建 cv2.SIFT_create()/cv2.BFMatcher, 且对每个模板重新
+# detectAndCompute; greedy_match_boxes 在 O(框×模板) 循环里调用, 模板特征被重复计算
+# m 次/框, 每帧 CPU 开销随模板数线性放大。优化:
+#   1. 模块级单例 SIFT/BFMatcher(惰性创建; SIFT/BF 均确定性 -> 结果不变)
+#   2. 模板 灰度图+关键点+描述符 按 id(模板图) 缓存(素材在导航会话期间常驻, id 稳定;
+#      缓存条目持有图像引用防 id 复用, 命中时校验对象同一性)
+#   3. greedy/坐标匹配循环内每框只提取一次裁剪框特征(_crop_desc), 不再随模板数重复
+_SIFT = None
+_BF = None
+_TEMPLATE_CACHE = {}
+
+
+def _get_sift():
+    global _SIFT
+    if _SIFT is None:
+        try:
+            _SIFT = cv2.SIFT_create()
+        except Exception:
+            _SIFT = False      # 环境不支持 SIFT: 标记不可用, 避免每次重试
+    return _SIFT
+
+
+def _get_bf():
+    global _BF
+    if _BF is None:
+        _BF = cv2.BFMatcher(cv2.NORM_L2)
+    return _BF
+
+
+def _template_features(template_bgr):
+    """模板 (灰度图, 关键点, 描述符), 带缓存:
+    以 id(模板图) 为 key, 缓存条目持有图像引用 -> 图未被 GC 前 id 不复用,
+    命中时校验对象同一性防止 id 碰撞; 结果与逐次新建 SIFT 计算完全一致。"""
+    key = id(template_bgr)
+    hit = _TEMPLATE_CACHE.get(key)
+    if hit is not None and hit[0] is template_bgr:
+        return hit[1]
+    tb = template_bgr
+    if tb.ndim == 3 and tb.shape[2] == 4:
+        tb = tb[:, :, :3]      # 丢弃 alpha 通道, 兼容 Maa screencap
+    tg = cv2.cvtColor(tb, cv2.COLOR_BGR2GRAY)
+    tk, td = _get_sift().detectAndCompute(tg, None)
+    entry = (tg, tk, td if td is not None else None)
+    _TEMPLATE_CACHE[key] = (template_bgr, entry)
+    return entry
+
+
+def clear_sift_cache():
+    """清空模板描述符缓存(素材重载后调用, 防旧条目残留与内存增长)"""
+    _TEMPLATE_CACHE.clear()
+
+
+def _crop_desc(crop_bgr):
+    """裁剪框 (灰度图, 描述符): 每帧截图内容都变, 不缓存, 每框只算一次"""
+    if crop_bgr is None or crop_bgr.size == 0:
+        return None, None
+    cb = crop_bgr
+    if cb.ndim == 3 and cb.shape[2] == 4:
+        cb = cb[:, :, :3]      # 丢弃 alpha 通道, 兼容 Maa screencap
+    sift = _get_sift()
+    if not sift:
+        return None, None
+    cg = cv2.cvtColor(cb, cv2.COLOR_BGR2GRAY)
+    _, cd = sift.detectAndCompute(cg, None)
+    return cg, cd
+
+
+def _sift_pair_score(cd, template_bgr):
+    """模板特征(缓存) vs 已提取裁剪框描述符 -> 匹配分, 行为与 match_sift 一致"""
+    _, tk, td = _template_features(template_bgr)
+    if cd is None or td is None or len(tk) < 3:
+        return 0.0
+    matches = _get_bf().knnMatch(td, cd, k=2)
+    good = [m for m, n in matches if m.distance < 0.75 * n.distance]
+    return float(len(good)) / max(1.0, len(tk))
+
+
+def match_sift(crop_bgr, template_bgr):
+    """SIFT 特征匹配分数: good匹配数(ratio test 0.75) / 模板关键点数
+    对缩放/位移/亮度鲁棒, 无需缩放即可匹配尺寸不一致的素材;
+    生产识别当前走 match_sift(外扩PAD+20高旧素材), 达标阈值 SIFT_TH(0.30)。
+    性能: 复用单例 SIFT/BFMatcher + 模板描述符缓存, 结果与原实现一致。"""
+    _, cd = _crop_desc(crop_bgr)
+    if cd is None:
+        return 0.0
+    return _sift_pair_score(cd, template_bgr)
+
+
+def greedy_match_boxes(box_crops, templates):
+    """模板主导独占匹配: 每个模板只认领分数最高的一个框(全局最高分优先)
+
+    分配方向(与逐框独立匹配相反): 由模板去找框, 每个框也最多被一个模板认领,
+    避免一个模板被多个框同时匹配(高分重复)或低分框抢占真框的素材。
+    仅返回达标(>= SIFT_TH)的分配对。
+    返回 (assigned, unassigned_idx):
+      assigned:      [(box_idx, tpl_idx, score), ...] 按分数从高到低
+      unassigned_idx: [box_idx, ...] 未被任何模板认领的框索引"""
+    tpl_names = list(templates.keys())
+    n, m = len(box_crops), len(tpl_names)
+    scores = np.zeros((n, m))
+    cds = [_crop_desc(b)[1] for b in box_crops]   # 每框只提取一次特征(模板特征走缓存)
+    for i in range(n):
+        if box_crops[i] is None or box_crops[i].size == 0:
+            continue
+        for j in range(m):
+            scores[i, j] = _sift_pair_score(cds[i], templates[tpl_names[j]])
+    # 独占分配: 按分数降序排序后一次遍历(同分按 i,j 升序, 与原"每轮全表扫描取最高分"
+    # 严格一致), 复杂度由 O(n·m·min(n,m)) 降为 O(n·m·log(n·m))
+    used_box = [False] * n
+    used_tpl = [False] * m
+    assigned = []
+    pairs = [(scores[i, j], i, j) for i in range(n) for j in range(m)
+             if scores[i, j] >= SIFT_TH]
+    pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
+    for s, i, j in pairs:
+        if used_box[i] or used_tpl[j]:
+            continue
+        assigned.append((i, j, s))
+        used_box[i] = True
+        used_tpl[j] = True
+    unassigned = [i for i in range(n) if not used_box[i]]
+    return assigned, unassigned
+
+
+def load_quest_coords(root_dir, folder):
+    """读取 coords.json(全景坐标表, 由 distribute_coords.py 分发)
+    固定只读 agent 附属数据目录 root_dir/agent/utils/{folder}/coords.json
+    (folder 形如 map/Gotterdammerung, 与素材目录命名一致; agent 目录不参与
+    MaaFramework 资源校验; resource/image 下不放置 coords.json, 无需兜底)。
+    coords 的 key = 素材文件名(关卡名), 与 load_quest_templates 一致。
+    无坐标表时返回空 dict, 调用方退化为全模板匹配(原行为)。"""
+    path = os.path.join(root_dir, "agent", "utils", folder, "coords.json")
+    if not os.path.isfile(path):
+        return {}, 0
+    try:
+        with open(path, encoding="utf-8") as fp:
+            data = json.load(fp)
+        coords = {q: (int(v["x"]), int(v["y"]))
+                  for q, v in data.get("quests", {}).items() if "x" in v and "y" in v}
+        return coords, int(data.get("map_height", 0))
+    except Exception as e:
+        mfaalog.warning(f"[导航] coords.json 读取失败: {e}")
+    return {}, 0
+
+
+def match_with_coords(box_infos, box_crops, templates, coords, offset_y):
+    """坐标表辅助独占匹配: 每框候选 = x容差 + (offset_y 建立后)全景y在视口±margin 内的模板,
+    候选内做全局最高分独占分配(行为与原 greedy 一致, 只是候选集缩小, 更快更准).
+    返回 (assigned, offset_y):
+      assigned:  [(box_idx, 关卡名, score), ...] 按分数从高到低
+      offset_y:  由本次识别结果反推的视角顶部全景y(多关取中位数, 抗误匹配), 未识别则不变
+    无 coords 时退化为全模板 greedy(原行为), offset_y 不更新。"""
+    tpl_names = list(templates.keys())
+    if not coords:
+        assigned, _ = greedy_match_boxes(box_crops, templates)
+        return [(bi, tpl_names[bj], s) for bi, bj, s in assigned], offset_y
+
+    n = len(box_crops)
+    cand = [[] for _ in range(n)]   # 每框候选模板索引
+    for i in range(n):
+        if box_crops[i] is None or box_crops[i].size == 0:
+            continue
+        cx = box_infos[i][0] + box_infos[i][2] // 2
+        cy = box_infos[i][1] + box_infos[i][3] // 2
+        for j, name in enumerate(tpl_names):
+            t = coords.get(name)
+            if t is None:
+                continue
+            tx, ty = t
+            if abs(tx - cx) > COORDS_X_TOL:
+                continue
+            if offset_y is not None and not (offset_y - COORDS_Y_MARGIN <= ty <= offset_y + SCREEN_H + COORDS_Y_MARGIN):
+                continue
+            cand[i].append(j)
+
+    scores = np.full((n, len(tpl_names)), -1.0)
+    cds = [_crop_desc(b)[1] for b in box_crops]   # 每框只提取一次特征(模板特征走缓存)
+    for i in range(n):
+        for j in cand[i]:
+            scores[i, j] = _sift_pair_score(cds[i], templates[tpl_names[j]])
+    # 独占分配: 分数降序排序一次遍历(同分按 i,j 升序, 与"每轮全表扫描取最高"一致)
+    used_box, used_tpl = [False] * n, [False] * len(tpl_names)
+    assigned = []
+    pairs = [(scores[i, j], i, j) for i in range(n) for j in range(len(tpl_names))
+             if scores[i, j] >= SIFT_TH]
+    pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
+    for s, i, j in pairs:
+        if used_box[i] or used_tpl[j]:
+            continue
+        assigned.append((i, tpl_names[j], s))
+        used_box[i] = True
+        used_tpl[j] = True
+
+    # 反推 offset_y: 识别对 (box_cy + offset_y = 全景y), 多关取中位数
+    if assigned:
+        offs = sorted(coords[name][1] - (box_infos[bi][1] + box_infos[bi][3] // 2)
+                      for bi, name, _ in assigned)
+        offset_y = offs[len(offs) // 2]
+    return assigned, offset_y
+
+
+def prevent_touch(context):
+    """手势操作(缩放/滑动)后防止误触进入关卡: 触发 pipeline 节点"防止导航误触"
+    由 MaaFramework 原生完成 截图->识别(UI隐藏模板, ROI限定)->点击关闭
+    通过 run_task 返回的 TaskDetail.nodes 判断是否发生误触:
+    存在名为"关闭误触"的节点且其点击动作成功 = 检测到误触界面并已点击关闭"""
+    touched = False
+    try:
+        detail = context.run_task("防止导航误触")
+        if detail is not None:
+            for node in detail.nodes:
+                if node.name == "关闭误触" and node.action is not None and node.action.success:
+                    touched = True
+                    break
+    except Exception as e:
+        mfaalog.warning(f"[防误触] 检查失败: {e}")
+    if touched:
+        mfaalog.info("[防误触] 检测到误触, 已点击关闭返回")
+    else:
+        mfaalog.info("[防误触] 未检测到误触")
+    time.sleep(1.5)
+    return touched
+
+
 def pinch_zoom_out(controller):
-    """双指捏合缩小地图(Maa 官方多点触控 API), 缩放到最大可视范围"""
-    f1_start, f1_end = (200, 150), (560, 330)
-    f2_start, f2_end = (1080, 570), (720, 390)
-    steps = 6
-    controller.post_touch_down(*f1_start, 0, 1).wait()
-    controller.post_touch_down(*f2_start, 1, 1).wait()
+    """双指捏合缩小地图(Maa 官方多点触控 API), 缩放到最大可视范围
+
+    手势规范(防抖动):
+      1. 两指低间隔同时落点: down 命令连续发出后再统一 wait, 间隔极小近似同时
+      2. 同时向内滑动: 每步两指 move 连续发出后再统一 wait, 同步推进不错位
+      3. 同时结束: 两指 up 连续发出后再统一 wait, 避免一先一后引起画面抖动
+    """
+    # 两指落点, 捏合终点向两指中点(约 625,328)各收缩 150px(每指移动量)
+    f1_start, f1_end = ZOOM_FINGER_A, (212, 165)
+    f2_start, f2_end = ZOOM_FINGER_B, (1038, 491)
+    steps = 8
+
+    # 1. 低间隔同时落点(两命令连续入队再统一等待)
+    d1 = controller.post_touch_down(*f1_start, 0, 1)
+    d2 = controller.post_touch_down(*f2_start, 1, 1)
+    d1.wait()
+    d2.wait()
     try:
         for i in range(1, steps + 1):
             t = i / steps
@@ -152,33 +383,43 @@ def pinch_zoom_out(controller):
                   int(f1_start[1] + (f1_end[1] - f1_start[1]) * t))
             p2 = (int(f2_start[0] + (f2_end[0] - f2_start[0]) * t),
                   int(f2_start[1] + (f2_end[1] - f2_start[1]) * t))
-            controller.post_touch_move(*p1, 0, 1).wait()
-            controller.post_touch_move(*p2, 1, 1).wait()
-            time.sleep(0.05)
+            # 2. 两指 move 连续发出再统一等待, 同步推进
+            m1 = controller.post_touch_move(*p1, 0, 1)
+            m2 = controller.post_touch_move(*p2, 1, 1)
+            m1.wait()
+            m2.wait()
+            time.sleep(0.02)
     finally:
-        # 异常时也确保释放两个触点, 避免屏幕卡在多指触控状态
-        controller.post_touch_up(0).wait()
-        controller.post_touch_up(1).wait()
-    time.sleep(0.5)
+        # 3. 两指 up 连续发出再统一等待, 同时结束
+        #    异常时也确保释放两个触点, 避免屏幕卡在多指触控状态
+        u1 = controller.post_touch_up(0)
+        u2 = controller.post_touch_up(1)
+        u1.wait()
+        u2.wait()
+    time.sleep(1.5)
 
 
 def pinch_zoom_in(controller, center, spread=360):
     """以 center 为中心双指外扩放大地图(Maa 官方多点触控 API)
     center: (cx, cy) 放大中心点
-    spread: 手指外扩总距离(px), 两指从 center 两侧同时展开"""
+    spread: 手指外扩总距离(px), 两指从 center 两侧同时展开
+    手势同步规范同 pinch_zoom_out: 低间隔同时落点 -> 同时外扩 -> 同时结束"""
     W, H = 1280, 720      # 屏幕宽高(统一 1280 宽坐标系, 720p)
     cx, cy = int(center[0]), int(center[1])
     half = spread // 2
     f1_start, f1_end = (cx - half, cy), (cx - spread, cy)
     f2_start, f2_end = (cx + half, cy), (cx + spread, cy)
-    steps = 6
+    steps = 8
 
     def clamp(x, y):
         # 触点钳制到有效屏幕范围内, center 接近边缘时也不会越界
         return max(0, min(W - 1, int(x))), max(0, min(H - 1, int(y)))
 
-    controller.post_touch_down(*clamp(*f1_start), 0, 1).wait()
-    controller.post_touch_down(*clamp(*f2_start), 1, 1).wait()
+    # 1. 低间隔同时落点(两命令连续入队再统一等待)
+    d1 = controller.post_touch_down(*clamp(*f1_start), 0, 1)
+    d2 = controller.post_touch_down(*clamp(*f2_start), 1, 1)
+    d1.wait()
+    d2.wait()
     try:
         for i in range(1, steps + 1):
             t = i / steps
@@ -186,14 +427,20 @@ def pinch_zoom_in(controller, center, spread=360):
                   f1_start[1] + (f1_end[1] - f1_start[1]) * t)
             p2 = (f2_start[0] + (f2_end[0] - f2_start[0]) * t,
                   f2_start[1] + (f2_end[1] - f2_start[1]) * t)
-            controller.post_touch_move(*clamp(*p1), 0, 1).wait()
-            controller.post_touch_move(*clamp(*p2), 1, 1).wait()
-            time.sleep(0.05)
+            # 2. 两指 move 连续发出再统一等待, 同步推进
+            m1 = controller.post_touch_move(*clamp(*p1), 0, 1)
+            m2 = controller.post_touch_move(*clamp(*p2), 1, 1)
+            m1.wait()
+            m2.wait()
+            time.sleep(0.02)
     finally:
-        # 异常时也确保释放两个触点, 避免屏幕卡在多指触控状态
-        controller.post_touch_up(0).wait()
-        controller.post_touch_up(1).wait()
-    time.sleep(0.5)
+        # 3. 两指 up 连续发出再统一等待, 同时结束
+        #    异常时也确保释放两个触点, 避免屏幕卡在多指触控状态
+        u1 = controller.post_touch_up(0)
+        u2 = controller.post_touch_up(1)
+        u1.wait()
+        u2.wait()
+    time.sleep(1.5)
 
 
 def is_paired(nx, ny, nw, nh, tx, ty, tw, th):
@@ -237,8 +484,40 @@ class QuestDetector:
         from ultralytics import YOLO
         self.model = YOLO(model_path)
 
+    @staticmethod
+    def _norm_img(img):
+        """规范化输入图像为 BGR uint8 numpy (H,W,3)
+        兼容 Maa screencap: 可能是 4通道(RGBA/ARGB) numpy, 或带 data/width/height 的 Image 对象
+        无法识别的类型: 记录日志并返回 None(快速失败), 由调用方处理错误路径,
+        不再原样透传导致错误在 ultralytics 内部抛出且无上下文"""
+        if not isinstance(img, np.ndarray):
+            if hasattr(img, "to_numpy"):
+                img = img.to_numpy()
+            elif hasattr(img, "data") and hasattr(img, "width") and hasattr(img, "height"):
+                w, h = int(img.width), int(img.height)
+                total = len(img.data)
+                ch = total // (w * h) if w > 0 and h > 0 else -1
+                # 显式算通道数(不依赖 -1 整除); frombuffer 只读 -> copy 可写
+                # (ultralytics/OpenCV 就地预处理需可写数组, 否则 ValueError: read-only)
+                if ch not in (1, 3, 4) or total != w * h * ch:
+                    mfaalog.error(f"[检测] 截图 data 长度 {total} 与 {w}x{h} 不匹配, 返回 None")
+                    return None
+                img = np.frombuffer(img.data, dtype=np.uint8).reshape(h, w, ch).copy()
+            else:
+                mfaalog.error(f"[检测] 截图类型 {type(img).__name__} 无法规范化, 返回 None")
+                return None
+        if img.ndim == 3 and img.shape[2] == 4:
+            img = img[:, :, :3]      # 丢弃 alpha 通道
+        if img.dtype != np.uint8:
+            img = img.astype(np.uint8)
+        return img
+
     def _infer(self, img, conf):
-        """整图推理, 返回 [(x1,y1,x2,y2,score,cls)] 原图坐标(ultralytics 原生后处理)"""
+        """整图推理, 返回 [(x1,y1,x2,y2,score,cls)] 原图坐标(ultralytics 原生后处理)
+        输入先规范化: Maa screencap 可能返回 RGBA(4通道) numpy, ultralytics 要求 3通道 uint8"""
+        img = self._norm_img(img)
+        if img is None:
+            return []      # 规范化失败(已记录日志), 按无检测结果处理, 不传给 ultralytics
         r = self.model(img, conf=conf, imgsz=self.IMGSZ, verbose=False)[0]
         res = []
         for b in r.boxes:
@@ -378,12 +657,20 @@ class GeneralNavigationAction(CustomAction):
             for i in range(ZOOM_ROUNDS):
                 pinch_zoom_out(controller)
                 mfaalog.info(f"[导航] 缩放第{i + 1}轮完成")
-            time.sleep(0.5)
+                prevent_touch(context)   # 缩放后检查误触进入关卡
+            time.sleep(1.5)
             # 反向滑动归位: 从左上角向右下角滑动几轮(每轮约200px), 让地图回到左上角起点
             for i in range(HOME_SWIPE_ROUNDS):
                 controller.post_swipe(*HOME_SWIPE_START, *HOME_SWIPE_END, SWIPE_DURATION).wait()
-                time.sleep(0.3)
-            time.sleep(0.5)
+                time.sleep(1.5)
+                prevent_touch(context)   # 滑动后检查误触进入关卡
+            time.sleep(1.5)
+            # 二次置顶归位: 归位滑动可能未完全到位, 向下滑动 2 次(手指下移=地图上滚=回顶部)
+            # 主循环 last_quests 从 None 开始, 首次截图不做"与上屏一致"到底判定, 不会误判
+            for i in range(HOME_RESET_ROUNDS):
+                controller.post_swipe(*SWIPE_START, SWIPE_START[0], SWIPE_START[1] + SWIPE_DIST, SWIPE_DURATION).wait()
+                time.sleep(1.5)
+                prevent_touch(context)   # 滑动后检查误触进入关卡
 
             # 步骤4: 特殊关卡: 目标在 special 配置中 -> 直接滑到底, 在指定位置放大后再走 YOLO+匹配识别
             # 特殊关卡识别不到: 地图最大缩放下该关卡被 UI 遮挡, 到底后在指定位置放大使其可见
@@ -392,18 +679,26 @@ class GeneralNavigationAction(CustomAction):
                 last_quests, empty_count, swipe_count = None, 0, 0
                 img = None
                 for round_idx in range(MAX_ROUNDS):
-                    img = controller.post_screencap().wait().get()
+                    img = QuestDetector._norm_img(controller.post_screencap().wait().get())
                     if img is None:
                         mfaalog.error("[导航] 截图失败")
                         return CustomAction.RunResult(success=False)
                     nametags, _tags = self._detector().detect(img)
+                    # 模板主导独占匹配(一屏多个框时避免重复/误抢)
+                    box_infos, box_crops = [], []
+                    for (nx, ny, nw, nh, _c) in nametags:
+                        nx, ny, nw, nh = int(nx), int(ny), int(nw), int(nh)
+                        crop = img[max(0, ny - PAD):ny + nh + PAD, max(0, nx - PAD):nx + nw + PAD]
+                        box_infos.append((nx, ny, nw, nh))
+                        box_crops.append(crop if crop.size else None)
+                    assigned, _un = greedy_match_boxes(box_crops, templates)
                     cur_set = set()
                     cur_quests = []
-                    for (nx, ny, nw, nh, _c) in nametags:
-                        name, _s = identify_quest(img[int(ny):int(ny + nh), int(nx):int(nx + nw)], templates)
-                        if name:
-                            cur_set.add(name)
-                            cur_quests.append((name, int(nx), int(ny)))
+                    for (bi, _bj, _s) in assigned:
+                        nx, ny, nw, nh = box_infos[bi]
+                        name = list(templates.keys())[_bj]
+                        cur_set.add(name)
+                        cur_quests.append((name, nx, ny))
                     cur_quests = sorted(cur_quests)
                     # 到底判定: 比较连续两屏检测框像素坐标, 完全一致才算到底
                     # (仅关卡名集合相同但坐标不同 = 地图实际在移动, 不算到底)
@@ -418,9 +713,10 @@ class GeneralNavigationAction(CustomAction):
                             mfaalog.info(f"[导航] 连续 {empty_count} 屏未识别到关卡, 判定到底")
                             break
                     last_quests = cur_quests
-                    controller.post_swipe(640, 600, 640, 600 - SWIPE_DIST, SWIPE_DURATION).wait()
+                    controller.post_swipe(*SWIPE_START, SWIPE_START[0], SWIPE_START[1] - SWIPE_DIST, SWIPE_DURATION).wait()
                     swipe_count += 1
-                    time.sleep(1.0)   # 移动后停顿1S, 等地图稳定后再截图检测
+                    time.sleep(1.5)   # 移动后停顿1.5S, 等地图稳定后再截图检测
+                    prevent_touch(context)   # 滑动后检查误触进入关卡
                 # 到底后: 在指定位置放大, 每轮放大后 YOLO+匹配识别, 命中即点击
                 cfg = special[target_quest]
                 center = tuple(int(v) for v in cfg.get("zoom_center", [640, 360]))
@@ -429,24 +725,33 @@ class GeneralNavigationAction(CustomAction):
                 for zi in range(zoom_rounds):
                     pinch_zoom_in(controller, center)
                     # 放大后微调视野: 先上移, 等地图稳定后再右移(慢速拖拽), 让被遮挡的关卡进入可视区
-                    controller.post_swipe(640, 600, 640, 600 - ZOOM_PULL_UP, ZOOM_PULL_DURATION).wait()
-                    time.sleep(0.5)   # 上移后等待地图稳定, 避免连续滑动被合并
+                    controller.post_swipe(*SWIPE_START, SWIPE_START[0], SWIPE_START[1] - ZOOM_PULL_UP, ZOOM_PULL_DURATION).wait()
+                    time.sleep(1.5)   # 上移后等待地图稳定, 避免连续滑动被合并
                     # 右滑分 3 段各 100px 累计, 单次长滑动实际位移不足
                     for _ in range(ZOOM_PULL_STEPS):
-                        controller.post_swipe(600, 600, 600 + ZOOM_PULL_STEP, 600, ZOOM_PULL_DURATION).wait()
-                        time.sleep(0.3)
-                    time.sleep(1.0)   # 移动后停顿, 等画面稳定再截图检测
+                        controller.post_swipe(*PULL_SWIPE_START, PULL_SWIPE_START[0] + ZOOM_PULL_STEP, PULL_SWIPE_START[1], ZOOM_PULL_DURATION).wait()
+                        time.sleep(1.5)
+                    time.sleep(1.5)   # 移动后停顿, 等画面稳定再截图检测
+                    prevent_touch(context)   # 放大微调滑动后检查误触进入关卡
                     mfaalog.info(f"[导航] 特殊关卡放大第{zi + 1}轮完成")
-                    img = controller.post_screencap().wait().get()
+                    img = QuestDetector._norm_img(controller.post_screencap().wait().get())
                     if img is None:
                         break
                     nametags, _tags = self._detector().detect(img)
+                    # 模板主导独占分配: 特殊放大画面也可能有多框, 独占分配避免误抢
+                    box_infos, box_crops = [], []
                     for (nx, ny, nw, nh, _c) in nametags:
                         nx, ny, nw, nh = int(nx), int(ny), int(nw), int(nh)
-                        crop = img[ny:ny + nh, nx:nx + nw]
-                        name, score = identify_quest(crop, templates)
+                        crop = img[max(0, ny - PAD):ny + nh + PAD, max(0, nx - PAD):nx + nw + PAD]
+                        box_infos.append((nx, ny, nw, nh))
+                        box_crops.append(crop if crop.size else None)
+                    assigned, _un = greedy_match_boxes(box_crops, templates)
+                    tpl_names = list(templates.keys())
+                    for (bi, bj, score) in assigned:
+                        name = tpl_names[bj]
                         if name != target_quest:
                             continue
+                        nx, ny, nw, nh = box_infos[bi]
                         cx, cy = nx + nw // 2, ny + nh // 2
                         mfaalog.info(f"[导航] 特殊关卡[{target_quest}] 放大后识别到, 点击 ({cx},{cy}) 匹配分 {score:.2f}")
                         controller.post_click(cx, cy).wait()
@@ -454,13 +759,16 @@ class GeneralNavigationAction(CustomAction):
                 mfaalog.error(f"[导航] 特殊关卡[{target_quest}] 放大 {zoom_rounds} 轮后仍未识别到 (滑动 {swipe_count} 次)")
                 return CustomAction.RunResult(success=False)
 
-            # 步骤5: 普通关卡滑动循环
-            last_quests = None       # 上一屏识别的关卡(名称+像素坐标)
+            # 步骤5: 普通关卡滑动循环(坐标表辅助: 候选过滤 + offset_y 反推闭环)
+            coords, _map_h = load_quest_coords(ROOT_DIR,
+                                               os.path.dirname(template.replace("\\", "/")).strip("/"))
+            offset_y = None          # 当前视角顶部在全景图中的y, 由识别结果反推(首屏只按x过滤)
+            last_bottom = None       # 上一屏底部关卡 (名称, 屏幕y), 用于到底判定
             empty_count = 0          # 连续空屏计数
             swipe_count = 0          # 已滑动次数
             for round_idx in range(MAX_ROUNDS):
                 mfaalog.info(f"[导航] === 第{round_idx + 1}屏 ===")
-                img = controller.post_screencap().wait().get()
+                img = QuestDetector._norm_img(controller.post_screencap().wait().get())
                 if img is None:
                     mfaalog.error("[导航] 截图失败")
                     return CustomAction.RunResult(success=False)
@@ -470,15 +778,18 @@ class GeneralNavigationAction(CustomAction):
                 mfaalog.info(f"[导航] 检测框 {len(nametags)} nametag, {len(tags)} tag")
 
                 # 5b. 对比识别 -> 当前屏关卡集合(含像素坐标), 目标在屏直接点击进入
-                cur_set = set()
-                cur_quests = []
+                # 模板主导独占分配(模板去找框): 每模板只认领最高分框(全局最高分优先),
+                # 每个框也最多被一个模板认领, 避免一模板被多框同时匹配(高分重复)或低分框抢占真框素材
+                box_infos, box_crops = [], []
                 for (nx, ny, nw, nh, _c) in nametags:
                     nx, ny, nw, nh = int(nx), int(ny), int(nw), int(nh)
-                    crop = img[ny:ny + nh, nx:nx + nw]
-                    name, score = identify_quest(crop, templates)
-                    if name is None:
-                        continue
-                    cur_set.add(name)
+                    crop = img[max(0, ny - PAD):ny + nh + PAD, max(0, nx - PAD):nx + nw + PAD]
+                    box_infos.append((nx, ny, nw, nh))
+                    box_crops.append(crop if crop.size else None)
+                assigned, offset_y = match_with_coords(box_infos, box_crops, templates, coords, offset_y)
+                cur_quests = []
+                for (bi, name, score) in assigned:
+                    nx, ny, nw, nh = box_infos[bi]
                     cur_quests.append((name, nx, ny))
                     mfaalog.info(f"[导航] 识别到关卡: {name} ({score:.2f}) 框=({nx},{ny},{nw},{nh})")
                     if name == target_quest:
@@ -488,24 +799,33 @@ class GeneralNavigationAction(CustomAction):
                         return CustomAction.RunResult(success=True)
                 cur_quests = sorted(cur_quests)
 
-                # 5c. 到底判定: 比较连续两屏检测框像素坐标, 完全一致才判定到底
-                # (关卡名集合相同但坐标不同 = 地图实际在移动, 不算到底)
+                # 5c. 到底判定: 看坐标表 Y 最大(底部)的关卡, 连续两屏屏幕y变化不大 => 地图已到底
                 if cur_quests:
                     empty_count = 0   # 检测到关卡 -> 重置连续空屏计数
-                    if last_quests is not None and cur_quests == last_quests:
-                        mfaalog.info(f"[导航] 滑到底, 关卡集合 {cur_set} 与上屏坐标完全一致")
-                        break
+                    if coords:
+                        bot_name, bot_sy, bot_ty = None, -1, -1
+                        for name, nx, ny in cur_quests:
+                            ty = coords.get(name, (0, 0))[1]
+                            if ty > bot_ty:
+                                bot_name, bot_sy, bot_ty = name, ny, ty
+                        if bot_name is not None and last_bottom is not None \
+                                and last_bottom[0] == bot_name and abs(bot_sy - last_bottom[1]) <= 2:
+                            mfaalog.info(f"[导航] 滑到底, 底部关卡[{bot_name}]两屏屏幕y "
+                                         f"{last_bottom[1]}->{bot_sy} 不再移动")
+                            break
+                        if bot_name is not None:
+                            last_bottom = (bot_name, bot_sy)
                 else:
                     empty_count += 1  # 空屏: 连续空屏达到阈值判定到底
                     if empty_count >= EMPTY_SCREEN_LIMIT:
                         mfaalog.info(f"[导航] 连续 {empty_count} 屏未识别到关卡, 判定到底")
                         break
-                last_quests = cur_quests
 
                 # 5d. 向下滑动(手指上滑, 看下方地图) 200px, 移动后停顿1S再检测
-                controller.post_swipe(640, 600, 640, 600 - SWIPE_DIST, SWIPE_DURATION).wait()
+                controller.post_swipe(*SWIPE_START, SWIPE_START[0], SWIPE_START[1] - SWIPE_DIST, SWIPE_DURATION).wait()
                 swipe_count += 1
-                time.sleep(1.0)
+                time.sleep(1.5)
+                prevent_touch(context)   # 滑动后检查误触进入关卡
 
             mfaalog.error(f"[导航] 滑到底未找到目标关卡: {target_quest} (共滑动 {swipe_count} 次)")
             return CustomAction.RunResult(success=False)
