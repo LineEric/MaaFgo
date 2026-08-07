@@ -85,7 +85,7 @@
     },
     "关卡选择": {
         "recognition": {
-            "type": "FeatureMatch",
+            "type": "TemplateMatch",
             "param": {
                 "roi": [
                     765,
@@ -96,7 +96,9 @@
                 "template": [
                     "map/Fuyuki/宅邸残迹.png"
                 ],
-                "count": 12
+                "threshold": [
+                    0.8
+                ]
             }
         },
         "action": {
