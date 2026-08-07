@@ -238,10 +238,10 @@ def locate_quest_near(img, tpl_bgr, px, py, radius=LOCAL_RADIUS, min_score=MT_MI
 # ---- 内联自 fallback_navigation(该模块已删除): 素材/坐标加载 + YOLO 检测 + 防误触 ----
 def resolve_quest_dir(root_dir, resource_package, template_path):
     """从运行时 template(map/{英文}/{关卡}.png) 推导导航素材目录
-    素材直接放章节文件夹: resource/{pkg}/image/map/{英文}/"""
-    pkg = resource_package if resource_package in ("cn", "jp") else "base"
+    素材约定: 日服放 base, 国服放 cn → resource/{base|cn}/image/map/{英文}/"""
+    pkg = "cn" if resource_package == "cn" else "base"
     folder = os.path.dirname(template_path).replace("\\", "/").strip("/")
-    return os.path.join(root_dir, "resource", pkg, "image", folder)
+    return os.path.join(root_dir, "resource", pkg, "image", *folder.split("/"))
 
 
 def load_quest_templates(quest_dir):
@@ -548,8 +548,9 @@ class GeneralNavigationAction(CustomAction):
             node = context.get_node_data(_argv.node_name) or {}
             target_quest = str((node.get("attach") or {}).get("quests") or "").strip()
             sel = context.get_node_data("关卡选择") or {}
+            # MaaFramework 5.x 官方 dump: recognition.param.template 为数组, 取第 0 个
             tpl_val = ((sel.get("recognition") or {}).get("param") or {}).get("template")
-            template = tpl_val if isinstance(tpl_val, str) else ""
+            template = tpl_val[0] if isinstance(tpl_val, list) and tpl_val else ""
             cfg = context.get_node_data("资源包配置") or {}
             resource_package = str((cfg.get("attach") or {}).get("resource_package") or "").strip()
             mfaalog.info(f"[导航] 导航参数: quest={target_quest} template={template} pkg={resource_package}")
