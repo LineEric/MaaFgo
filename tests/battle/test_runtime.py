@@ -221,7 +221,8 @@ def test_runtime_replaces_unavailable_np_with_face_card(monkeypatch):
             CardPick(PrimitiveKind.SELECT_CARD, 2),
         ),
     )
-    observations = iter((command, defeat))
+    # 选卡：进入选卡 -> 确认第1张仍选卡 -> 确认第2张仍选卡 -> 第3张自动开火 -> 下一回合读到失败
+    observations = iter((command, command, command, defeat))
     runtime = AutoBattleRuntime(
         _Context(), _Controller(), _FixedDecider(action), StrategyProfile()
     )
@@ -276,3 +277,97 @@ def test_runtime_rejects_invalid_np_slot_without_clicking():
     assert result.reason == "invalid_card_action:np_not_present"
     assert executor.np_slots == []
     assert executor.card_slots == []
+
+
+def test_runtime_confirms_still_in_command_selection_between_picks(monkeypatch):
+    """点击非末张卡后仍在选卡界面 -> 继续执行全部 picks。"""
+    command = BattleState(
+        scene=Scene.COMMAND_SELECTION,
+        scene_confidence=Confidence(0.99, "test"),
+        cards=tuple(
+            CommandCard(
+                ui_slot=slot,
+                color=CardColor.BUSTER,
+                owner_slot=None,
+                confidence=Confidence(0.99, "test"),
+            )
+            for slot in range(1, 6)
+        ),
+        np_cards=(),
+        enemies=(),
+    )
+    defeat = BattleState(
+        scene=Scene.DEFEAT,
+        scene_confidence=Confidence(0.99, "test"),
+        cards=(),
+        np_cards=(),
+        enemies=(),
+    )
+    action = BattleAction(
+        target_enemy=None,
+        picks=tuple(
+            CardPick(PrimitiveKind.SELECT_CARD, slot) for slot in (1, 2, 3)
+        ),
+    )
+    # 进入选卡 -> 确认 pick1 -> 确认 pick2 -> 第 3 张开火 -> 下一回合 defeat
+    observations = iter((command, command, command, defeat))
+    runtime = AutoBattleRuntime(
+        _Context(), _Controller(), _FixedDecider(action), StrategyProfile()
+    )
+    executor = _ExecutorTracksCalls()
+    runtime.executor = executor
+    monkeypatch.setattr(runtime, "_observe", lambda: next(observations))
+    monkeypatch.setattr(runtime, "_wait_turn_settled", lambda: True)
+    monkeypatch.setattr("battle.runtime.runtime.time.sleep", lambda _seconds: None)
+
+    result = runtime.run()
+
+    assert result.reason == "defeat"
+    assert executor.card_slots == [1, 2, 3]
+
+
+def test_runtime_fails_closed_when_leaves_command_selection_mid_pick(monkeypatch):
+    """点击非末张卡后不再处于选卡界面 -> fail-closed, 不执行剩余 pick。"""
+    command = BattleState(
+        scene=Scene.COMMAND_SELECTION,
+        scene_confidence=Confidence(0.99, "test"),
+        cards=tuple(
+            CommandCard(
+                ui_slot=slot,
+                color=CardColor.BUSTER,
+                owner_slot=None,
+                confidence=Confidence(0.99, "test"),
+            )
+            for slot in range(1, 6)
+        ),
+        np_cards=(),
+        enemies=(),
+    )
+    main = BattleState(
+        scene=Scene.MAIN_BATTLE,
+        scene_confidence=Confidence(0.99, "test"),
+        cards=(),
+        np_cards=(),
+        enemies=(),
+    )
+    action = BattleAction(
+        target_enemy=None,
+        picks=tuple(
+            CardPick(PrimitiveKind.SELECT_CARD, slot) for slot in (1, 2, 3)
+        ),
+    )
+    # 进入选卡 -> 点第1张后异常离开选卡界面(主界面) -> 确认失败
+    observations = iter((command, main))
+    runtime = AutoBattleRuntime(
+        _Context(), _Controller(), _FixedDecider(action), StrategyProfile()
+    )
+    executor = _ExecutorTracksCalls()
+    runtime.executor = executor
+    monkeypatch.setattr(runtime, "_observe", lambda: next(observations))
+    monkeypatch.setattr("battle.runtime.runtime.time.sleep", lambda _seconds: None)
+
+    result = runtime.run()
+
+    assert result.ok is False
+    assert result.reason == "selection_confirm_failed"
+    assert executor.card_slots == [1]

@@ -233,7 +233,7 @@ class AutoBattleRuntime:
     def _execute_selection(self, action) -> bool:
         picks = self._normalize_picks_for_execution(action.picks)
         mfaalog.info(f"[AutoBattle] _execute_selection() picks={picks}")
-        for p in picks:
+        for index, p in enumerate(picks):
             if p.kind is PrimitiveKind.SELECT_NP:
                 mfaalog.info(f"[AutoBattle] select_np(slot={p.slot})")
                 ok = self.executor.select_np(p.slot)
@@ -244,7 +244,21 @@ class AutoBattleRuntime:
             if not ok:
                 return False
             time.sleep(_PICK_DELAY_S)
+            # 除最后一张外，点击后必须仍在选卡界面（未误点出、未弹异常界面）。
+            # 最后一张会自动发动攻击，场景切换交给 _wait_turn_settled() 处理，
+            # 因此不在此确认，避免把正常开火误判为失败。
+            if index < len(picks) - 1 and not self._confirm_still_selecting():
+                mfaalog.info(
+                    "[AutoBattle] selection confirmation failed after pick; "
+                    "left command selection unexpectedly"
+                )
+                return False
         return True
+
+    def _confirm_still_selecting(self) -> bool:
+        """点击一张卡后，重观测确认仍在选卡界面（未误点出 / 未弹异常界面）。"""
+        state = self._observe()
+        return state.scene is Scene.COMMAND_SELECTION
 
     def _normalize_picks_for_execution(self, picks) -> tuple[CardPick, ...]:
         """Keep command-card execution moving when perception returns partial picks."""
