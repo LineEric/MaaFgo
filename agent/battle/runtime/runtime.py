@@ -15,7 +15,7 @@ from dataclasses import dataclass, replace
 
 from ..core.decider import Decider
 from ..core.enums import PrimitiveKind, Scene
-from ..core.models import CardPick
+from ..core.models import CardPick, is_slot
 from ..core.policy import StrategyProfile
 from ..core.validator import (
     skip_unusable_servant_skills,
@@ -34,27 +34,19 @@ _UNKNOWN_TIMEOUT_S = 15.0
 _POLL_FREEZE_MS = 500
 # 胜利后结算点击流（掉落/羁绊/结果多屏）的最大耗时
 _SETTLEMENT_TIMEOUT_S = 90.0
+# 每次选卡后的固定间隔，等待卡牌选中态渲染
+_PICK_DELAY_S = 1.0
+
+# —— 等待超时（秒）：均为真机验证过的正常时序；异常才用这些上限判定卡死 ——
+_OPEN_CARDS_TIMEOUT_S = 5.0         # 点击攻击后确认进入选卡界面
+_SKILL_TARGET_TIMEOUT_S = 5.0       # 技能目标子屏出现
+_SKILL_ANIM_TIMEOUT_S = 15.0        # 施放技能后动画结束回到主界面
+_MASTER_SKILL_RETURN_TIMEOUT_S = 10.0  # 御主技能后回主界面或进换人界面
+_ORDER_CHANGE_OPEN_TIMEOUT_S = 10.0    # 换人界面出现
+_ORDER_CHANGE_RETURN_TIMEOUT_S = 25.0  # 换人完成后回主界面
 
 _TERMINAL_OR_MAIN = (Scene.MAIN_BATTLE, Scene.VICTORY, Scene.DEFEAT)
 _KNOWN_SCENES = (Scene.MAIN_BATTLE, Scene.COMMAND_SELECTION, Scene.SKILL_TARGET_SELECTION, Scene.ORDER_CHANGE, Scene.VICTORY, Scene.DEFEAT)
-_STRUCTURAL_MAIN_ERRORS = {
-    "main_action_contains_card_picks",
-    "invalid_servant_skill",
-    "duplicate_servant_skill",
-    "invalid_skill_target",
-    "invalid_master_skill",
-    "duplicate_master_skill",
-    "order_change_without_master_skill",
-    "invalid_order_change_member",
-}
-_STRUCTURAL_CARD_ERRORS = {
-    "card_action_contains_main_actions",
-    "need_exactly_3_picks",
-    "duplicate_picks",
-}
-
-
-
 
 @dataclass(frozen=True)
 class BattleResult:
@@ -109,7 +101,7 @@ class AutoBattleRuntime:
                     mfaalog.info(f"[AutoBattle] servant skill skipped: {reason}")
                 verdict = validate_main_action(action, state, self.profile)
                 if not verdict.ok:
-                    if _is_structural_main_error(verdict.reason, action):
+                    if verdict.fatal:
                         mfaalog.info(f"[AutoBattle] Main action rejected: {verdict.reason}")
                         return BattleResult.fail(
                             f"invalid_main_action:{verdict.reason}", turns
@@ -161,7 +153,7 @@ class AutoBattleRuntime:
                     mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
                     return BattleResult.fail("open_cards_failed", turns)
                 mfaalog.info("[AutoBattle] command cards clicked, confirming command selection scene...")
-                if not self._wait_until((Scene.COMMAND_SELECTION,), 5.0):
+                if not self._wait_until((Scene.COMMAND_SELECTION,), _OPEN_CARDS_TIMEOUT_S):
                     mfaalog.info("[AutoBattle] command selection confirmation failed; stopping safely")
                     return BattleResult.fail("open_cards_confirm_failed", turns)
                 mfaalog.info("[AutoBattle] command cards opened and confirmed")
@@ -179,7 +171,7 @@ class AutoBattleRuntime:
                 mfaalog.info(f"[AutoBattle] Decided Action: {action}")
                 
                 verdict = validate_card_action(action, state, self.profile)
-                if not verdict.ok and _is_structural_card_error(verdict.reason, action):
+                if not verdict.ok and verdict.fatal:
                     mfaalog.info(f"[AutoBattle] Card action rejected: {verdict.reason}")
                     return BattleResult.fail(
                         f"invalid_card_action:{verdict.reason}", turns
@@ -192,7 +184,7 @@ class AutoBattleRuntime:
                         f"revalidated={verdict.ok} reason={verdict.reason}"
                     )
                 if not verdict.ok:
-                    if _is_structural_card_error(verdict.reason, action):
+                    if verdict.fatal:
                         mfaalog.info(f"[AutoBattle] Card action rejected: {verdict.reason}")
                         return BattleResult.fail(
                             f"invalid_card_action:{verdict.reason}", turns
@@ -251,7 +243,7 @@ class AutoBattleRuntime:
             mfaalog.info(f"[AutoBattle] pick result: ok={ok}")
             if not ok:
                 return False
-            time.sleep(1)
+            time.sleep(_PICK_DELAY_S)
         return True
 
     def _normalize_picks_for_execution(self, picks) -> tuple[CardPick, ...]:
@@ -333,80 +325,90 @@ class AutoBattleRuntime:
     def _execute_skills(self, action) -> bool:
         for sk in action.servant_skills:
             if not (
-                _is_slot(sk.servant_slot, 1, 3)
-                and _is_slot(sk.skill_index, 1, 3)
-                and (sk.target_ally is None or _is_slot(sk.target_ally, 1, 3))
+                is_slot(sk.servant_slot, 1, 3)
+                and is_slot(sk.skill_index, 1, 3)
+                and (sk.target_ally is None or is_slot(sk.target_ally, 1, 3))
             ):
                 mfaalog.info(f"[AutoBattle] invalid servant skill skipped: {sk}")
                 continue
             mfaalog.info(f"[AutoBattle] cast_servant_skill(slot={sk.servant_slot}, idx={sk.skill_index})")
-            self._mark_action("cast_servant_skill")
-            self.executor.cast_servant_skill(sk.servant_slot, sk.skill_index)
-            if self._close_skill_use_dialog_if_present():
-                continue
-            if sk.target_ally is not None:
-                mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
-                if self._wait_until((Scene.SKILL_TARGET_SELECTION,), 5.0):
-                    mfaalog.info(f"[AutoBattle] selecting skill target ally={sk.target_ally}")
-                    self.executor.select_skill_target(sk.target_ally)
-                else:
-                    mfaalog.info("[AutoBattle] failed to see skill target sub-screen!")
-                    return False
-            # Wait for animation to finish and return to MAIN_BATTLE
-            if not self._wait_until((Scene.MAIN_BATTLE,), 15.0):
+            if not self._execute_skill_cast(
+                "cast_servant_skill",
+                lambda: self.executor.cast_servant_skill(sk.servant_slot, sk.skill_index),
+                sk.target_ally,
+                (Scene.MAIN_BATTLE,),
+                _SKILL_ANIM_TIMEOUT_S,
+            ):
                 return False
 
         for sk in action.master_skills:
             if not (
-                _is_slot(sk.skill_index, 1, 3)
-                and (sk.target_ally is None or _is_slot(sk.target_ally, 1, 3))
+                is_slot(sk.skill_index, 1, 3)
+                and (sk.target_ally is None or is_slot(sk.target_ally, 1, 3))
             ):
                 mfaalog.info(f"[AutoBattle] invalid master skill skipped: {sk}")
                 continue
             mfaalog.info(f"[AutoBattle] cast_master_skill(idx={sk.skill_index})")
-            self._mark_action("cast_master_skill")
-            self.executor.cast_master_skill(sk.skill_index)
-            if self._close_skill_use_dialog_if_present():
-                continue
-            if sk.target_ally is not None:
-                mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
-                if self._wait_until((Scene.SKILL_TARGET_SELECTION,), 5.0):
-                    mfaalog.info(f"[AutoBattle] selecting skill target ally={sk.target_ally}")
-                    self.executor.select_skill_target(sk.target_ally)
-                else:
-                    return False
-            # 御主技能可能是换人技能 → 进入 ORDER_CHANGE 场景
-            # 也可能直接回 MAIN_BATTLE（普通技能）
-            if action.order_change is not None:
-                # 换人技能：等 ORDER_CHANGE 场景，由后面的 order_change 逻辑处理
-                if not self._wait_until((Scene.ORDER_CHANGE, Scene.MAIN_BATTLE), 10.0):
-                    return False
-            else:
-                if not self._wait_until((Scene.MAIN_BATTLE,), 15.0):
-                    return False
+            # 御主技能可能是换人技能 → 之后进 ORDER_CHANGE；也可能是普通技能直接回 MAIN_BATTLE
+            return_scenes = (
+                (Scene.ORDER_CHANGE, Scene.MAIN_BATTLE)
+                if action.order_change is not None
+                else (Scene.MAIN_BATTLE,)
+            )
+            return_timeout = (
+                _MASTER_SKILL_RETURN_TIMEOUT_S
+                if action.order_change is not None
+                else _SKILL_ANIM_TIMEOUT_S
+            )
+            if not self._execute_skill_cast(
+                "cast_master_skill",
+                lambda: self.executor.cast_master_skill(sk.skill_index),
+                sk.target_ally,
+                return_scenes,
+                return_timeout,
+            ):
+                return False
 
         if action.order_change is not None:
             oc = action.order_change
             if not (
-                _is_slot(oc.starting_member_idx, 1, 3)
-                and _is_slot(oc.sub_member_idx, 4, 6)
+                is_slot(oc.starting_member_idx, 1, 3)
+                and is_slot(oc.sub_member_idx, 4, 6)
             ):
                 mfaalog.info(f"[AutoBattle] invalid order change skipped: {oc}")
                 return True
             mfaalog.info(f"[AutoBattle] order_change(starting={oc.starting_member_idx}, sub={oc.sub_member_idx})")
             # 换人技能已由前面的 master_skills 触发（御主换人服技能）
             # 等待换人界面出现
-            if not self._wait_until((Scene.ORDER_CHANGE,), 10.0):
+            if not self._wait_until((Scene.ORDER_CHANGE,), _ORDER_CHANGE_OPEN_TIMEOUT_S):
                 mfaalog.info("[AutoBattle] failed to see order change screen!")
                 return False
             # 在换人界面选择首发成员和候补成员
             self._mark_action("order_change")
             self.executor.order_change(oc.starting_member_idx, oc.sub_member_idx)
             # 等待回到主界面
-            if not self._wait_until((Scene.MAIN_BATTLE,), 25.0):
+            if not self._wait_until((Scene.MAIN_BATTLE,), _ORDER_CHANGE_RETURN_TIMEOUT_S):
                 return False
 
         return True
+
+    def _execute_skill_cast(self, label, cast_callable, target_ally, return_scenes, return_timeout):
+        """通用技能执行核：cast → 关技能提示窗 → 选目标子屏 → 等待回到指定场景。
+
+        返回 True 表示本技能处理完成（含"触发 CD 提示窗而跳过后续"）；False 表示卡死/确认失败。
+        """
+        self._mark_action(label)
+        cast_callable()
+        if self._close_skill_use_dialog_if_present():
+            return True
+        if target_ally is not None:
+            mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
+            if not self._wait_until((Scene.SKILL_TARGET_SELECTION,), _SKILL_TARGET_TIMEOUT_S):
+                mfaalog.info("[AutoBattle] failed to see skill target sub-screen!")
+                return False
+            mfaalog.info(f"[AutoBattle] selecting skill target ally={target_ally}")
+            self.executor.select_skill_target(target_ally)
+        return self._wait_until(return_scenes, return_timeout)
 
     def _close_skill_use_dialog_if_present(self) -> bool:
         """关闭 CD 技能提示窗，并让后续流程继续执行。"""
@@ -457,38 +459,3 @@ class AutoBattleRuntime:
             self.ctx.wait_freezes(_POLL_FREEZE_MS)
         mfaalog.info(f"[AutoBattle] _wait_until() timed out")
         return False
-
-
-def _is_slot(value: object, low: int, high: int) -> bool:
-    """Return whether value is an integer slot within the inclusive range."""
-    return type(value) is int and low <= value <= high
-
-
-def _is_structural_main_error(reason: str, action) -> bool:
-    if reason in _STRUCTURAL_MAIN_ERRORS:
-        return True
-    return reason == "invalid_enemy_target" and not _is_slot(
-        action.target_enemy, 1, 3
-    )
-
-
-def _is_structural_card_error(reason: str, action) -> bool:
-    if reason in _STRUCTURAL_CARD_ERRORS or reason.startswith(
-        "forbidden_pick_kind:"
-    ):
-        return True
-    if reason == "invalid_enemy_target":
-        return not _is_slot(action.target_enemy, 1, 3)
-    if reason == "card_not_present":
-        return any(
-            pick.kind is PrimitiveKind.SELECT_CARD
-            and not _is_slot(pick.slot, 1, 5)
-            for pick in action.picks
-        )
-    if reason == "np_not_present":
-        return any(
-            pick.kind is PrimitiveKind.SELECT_NP
-            and not _is_slot(pick.slot, 1, 3)
-            for pick in action.picks
-        )
-    return False

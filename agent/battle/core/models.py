@@ -15,6 +15,11 @@ from .enums import CardColor, PrimitiveKind, Scene
 SCHEMA_VERSION = 1
 
 
+def is_slot(value: object, low: int, high: int) -> bool:
+    """Return whether ``value`` is an integer within ``[low, high]`` (inclusive)."""
+    return type(value) is int and low <= value <= high
+
+
 @dataclass(frozen=True)
 class Confidence:
     value: float

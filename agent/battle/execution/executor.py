@@ -9,6 +9,13 @@ from __future__ import annotations
 
 from . import coords
 
+import time
+
+
+# 两步点击之间的固定间隔；配合 controller 时序保证点击生效
+_MASTER_SKILL_MENU_DELAY_S = 0.5
+_ORDER_CHANGE_STEP_DELAY_S = 0.3
+
 
 class Executor:
     def __init__(self, context, controller=None) -> None:
@@ -43,9 +50,8 @@ class Executor:
         return True
 
     def cast_master_skill(self, skill_index: int) -> bool:
-        import time
         self._click(coords.MASTER_SKILL_MENU_BTN)
-        time.sleep(0.5)
+        time.sleep(_MASTER_SKILL_MENU_DELAY_S)
         self._click(coords.MASTER_SKILL_CLICK[skill_index])
         return True
 
@@ -55,11 +61,10 @@ class Executor:
         return True
 
     def order_change(self, starting_member_idx: int, sub_member_idx: int) -> bool:
-        import time
         self._click(coords.ORDER_CHANGE_MEMBER[starting_member_idx])
-        time.sleep(0.3)
+        time.sleep(_ORDER_CHANGE_STEP_DELAY_S)
         self._click(coords.ORDER_CHANGE_MEMBER[sub_member_idx])
-        time.sleep(0.3)
+        time.sleep(_ORDER_CHANGE_STEP_DELAY_S)
         self._click(coords.ORDER_CHANGE_CONFIRM_BTN)
         return True
 
