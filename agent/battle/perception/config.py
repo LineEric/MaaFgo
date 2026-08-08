@@ -38,6 +38,9 @@ SERVANT_SKILL_CD_NODE = "战斗_从者{servant_slot}技能{skill_index}_CD"
 MASTER_SKILL_NODE = "战斗_御主技能{skill_index}"
 MASTER_SKILL_CD_NODE = "战斗_御主技能{skill_index}_CD"
 
+# 技能处于 CD 时点击后弹出的提示窗。
+SKILL_USE_DIALOG_NODE = "战斗_技能使用弹窗"
+
 # 结算流程终点识别节点：结算点击流走完、回到关卡列表/主界面的稳定特征。
 # TODO(标定): 需真机 720p 截图后在 assets/resource/.../自动战斗_感知.json 中新增此节点。
 SETTLEMENT_DONE_NODE = "战斗_结算完成"

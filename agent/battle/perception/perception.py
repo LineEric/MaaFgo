@@ -72,6 +72,12 @@ def reached_post_battle(context, img) -> bool:
     return bool(r and r.hit)
 
 
+def skill_use_dialog_present(context, img) -> bool:
+    """是否出现"技能使用"提示窗。通常由点击 CD 中的技能触发。"""
+    r = _reco(context, config.SKILL_USE_DIALOG_NODE, img)
+    return bool(r and r.hit)
+
+
 def _detect_scene(context, img) -> Tuple[Scene, float]:
     # 命中哪个场景节点就是哪个；都不命中 -> UNKNOWN
     for scene_key, node in config.SCENE_NODES.items():

@@ -24,9 +24,6 @@ from battle.core.plan_parser import (_load_action_param, _parse_plan,
                                     _parse_strategy_profile)
 from battle.core.policy import CardPolicy, StrategyProfile
 from battle.runtime.runtime import AutoBattleRuntime
-from battle.vision.config import VisionConfig
-from battle.vision.provider import create_provider
-from battle.vision.orchestrator import VisionOrchestrator
 
 
 @AgentServer.custom_action("auto_battle")
@@ -41,23 +38,13 @@ class AutoBattleAction(CustomAction):
         # 获取一个新的 handle，只有第一次有效。因此在这里获取一次并传递下去。
         controller = context.tasker.controller
 
-        vision_orchestrator = None
-        vision_config = VisionConfig.from_mapping(param.get("vision"))
-        if vision_config.enabled:
-            vision_provider = create_provider(vision_config)
-            vision_orchestrator = VisionOrchestrator(vision_provider, vision_config)
-            mfaalog.info(
-                f"[auto_battle] vision enabled provider={vision_config.provider} "
-                f"model={vision_config.model} max_calls_per_turn={vision_config.max_calls_per_turn}"
-            )
-
         plan_status = "loaded" if plan is not None else "none"
         plan_turns = len(plan.turns) if plan is not None else 0
         mfaalog.info(
             f"[auto_battle] start profile={profile.id} "
             f"max_turns={profile.max_turns} plan={plan_status} plan_turns={plan_turns}"
         )
-        result = AutoBattleRuntime(context, controller, decider, profile, vision_orchestrator=vision_orchestrator).run()
+        result = AutoBattleRuntime(context, controller, decider, profile).run()
         mfaalog.info(f"[auto_battle] end ok={result.ok} reason={result.reason} turns={result.turns}")
 
         # TODO(save_evidence)：失败时保存截图/状态证据

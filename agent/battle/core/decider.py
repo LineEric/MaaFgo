@@ -80,14 +80,12 @@ class RuleDecider:
 
         # ---- 宝具卡选择 ----
         np_picks: List[CardPick] = []
-        available_np = {c.servant_slot: c for c in state.np_cards}
 
         if tp is not None and tp.np_order:
-            # 按计划指定的宝具顺序选卡
+            # 固定计划优先按配置点击宝具，不依赖 NP OCR 是否识别成功。
             for slot in tp.np_order:
-                if slot in available_np and len(np_picks) < 3:
+                if slot not in {pick.slot for pick in np_picks} and len(np_picks) < 3:
                     np_picks.append(CardPick(PrimitiveKind.SELECT_NP, slot))
-                    del available_np[slot]
         elif self.policy.np_first:
             # 无计划：有宝具就优先出
             np_picks = [CardPick(PrimitiveKind.SELECT_NP, c.servant_slot)

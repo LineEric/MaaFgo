@@ -1,3 +1,8 @@
+# ARCHIVED - Vision (V3 multimodal) is shelved (2026-08-08).
+# This file is NOT collected by pytest (renamed off the test_*.py glob).
+# Kept for a future V3 return. Restore it as tests/battle/test_vision.py
+# and re-wire battle.vision into auto_battle_action/runtime to re-enable.
+
 """多模态视觉层离线测试。"""
 from __future__ import annotations
 

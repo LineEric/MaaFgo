@@ -147,6 +147,22 @@
       }
     }
   },
+  "战斗_技能使用弹窗": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          556,
+          156,
+          146,
+          42
+        ],
+        "expected": [
+          "技能使用"
+        ]
+      }
+    }
+  },
   "战斗_换人界面": {
     "recognition": {
       "type": "OCR",

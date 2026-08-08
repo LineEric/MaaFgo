@@ -11,10 +11,11 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from ..core.decider import Decider
 from ..core.enums import PrimitiveKind, Scene
+from ..core.models import CardPick
 from ..core.policy import StrategyProfile
 from ..core.validator import (
     skip_unusable_servant_skills,
@@ -23,8 +24,6 @@ from ..core.validator import (
 )
 from ..execution.executor import Executor
 from ..perception import perception
-from ..vision.orchestrator import VisionOrchestrator, encode_png
-from ..vision.trigger import VisionRuntimeTracker
 import mfaalog
 
 # 选完卡后等攻击动画结束（20~40s，留足余量）
@@ -38,6 +37,23 @@ _SETTLEMENT_TIMEOUT_S = 90.0
 
 _TERMINAL_OR_MAIN = (Scene.MAIN_BATTLE, Scene.VICTORY, Scene.DEFEAT)
 _KNOWN_SCENES = (Scene.MAIN_BATTLE, Scene.COMMAND_SELECTION, Scene.SKILL_TARGET_SELECTION, Scene.ORDER_CHANGE, Scene.VICTORY, Scene.DEFEAT)
+_STRUCTURAL_MAIN_ERRORS = {
+    "main_action_contains_card_picks",
+    "invalid_servant_skill",
+    "duplicate_servant_skill",
+    "invalid_skill_target",
+    "invalid_master_skill",
+    "duplicate_master_skill",
+    "order_change_without_master_skill",
+    "invalid_order_change_member",
+}
+_STRUCTURAL_CARD_ERRORS = {
+    "card_action_contains_main_actions",
+    "need_exactly_3_picks",
+    "duplicate_picks",
+}
+
+
 
 
 @dataclass(frozen=True)
@@ -56,14 +72,12 @@ class BattleResult:
 
 
 class AutoBattleRuntime:
-    def __init__(self, context, controller, decider: Decider, profile: StrategyProfile, vision_orchestrator: VisionOrchestrator | None = None, vision_tracker: VisionRuntimeTracker | None = None) -> None:
+    def __init__(self, context, controller, decider: Decider, profile: StrategyProfile) -> None:
         self.ctx = context
         self.controller = controller
         self.decider = decider
         self.profile = profile
         self.executor = Executor(context, controller)
-        self.vision_orchestrator = vision_orchestrator
-        self.vision_tracker = vision_tracker or VisionRuntimeTracker()
         self._turn_index = 0
 
     def run(self) -> BattleResult:
@@ -91,17 +105,18 @@ class AutoBattleRuntime:
                 action, skipped_skills = skip_unusable_servant_skills(
                     action, state, self.profile
                 )
-                for skipped in skipped_skills:
-                    mfaalog.info(
-                        f"[AutoBattle] servant skill skipped safely: {skipped}"
-                    )
+                for reason in skipped_skills:
+                    mfaalog.info(f"[AutoBattle] servant skill skipped: {reason}")
                 verdict = validate_main_action(action, state, self.profile)
                 if not verdict.ok:
+                    if _is_structural_main_error(verdict.reason, action):
+                        mfaalog.info(f"[AutoBattle] Main action rejected: {verdict.reason}")
+                        return BattleResult.fail(
+                            f"invalid_main_action:{verdict.reason}", turns
+                        )
                     mfaalog.info(
-                        f"[AutoBattle] Main action rejected by validator: {verdict.reason}"
-                    )
-                    return BattleResult.fail(
-                        f"main_action_rejected:{verdict.reason}", turns
+                        "[AutoBattle] Main action validation warning; "
+                        f"continuing: {verdict.reason}"
                     )
 
                 if action.target_enemy is not None:
@@ -114,11 +129,14 @@ class AutoBattleRuntime:
                     )
                     if enemy is None:
                         mfaalog.info(
-                            f"[AutoBattle] target enemy {action.target_enemy} not detected"
+                            "[AutoBattle] target enemy "
+                            f"{action.target_enemy} not detected; skip target click"
                         )
-                        return BattleResult.fail("target_enemy_not_detected", turns)
+                        enemy = None
 
-                    if enemy.targeted:
+                    if enemy is None:
+                        pass
+                    elif enemy.targeted:
                         mfaalog.info(
                             f"[AutoBattle] enemy {action.target_enemy} already targeted, skip click"
                         )
@@ -128,9 +146,11 @@ class AutoBattleRuntime:
                         )
                         self._mark_action("select_enemy")
                         if not self.executor.select_enemy(action.target_enemy):
-                            return BattleResult.fail("select_enemy_failed", turns)
+                            mfaalog.info("[AutoBattle] select_enemy failed; continuing")
                         if not self._wait_until_enemy_targeted(action.target_enemy):
-                            return BattleResult.fail("enemy_target_confirm_failed", turns)
+                            mfaalog.info(
+                                "[AutoBattle] enemy target confirmation failed; continuing"
+                            )
 
                 if not self._execute_skills(action):
                     return BattleResult.fail("skill_execution_failed", turns)
@@ -159,9 +179,28 @@ class AutoBattleRuntime:
                 mfaalog.info(f"[AutoBattle] Decided Action: {action}")
                 
                 verdict = validate_card_action(action, state, self.profile)
+                if not verdict.ok and _is_structural_card_error(verdict.reason, action):
+                    mfaalog.info(f"[AutoBattle] Card action rejected: {verdict.reason}")
+                    return BattleResult.fail(
+                        f"invalid_card_action:{verdict.reason}", turns
+                    )
+                if not verdict.ok and verdict.reason == "np_not_present":
+                    action = self._replace_unavailable_np_picks(action, state)
+                    verdict = validate_card_action(action, state, self.profile)
+                    mfaalog.info(
+                        "[AutoBattle] unavailable NP removed; "
+                        f"revalidated={verdict.ok} reason={verdict.reason}"
+                    )
                 if not verdict.ok:
-                    mfaalog.info(f"[AutoBattle] Action rejected by validator! Reason: {verdict.reason}")
-                    return BattleResult.fail(f"action_rejected:{verdict.reason}", turns)
+                    if _is_structural_card_error(verdict.reason, action):
+                        mfaalog.info(f"[AutoBattle] Card action rejected: {verdict.reason}")
+                        return BattleResult.fail(
+                            f"invalid_card_action:{verdict.reason}", turns
+                        )
+                    mfaalog.info(
+                        "[AutoBattle] Card action validation warning; "
+                        f"continuing: {verdict.reason}"
+                    )
                     
                 mfaalog.info("[AutoBattle] Executing picks...")
                 if not self._execute_selection(action):
@@ -193,31 +232,16 @@ class AutoBattleRuntime:
         img = self.controller.post_screencap().wait().get()
         mfaalog.info(f"[AutoBattle] _observe() -> screencap done, shape={img.shape if img is not None else 'None'}")
         result = perception.build(self.ctx, img)
-        vision_result = None
         mfaalog.info(f"[AutoBattle] _observe() -> perception built, scene={result.scene.name}")
-        if self.vision_orchestrator is not None and img is not None:
-            image_bytes = encode_png(img)
-            tracked = self.vision_tracker.observe(result.scene, image_bytes, unknown_fields=result.unknown_fields)
-            vision_result = self.vision_orchestrator.analyze_state_if_needed(image_bytes, result, tracked.context, turn_index=self._turn_index)
-            if vision_result.call.response is not None:
-                response = vision_result.call.response
-                if response.observation is not None:
-                    mfaalog.info(f"[AutoBattle] vision supplement accepted model={response.model} conflicts={len(vision_result.conflicts)}")
-                elif response.error:
-                    mfaalog.info(f"[AutoBattle] vision supplement failed: {response.error}")
-            elif vision_result.call.skipped:
-                mfaalog.info(f"[AutoBattle] vision skipped: {vision_result.call.reason}")
-        if vision_result is not None and vision_result.effective_state is not None:
-            result = vision_result.effective_state
         return result
 
     def _mark_action(self, action: str) -> None:
-        if self.vision_orchestrator is not None:
-            self.vision_tracker.mark_action(action)
+        mfaalog.info(f"[AutoBattle] action: {action}")
 
     def _execute_selection(self, action) -> bool:
-        mfaalog.info(f"[AutoBattle] _execute_selection() picks={action.picks}")
-        for p in action.picks:
+        picks = self._normalize_picks_for_execution(action.picks)
+        mfaalog.info(f"[AutoBattle] _execute_selection() picks={picks}")
+        for p in picks:
             if p.kind is PrimitiveKind.SELECT_NP:
                 mfaalog.info(f"[AutoBattle] select_np(slot={p.slot})")
                 ok = self.executor.select_np(p.slot)
@@ -229,6 +253,69 @@ class AutoBattleRuntime:
                 return False
             time.sleep(1)
         return True
+
+    def _normalize_picks_for_execution(self, picks) -> tuple[CardPick, ...]:
+        """Keep command-card execution moving when perception returns partial picks."""
+        normalized: list[CardPick] = []
+        selected_face_slots: set[int] = set()
+        selected_np_slots: set[int] = set()
+
+        for pick in picks:
+            if len(normalized) >= 3:
+                break
+            if type(pick.slot) is not int:
+                continue
+            if pick.kind is PrimitiveKind.SELECT_NP and 1 <= pick.slot <= 3:
+                if pick.slot in selected_np_slots:
+                    continue
+                selected_np_slots.add(pick.slot)
+                normalized.append(pick)
+                continue
+            if pick.kind is PrimitiveKind.SELECT_CARD and 1 <= pick.slot <= 5:
+                if pick.slot in selected_face_slots:
+                    continue
+                selected_face_slots.add(pick.slot)
+                normalized.append(pick)
+
+        if len(normalized) < 3:
+            mfaalog.info(
+                "[AutoBattle] command picks incomplete after validation warning; "
+                "padding with face cards"
+            )
+        for slot in range(1, 6):
+            if len(normalized) >= 3:
+                break
+            if slot in selected_face_slots:
+                continue
+            selected_face_slots.add(slot)
+            normalized.append(CardPick(PrimitiveKind.SELECT_CARD, slot))
+
+        return tuple(normalized)
+
+    @staticmethod
+    def _replace_unavailable_np_picks(action, state):
+        """Replace NP picks missing from state with detected face cards."""
+        available_np_slots = {card.servant_slot for card in state.np_cards}
+        available_face_slots = {card.ui_slot for card in state.cards}
+        picks = [
+            pick
+            for pick in action.picks
+            if pick.kind is not PrimitiveKind.SELECT_NP
+            or pick.slot in available_np_slots
+        ]
+        selected_face_slots = {
+            pick.slot
+            for pick in picks
+            if pick.kind is PrimitiveKind.SELECT_CARD
+        }
+        for slot in sorted(available_face_slots):
+            if len(picks) >= 3:
+                break
+            if slot in selected_face_slots:
+                continue
+            picks.append(CardPick(PrimitiveKind.SELECT_CARD, slot))
+            selected_face_slots.add(slot)
+        return replace(action, picks=tuple(picks[:3]))
 
     def _wait_until_enemy_targeted(self, slot: int, timeout_s: float = 3.0) -> bool:
         """点击敌人后确认职介框蓝色选中态已经出现。"""
@@ -245,9 +332,18 @@ class AutoBattleRuntime:
 
     def _execute_skills(self, action) -> bool:
         for sk in action.servant_skills:
+            if not (
+                _is_slot(sk.servant_slot, 1, 3)
+                and _is_slot(sk.skill_index, 1, 3)
+                and (sk.target_ally is None or _is_slot(sk.target_ally, 1, 3))
+            ):
+                mfaalog.info(f"[AutoBattle] invalid servant skill skipped: {sk}")
+                continue
             mfaalog.info(f"[AutoBattle] cast_servant_skill(slot={sk.servant_slot}, idx={sk.skill_index})")
             self._mark_action("cast_servant_skill")
             self.executor.cast_servant_skill(sk.servant_slot, sk.skill_index)
+            if self._close_skill_use_dialog_if_present():
+                continue
             if sk.target_ally is not None:
                 mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
                 if self._wait_until((Scene.SKILL_TARGET_SELECTION,), 5.0):
@@ -261,9 +357,17 @@ class AutoBattleRuntime:
                 return False
 
         for sk in action.master_skills:
+            if not (
+                _is_slot(sk.skill_index, 1, 3)
+                and (sk.target_ally is None or _is_slot(sk.target_ally, 1, 3))
+            ):
+                mfaalog.info(f"[AutoBattle] invalid master skill skipped: {sk}")
+                continue
             mfaalog.info(f"[AutoBattle] cast_master_skill(idx={sk.skill_index})")
             self._mark_action("cast_master_skill")
             self.executor.cast_master_skill(sk.skill_index)
+            if self._close_skill_use_dialog_if_present():
+                continue
             if sk.target_ally is not None:
                 mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
                 if self._wait_until((Scene.SKILL_TARGET_SELECTION,), 5.0):
@@ -283,6 +387,12 @@ class AutoBattleRuntime:
 
         if action.order_change is not None:
             oc = action.order_change
+            if not (
+                _is_slot(oc.starting_member_idx, 1, 3)
+                and _is_slot(oc.sub_member_idx, 4, 6)
+            ):
+                mfaalog.info(f"[AutoBattle] invalid order change skipped: {oc}")
+                return True
             mfaalog.info(f"[AutoBattle] order_change(starting={oc.starting_member_idx}, sub={oc.sub_member_idx})")
             # 换人技能已由前面的 master_skills 触发（御主换人服技能）
             # 等待换人界面出现
@@ -296,6 +406,17 @@ class AutoBattleRuntime:
             if not self._wait_until((Scene.MAIN_BATTLE,), 25.0):
                 return False
 
+        return True
+
+    def _close_skill_use_dialog_if_present(self) -> bool:
+        """关闭 CD 技能提示窗，并让后续流程继续执行。"""
+        self.ctx.wait_freezes(_POLL_FREEZE_MS)
+        img = self.controller.post_screencap().wait().get()
+        if not perception.skill_use_dialog_present(self.ctx, img):
+            return False
+        mfaalog.info("[AutoBattle] skill-use dialog detected; closing and continuing")
+        self.executor.close_skill_use_dialog()
+        self.ctx.wait_freezes(_POLL_FREEZE_MS)
         return True
 
     def _drive_settlement(self, turns: int) -> BattleResult:
@@ -336,3 +457,38 @@ class AutoBattleRuntime:
             self.ctx.wait_freezes(_POLL_FREEZE_MS)
         mfaalog.info(f"[AutoBattle] _wait_until() timed out")
         return False
+
+
+def _is_slot(value: object, low: int, high: int) -> bool:
+    """Return whether value is an integer slot within the inclusive range."""
+    return type(value) is int and low <= value <= high
+
+
+def _is_structural_main_error(reason: str, action) -> bool:
+    if reason in _STRUCTURAL_MAIN_ERRORS:
+        return True
+    return reason == "invalid_enemy_target" and not _is_slot(
+        action.target_enemy, 1, 3
+    )
+
+
+def _is_structural_card_error(reason: str, action) -> bool:
+    if reason in _STRUCTURAL_CARD_ERRORS or reason.startswith(
+        "forbidden_pick_kind:"
+    ):
+        return True
+    if reason == "invalid_enemy_target":
+        return not _is_slot(action.target_enemy, 1, 3)
+    if reason == "card_not_present":
+        return any(
+            pick.kind is PrimitiveKind.SELECT_CARD
+            and not _is_slot(pick.slot, 1, 5)
+            for pick in action.picks
+        )
+    if reason == "np_not_present":
+        return any(
+            pick.kind is PrimitiveKind.SELECT_NP
+            and not _is_slot(pick.slot, 1, 3)
+            for pick in action.picks
+        )
+    return False

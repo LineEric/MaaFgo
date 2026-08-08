@@ -49,6 +49,11 @@ class Executor:
         self._click(coords.MASTER_SKILL_CLICK[skill_index])
         return True
 
+    def close_skill_use_dialog(self) -> bool:
+        """关闭点击 CD 技能后出现的"技能使用"提示窗。"""
+        self._click(coords.SKILL_USE_DIALOG_CLOSE_BTN)
+        return True
+
     def order_change(self, starting_member_idx: int, sub_member_idx: int) -> bool:
         import time
         self._click(coords.ORDER_CHANGE_MEMBER[starting_member_idx])

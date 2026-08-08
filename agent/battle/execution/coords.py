@@ -92,6 +92,11 @@ MASTER_SKILL_CLICK = {
     idx: center(roi) for idx, roi in MASTER_SKILL_ROI.items()
 }
 
+# 点击 CD 中技能后出现的"技能使用"提示窗。
+SKILL_USE_DIALOG_TITLE_ROI = (556, 156, 146, 42)
+SKILL_USE_DIALOG_CLOSE_ROI = (1088, 166, 48, 27)
+SKILL_USE_DIALOG_CLOSE_BTN = center(SKILL_USE_DIALOG_CLOSE_ROI)
+
 # 换人界面（Order Change）场景识别 ROI（OCR "请从首发成员和候补成员中"）
 ORDER_CHANGE_SCENE_ROI = (339, 134, 625, 63)
 
@@ -120,4 +125,3 @@ SETTLEMENT_CALIBRATED = False
 #   ⚠ 标定注意：该点必须只推进结算，绝不能落在"连续出击/继续出击"的确认钮上，
 #     否则会误触发下一场战斗（违背安全边界）。若结算含连续出击弹窗，需另标一个"取消连续出击"节点+坐标。
 SETTLEMENT_CONTINUE = (0, 0)  # 占位，未标定
-
