@@ -9,7 +9,7 @@ from battle.core.enums import CardColor, PrimitiveKind, Scene
 from battle.core.models import (BattleAction, BattlePlan, BattleState, CardPick,
                                  CommandCard, Confidence, EnemyState, MasterSkillAction,
                                  NpCard, OrderChangeAction, ServantSkillAction, SkillState, ServantState, TurnPlan)
-from battle.core.policy import CardPolicy, Goal, StrategyProfile
+from battle.core.policy import BattlePolicy, CardPolicy, Goal, SkillPolicy, StrategyProfile
 from battle.core.decider import RuleDecider
 from battle.core.validator import (
     skip_unusable_master_skills,
@@ -203,12 +203,42 @@ def _main_battle_state(enemies=None):
 
 
 def test_main_battle_no_plan_returns_empty_skills():
+    # auto_servant_skills=False 时，无计划返回空技能
     state = _main_battle_state()
-    action = RuleDecider().decide(state, turn_index=0)
+    policy = BattlePolicy(skill=SkillPolicy(auto_servant_skills=False))
+    action = RuleDecider(policy).decide(state, turn_index=0)
     assert action.servant_skills == ()
     assert action.master_skills == ()
     assert action.order_change is None
     assert action.picks == ()
+
+
+def test_main_battle_no_plan_auto_servant_skills():
+    # 默认 auto_servant_skills=True：无计划时自动放可用从者技能
+    state = _main_battle_state()
+    action = RuleDecider().decide(state, turn_index=0)
+    assert action.master_skills == ()
+    assert action.order_change is None
+    assert action.picks == ()
+    # 从者1 的 3 个技能都 available=True → 全部自动放
+    assert len(action.servant_skills) == 3
+    assert all(s.servant_slot == 1 for s in action.servant_skills)
+    assert {s.skill_index for s in action.servant_skills} == {1, 2, 3}
+
+
+def test_main_battle_no_plan_skill_policy_filters():
+    # SkillPolicy 过滤：只放 1 号位、跳过技能2、每回合最多 1 个
+    state = _main_battle_state()
+    policy = BattlePolicy(skill=SkillPolicy(
+        auto_servant_skills=True,
+        servant_slots=(1,),
+        skip_skill_indexes=(2,),
+        max_skills_per_turn=1,
+    ))
+    action = RuleDecider(policy).decide(state, turn_index=0)
+    assert len(action.servant_skills) == 1
+    assert action.servant_skills[0].servant_slot == 1
+    assert action.servant_skills[0].skill_index != 2
 
 
 def test_main_battle_with_plan_returns_skills():

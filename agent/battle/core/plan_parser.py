@@ -5,10 +5,12 @@
 from __future__ import annotations
 
 import json
+from typing import Tuple
 
 from battle.core.models import (BattlePlan, MasterSkillAction, OrderChangeAction,
                                 ServantSkillAction, TurnPlan)
-from battle.core.policy import StrategyProfile
+from battle.core.policy import (BattlePolicy, CardPolicy, Goal, SkillPolicy,
+                                StrategyProfile)
 
 
 def _parse_plan(param: dict | None) -> BattlePlan | None:
@@ -139,4 +141,84 @@ def _parse_strategy_profile(param: dict) -> StrategyProfile:
         max_turns = 20
     max_turns = max(1, min(max_turns, 100))
     return StrategyProfile(id=profile_id, max_turns=max_turns)
+
+
+def _parse_battle_policy(param: dict) -> BattlePolicy:
+    """从 custom_action_param 解析 BattlePolicy（选卡策略 + 技能策略）。
+
+    参数格式示例：
+    {
+        "card_policy": {
+            "goal": "finish_wave",
+            "color_priority": ["B", "A", "Q"],
+            "np_first": true,
+            "prefer_mighty_chain": true
+        },
+        "skill_policy": {
+            "auto_servant_skills": true,
+            "servant_slots": [1, 2],
+            "max_skills_per_turn": 3,
+            "skip_skill_indexes": [2],
+            "use_master_skills": false
+        }
+    }
+    """
+    card_param = param.get("card_policy", {})
+    if not isinstance(card_param, dict):
+        card_param = {}
+
+    goal_raw = card_param.get("goal", "finish_wave")
+    goal = Goal.FINISH_WAVE
+    if isinstance(goal_raw, str):
+        try:
+            goal = Goal(goal_raw)
+        except ValueError:
+            goal = Goal.FINISH_WAVE
+
+    color_priority = (CardColor.BUSTER, CardColor.ARTS, CardColor.QUICK)
+    cp_raw = card_param.get("color_priority")
+    if isinstance(cp_raw, list):
+        parsed = []
+        for c in cp_raw:
+            if c == "B":
+                parsed.append(CardColor.BUSTER)
+            elif c == "A":
+                parsed.append(CardColor.ARTS)
+            elif c == "Q":
+                parsed.append(CardColor.QUICK)
+        if len(parsed) == 3:
+            color_priority = tuple(parsed)
+
+    card = CardPolicy(
+        goal=goal,
+        color_priority=color_priority,
+        np_first=bool(card_param.get("np_first", True)),
+        prefer_mighty_chain=bool(card_param.get("prefer_mighty_chain", True)),
+    )
+
+    skill_param = param.get("skill_policy", {})
+    if not isinstance(skill_param, dict):
+        skill_param = {}
+
+    def _int_list(v) -> Tuple[int, ...]:
+        if not isinstance(v, list):
+            return ()
+        out = []
+        for x in v:
+            if isinstance(x, int) and not isinstance(x, bool):
+                out.append(x)
+        return tuple(out)
+
+    skill = SkillPolicy(
+        auto_servant_skills=bool(skill_param.get("auto_servant_skills", True)),
+        servant_slots=_int_list(skill_param.get("servant_slots")),
+        max_skills_per_turn=skill_param.get("max_skills_per_turn", 0)
+        if isinstance(skill_param.get("max_skills_per_turn", 0), int)
+        and not isinstance(skill_param.get("max_skills_per_turn", 0), bool)
+        else 0,
+        skip_skill_indexes=_int_list(skill_param.get("skip_skill_indexes")),
+        use_master_skills=bool(skill_param.get("use_master_skills", False)),
+    )
+
+    return BattlePolicy(card=card, skill=skill)
 

@@ -16,8 +16,8 @@ from typing import List, Optional, Protocol, Tuple
 
 from .enums import CardColor, PrimitiveKind, Scene
 from .models import (BattleAction, BattlePlan, BattleState, CardPick,
-                     CommandCard, TurnPlan)
-from .policy import CardPolicy, Goal
+                     CommandCard, ServantSkillAction, TurnPlan, is_slot)
+from .policy import BattlePolicy, CardPolicy, Goal, SkillPolicy
 
 _GOAL_COLOR = {
     Goal.FINISH_WAVE: CardColor.BUSTER,
@@ -31,10 +31,23 @@ class Decider(Protocol):
 
 
 class RuleDecider:
-    def __init__(self, policy: CardPolicy | None = None,
+    def __init__(self, policy: BattlePolicy | CardPolicy | None = None,
                  plan: BattlePlan | None = None) -> None:
-        self.policy = policy or CardPolicy()
+        if isinstance(policy, BattlePolicy):
+            self.policy = policy
+        elif isinstance(policy, CardPolicy):
+            self.policy = BattlePolicy(card=policy)
+        else:
+            self.policy = BattlePolicy()
         self.plan = plan
+
+    @property
+    def card_policy(self) -> CardPolicy:
+        return self.policy.card
+
+    @property
+    def skill_policy(self) -> SkillPolicy:
+        return self.policy.skill
 
     def decide(self, state: BattleState, turn_index: int = 0) -> BattleAction:
         target = _pick_target(state)
@@ -48,14 +61,15 @@ class RuleDecider:
     def _decide_main_battle(self, state: BattleState, turn_index: int,
                             target) -> BattleAction:
         if self.plan is None:
-            # 无计划：空技能，直接开卡
+            # 无计划：按 SkillPolicy 自动决策可用的从者技能
+            servant_skills = _auto_servant_skills(state, self.skill_policy)
             return BattleAction(
                 target_enemy=target,
                 picks=(),
-                servant_skills=(),
+                servant_skills=servant_skills,
                 master_skills=(),
                 order_change=None,
-                rationale_tag="v2:main_battle_no_plan"
+                rationale_tag="v2:main_battle_auto_skills"
             )
 
         tp = self.plan.turn(turn_index)
@@ -86,7 +100,7 @@ class RuleDecider:
             for slot in tp.np_order:
                 if slot not in {pick.slot for pick in np_picks} and len(np_picks) < 3:
                     np_picks.append(CardPick(PrimitiveKind.SELECT_NP, slot))
-        elif self.policy.np_first:
+        elif self.card_policy.np_first:
             # 无计划：有宝具就优先出
             np_picks = [CardPick(PrimitiveKind.SELECT_NP, c.servant_slot)
                         for c in state.np_cards][:3]
@@ -95,7 +109,7 @@ class RuleDecider:
         need = 3 - len(np_picks)
         face_picks: List[CardPick] = []
         if need > 0 and state.cards:
-            slots = _best_face_order(state.cards, min(need, len(state.cards)), self.policy)
+            slots = _best_face_order(state.cards, min(need, len(state.cards)), self.card_policy)
             face_picks = [CardPick(PrimitiveKind.SELECT_CARD, s) for s in slots]
 
         picks = tuple((np_picks + face_picks)[:3])
@@ -103,7 +117,7 @@ class RuleDecider:
         # 计划中指定的敌人目标优先
         enemy = tp.target_enemy if (tp is not None and tp.target_enemy is not None) else target
 
-        tag = f"v2:turn{turn_index}" if tp is not None else f"v2:{self.policy.goal.value}"
+        tag = f"v2:turn{turn_index}" if tp is not None else f"v2:{self.card_policy.goal.value}"
         return BattleAction(
             target_enemy=enemy,
             picks=picks,
@@ -116,6 +130,42 @@ def _pick_target(state: BattleState):
     if tgt is None:
         tgt = next((e.slot for e in state.enemies if e.alive), None)
     return tgt
+
+
+def _auto_servant_skills(state: BattleState, skill_policy: SkillPolicy) -> Tuple[ServantSkillAction, ...]:
+    """无计划时按 SkillPolicy 自动决策可用的从者技能。
+
+    规则：
+    - auto_servant_skills=False → 不自动放技能
+    - servant_slots 非空 → 只放指定从者的技能
+    - skip_skill_indexes → 跳过指定技能索引
+    - max_skills_per_turn > 0 → 每回合最多放 N 个技能
+    - available is True → 加入技能序列；False（CD）或 None（未知）→ 跳过
+    技能可用性过滤由 Runtime 的统一安全门（skip_unusable_servant_skills）兜底。
+    """
+    if not skill_policy.auto_servant_skills:
+        return ()
+
+    slots = set(skill_policy.servant_slots) if skill_policy.servant_slots else None
+    skip = set(skill_policy.skip_skill_indexes)
+
+    skills: List[ServantSkillAction] = []
+    for servant in state.servants:
+        if not is_slot(servant.slot, 1, 3):
+            continue
+        if slots is not None and servant.slot not in slots:
+            continue
+        for idx, skill_state in enumerate(servant.skills, start=1):
+            if idx in skip:
+                continue
+            if skill_state.available is True:
+                skills.append(ServantSkillAction(
+                    servant_slot=servant.slot,
+                    skill_index=idx,
+                ))
+        if skill_policy.max_skills_per_turn > 0 and len(skills) >= skill_policy.max_skills_per_turn:
+            break
+    return tuple(skills[:skill_policy.max_skills_per_turn] if skill_policy.max_skills_per_turn > 0 else skills)
 
 
 def _best_face_order(cards: Tuple[CommandCard, ...], need: int, policy: CardPolicy) -> List[int]:

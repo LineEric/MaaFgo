@@ -23,6 +23,28 @@ class CardPolicy:
 
 
 @dataclass(frozen=True)
+class SkillPolicy:
+    """技能决策策略。"""
+    # 无计划时是否自动使用从者技能
+    auto_servant_skills: bool = True
+    # 自动使用哪些从者的技能（空 = 全部从者）
+    servant_slots: Tuple[int, ...] = ()
+    # 每回合最多自动放几个技能（0 = 不限制）
+    max_skills_per_turn: int = 0
+    # 跳过指定技能索引（如 (2,) 表示跳过所有从者的技能2）
+    skip_skill_indexes: Tuple[int, ...] = ()
+    # 是否使用御主技能（默认 False：只使用英灵技能）
+    use_master_skills: bool = False
+
+
+@dataclass(frozen=True)
+class BattlePolicy:
+    """战斗策略（顶层）：选卡策略 + 技能策略。"""
+    card: CardPolicy = field(default_factory=CardPolicy)
+    skill: SkillPolicy = field(default_factory=SkillPolicy)
+
+
+@dataclass(frozen=True)
 class StrategyProfile:
     id: str = "farm-safe-v1"
     min_scene_confidence: float = 0.95

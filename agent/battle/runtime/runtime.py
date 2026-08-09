@@ -16,7 +16,7 @@ from dataclasses import dataclass, replace
 from ..core.decider import Decider
 from ..core.enums import PrimitiveKind, Scene
 from ..core.models import CardPick, is_slot
-from ..core.policy import StrategyProfile
+from ..core.policy import BattlePolicy, StrategyProfile
 from ..core.validator import (
     skip_unusable_servant_skills,
     validate_card_action,
@@ -64,11 +64,13 @@ class BattleResult:
 
 
 class AutoBattleRuntime:
-    def __init__(self, context, controller, decider: Decider, profile: StrategyProfile) -> None:
+    def __init__(self, context, controller, decider: Decider, profile: StrategyProfile,
+                 battle_policy: BattlePolicy | None = None) -> None:
         self.ctx = context
         self.controller = controller
         self.decider = decider
         self.profile = profile
+        self.battle_policy = battle_policy or BattlePolicy()
         self.executor = Executor(context, controller)
         self._turn_index = 0
 
@@ -356,6 +358,12 @@ class AutoBattleRuntime:
                 return False
 
         for sk in action.master_skills:
+            if not self.battle_policy.skill.use_master_skills:
+                mfaalog.info(
+                    f"[AutoBattle] master skill skipped (use_master_skills=False): "
+                    f"idx={sk.skill_index}"
+                )
+                continue
             if not (
                 is_slot(sk.skill_index, 1, 3)
                 and (sk.target_ally is None or is_slot(sk.target_ally, 1, 3))

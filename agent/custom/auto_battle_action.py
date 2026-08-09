@@ -22,9 +22,9 @@ from maa.custom_action import CustomAction
 import mfaalog
 from battle.core.decider import RuleDecider
 from battle.core.models import BattlePlan
-from battle.core.plan_parser import (_load_action_param, _parse_plan,
-                                    _parse_strategy_profile)
-from battle.core.policy import CardPolicy, StrategyProfile
+from battle.core.plan_parser import (_load_action_param, _parse_battle_policy,
+                                    _parse_plan, _parse_strategy_profile)
+from battle.core.policy import StrategyProfile
 from battle.data.chaldea_converter import convert_chaldea_actions_to_battle_plan
 from battle.runtime.runtime import AutoBattleRuntime
 from chaldea import fetch_share_data
@@ -35,10 +35,11 @@ class AutoBattleAction(CustomAction):
     def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
         param = _load_action_param(argv.custom_action_param)
         profile = _parse_strategy_profile(param)
+        battle_policy = _parse_battle_policy(param)
         plan = _parse_plan(param)
         if plan is None:
             plan = _plan_from_chaldea_share(param)
-        decider = RuleDecider(CardPolicy(), plan=plan)
+        decider = RuleDecider(battle_policy, plan=plan)
 
         # Agent 模式下，每次调用 context.tasker.controller 都会通过反向 IPC
         # 获取一个新的 handle，只有第一次有效。因此在这里获取一次并传递下去。
@@ -50,7 +51,7 @@ class AutoBattleAction(CustomAction):
             f"[auto_battle] start profile={profile.id} "
             f"max_turns={profile.max_turns} plan={plan_status} plan_turns={plan_turns}"
         )
-        result = AutoBattleRuntime(context, controller, decider, profile).run()
+        result = AutoBattleRuntime(context, controller, decider, profile, battle_policy).run()
         mfaalog.info(f"[auto_battle] end ok={result.ok} reason={result.reason} turns={result.turns}")
 
         # TODO(save_evidence)：失败时保存截图/状态证据
