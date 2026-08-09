@@ -9,13 +9,19 @@
             "turns": [
               {
                 "servant_skills": [
-                  {"servant_slot": 1, "skill_index": 1}
+                  {
+                    "servant_slot": 1,
+                    "skill_index": 1
+                  }
                 ]
               }
             ]
           }
         }
       }
-    }
+    },
+    "next": [
+      "结束战斗"
+    ]
   }
 }

@@ -5,7 +5,10 @@
       "param": {
         "custom_action": "auto_battle"
       }
-    }
+    },
+    "next": [
+      "结束战斗"
+    ]
   },
   "原生自动战斗_Chaldea入口": {
     "action": {
@@ -17,6 +20,9 @@
           "max_turns": 20
         }
       }
-    }
+    },
+    "next": [
+      "结束战斗"
+    ]
   }
 }

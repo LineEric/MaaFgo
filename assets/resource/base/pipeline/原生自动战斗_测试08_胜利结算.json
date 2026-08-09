@@ -12,6 +12,9 @@
           "save_evidence": true
         }
       }
-    }
+    },
+    "next": [
+      "结束战斗"
+    ]
   }
 }

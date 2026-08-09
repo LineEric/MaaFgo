@@ -9,13 +9,22 @@
             "turns": [
               {
                 "servant_skills": [
-                  {"servant_slot": 1, "skill_index": 1}
+                  {
+                    "servant_slot": 1,
+                    "skill_index": 1
+                  }
                 ],
-                "np_order": [1]
+                "np_order": [
+                  1
+                ]
               },
               {
                 "servant_skills": [
-                  {"servant_slot": 3, "skill_index": 2, "target_ally": 1}
+                  {
+                    "servant_slot": 3,
+                    "skill_index": 2,
+                    "target_ally": 1
+                  }
                 ],
                 "np_order": []
               }
@@ -23,6 +32,9 @@
           }
         }
       }
-    }
+    },
+    "next": [
+      "结束战斗"
+    ]
   }
 }

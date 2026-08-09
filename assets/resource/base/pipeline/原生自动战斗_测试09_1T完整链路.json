@@ -11,25 +11,62 @@
             "turns": [
               {
                 "servant_skills": [
-                  {"servant_slot": 1, "skill_index": 1},
-                  {"servant_slot": 1, "skill_index": 2},
-                  {"servant_slot": 1, "skill_index": 3},
-                  {"servant_slot": 2, "skill_index": 1},
-                  {"servant_slot": 2, "skill_index": 3, "target_ally": 1},
-                  {"servant_slot": 3, "skill_index": 1, "target_ally": 1},
-                  {"servant_slot": 3, "skill_index": 2},
-                  {"servant_slot": 3, "skill_index": 3, "target_ally": 1}
+                  {
+                    "servant_slot": 1,
+                    "skill_index": 1
+                  },
+                  {
+                    "servant_slot": 1,
+                    "skill_index": 2
+                  },
+                  {
+                    "servant_slot": 1,
+                    "skill_index": 3
+                  },
+                  {
+                    "servant_slot": 2,
+                    "skill_index": 1
+                  },
+                  {
+                    "servant_slot": 2,
+                    "skill_index": 3,
+                    "target_ally": 1
+                  },
+                  {
+                    "servant_slot": 3,
+                    "skill_index": 1,
+                    "target_ally": 1
+                  },
+                  {
+                    "servant_slot": 3,
+                    "skill_index": 2
+                  },
+                  {
+                    "servant_slot": 3,
+                    "skill_index": 3,
+                    "target_ally": 1
+                  }
                 ],
                 "master_skills": [
-                  {"skill_index": 1, "target_ally": 1},
-                  {"skill_index": 2}
+                  {
+                    "skill_index": 1,
+                    "target_ally": 1
+                  },
+                  {
+                    "skill_index": 2
+                  }
                 ],
-                "np_order": [1]
+                "np_order": [
+                  1
+                ]
               }
             ]
           }
         }
       }
-    }
+    },
+    "next": [
+      "结束战斗"
+    ]
   }
 }

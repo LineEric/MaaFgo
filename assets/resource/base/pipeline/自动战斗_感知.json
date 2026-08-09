@@ -225,20 +225,6 @@
   "战斗_未知弹窗": {
     "action": "DoNothing"
   },
-  "战斗_技能使用弹窗": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [
-          547,
-          156,
-          157,
-          47
-        ],
-        "expected": "技能使用"
-      }
-    }
-  },
   "战斗_从者1技能1_CD": {
     "recognition": {
       "type": "OCR",
