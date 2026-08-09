@@ -81,8 +81,8 @@ def skip_unusable_master_skills(
     seen: set[int] = set()
     for skill in action.master_skills:
         if (
-            not _is_slot(skill.skill_index, 1, 3)
-            or (skill.target_ally is not None and not _is_slot(skill.target_ally, 1, 3))
+            not is_slot(skill.skill_index, 1, 3)
+            or (skill.target_ally is not None and not is_slot(skill.target_ally, 1, 3))
         ):
             return action, ()
         if skill.skill_index in seen:

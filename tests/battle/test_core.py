@@ -55,15 +55,60 @@ def test_np_first_then_fill_to_three():
 
 
 def test_no_np_finish_wave_prefers_buster_first_and_last():
+    # 关闭三色连锁时，清场目标下首尾都是红卡
     state = make_state(
         cards=[_card(1, "A"), _card(2, "B"), _card(3, "Q"), _card(4, "B"), _card(5, "A")],
     )
-    policy = CardPolicy(goal=Goal.FINISH_WAVE)
+    policy = CardPolicy(goal=Goal.FINISH_WAVE, prefer_mighty_chain=False)
     action = RuleDecider(policy).decide(state)
     slots = [p.slot for p in action.picks]
     assert all(p.kind is PrimitiveKind.SELECT_CARD for p in action.picks)
     assert slots[0] in (2, 4)     # 首卡 Buster
     assert slots[-1] in (2, 4)    # 末卡 Buster
+
+
+def test_mighty_chain_finish_wave_prefers_qab_order():
+    # 清场目标下三色连锁：QAB（绿垫刀，红末位吃最高倍率）
+    cards = [_card(1, "A"), _card(2, "B"), _card(3, "Q")]
+    state = make_state(cards)
+    policy = CardPolicy(goal=Goal.FINISH_WAVE)
+    action = RuleDecider(policy).decide(state)
+    slots = [p.slot for p in action.picks]
+    colors = [cards[s - 1].color for s in slots]
+    assert colors == [CardColor.QUICK, CardColor.ARTS, CardColor.BUSTER]  # QAB
+
+
+def test_mighty_chain_build_np_prefers_bqa_order():
+    # 攒NP目标下三色连锁：BQA（红首位压血线，蓝末位吃140%）
+    cards = [_card(1, "A"), _card(2, "B"), _card(3, "Q")]
+    state = make_state(cards)
+    policy = CardPolicy(goal=Goal.BUILD_NP)
+    action = RuleDecider(policy).decide(state)
+    slots = [p.slot for p in action.picks]
+    colors = [cards[s - 1].color for s in slots]
+    assert colors == [CardColor.BUSTER, CardColor.QUICK, CardColor.ARTS]  # BQA
+
+
+def test_mighty_chain_build_stars_prefers_abq_order():
+    # 攒星目标下三色连锁：ABQ（蓝首位，绿末位吃112%）
+    cards = [_card(1, "A"), _card(2, "B"), _card(3, "Q")]
+    state = make_state(cards)
+    policy = CardPolicy(goal=Goal.BUILD_STARS)
+    action = RuleDecider(policy).decide(state)
+    slots = [p.slot for p in action.picks]
+    colors = [cards[s - 1].color for s in slots]
+    assert colors == [CardColor.ARTS, CardColor.BUSTER, CardColor.QUICK]  # ABQ
+
+
+def test_mighty_chain_preferred_when_three_colors_available():
+    # 红蓝绿各一张时，优先触发三色连锁（红蓝绿各一张）
+    cards = [_card(1, "A"), _card(2, "B"), _card(3, "Q"), _card(4, "B"), _card(5, "A")]
+    state = make_state(cards)
+    policy = CardPolicy(goal=Goal.FINISH_WAVE)
+    action = RuleDecider(policy).decide(state)
+    slots = [p.slot for p in action.picks]
+    colors = {cards[s - 1].color for s in slots}
+    assert len(colors) == 3        # 三色连锁：红蓝绿各一张
 
 
 def test_three_np_cards_all_np():

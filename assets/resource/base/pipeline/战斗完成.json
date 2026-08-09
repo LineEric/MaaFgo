@@ -21,7 +21,8 @@
     "结算推进": {
         "action": "Click",
         "next": [
-            "[JumpBack]结算推进"
+            "[JumpBack]结算推进",
+            "作战成功"
         ],
         "post_wait_freezes": 1000,
         "recognition": "OCR",

@@ -19,6 +19,7 @@ class CardPolicy:
     goal: Goal = Goal.FINISH_WAVE
     color_priority: Tuple[CardColor, ...] = (CardColor.BUSTER, CardColor.ARTS, CardColor.QUICK)
     np_first: bool = True                 # 有宝具卡则优先出
+    prefer_mighty_chain: bool = True      # 三色连锁（红蓝绿各一张）优先
 
 
 @dataclass(frozen=True)

@@ -127,9 +127,35 @@ def _best_face_order(cards: Tuple[CommandCard, ...], need: int, policy: CardPoli
         n = len(seq)
         for pos, card in enumerate(seq):
             s += weights.get(card.color, 0) * (n - pos)      # 靠前的卡权重更高
-        if len(set(c.color for c in seq)) == 1:              # 同色链
+        colors = {c.color for c in seq}
+        if len(colors) == 1:                                 # 同色链
             s += 5.0
+        elif len(colors) == 3 and policy.prefer_mighty_chain:
+            # 三色连锁（红蓝绿各一张）：全卡享受三种首卡染色加成，
+            # 顺序偏好取决于目标：
+            #   FINISH_WAVE → QAB（绿垫刀，红末位吃最高倍率）
+            #   BUILD_NP    → BQA（红首位压血线，蓝末位吃140%）
+            #   BUILD_STARS → ABQ（蓝首位，绿末位吃112%）
+            s += 8.0
+            if goal_color is not None:
+                # 目标色卡放末位（吃最高位置加成）
+                if seq[-1].color is goal_color:
+                    s += 4.0
+                # 根据目标推荐首位
+                if goal_color is CardColor.BUSTER:
+                    # FINISH_WAVE: 绿卡首位垫刀
+                    if seq[0].color is CardColor.QUICK:
+                        s += 3.0
+                elif goal_color is CardColor.ARTS:
+                    # BUILD_NP: 红卡首位压血线
+                    if seq[0].color is CardColor.BUSTER:
+                        s += 3.0
+                elif goal_color is CardColor.QUICK:
+                    # BUILD_STARS: 蓝卡首位
+                    if seq[0].color is CardColor.ARTS:
+                        s += 3.0
         if goal_color is not None:
+            # 通用：首卡/末卡目标色加分（同色链、三色链、杂色均适用）
             if seq[0].color is goal_color:
                 s += 3.0
             if seq[-1].color is goal_color:
