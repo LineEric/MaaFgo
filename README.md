@@ -52,13 +52,14 @@
 | 每日 1 石 | 自动抽每日付费召唤卡池，石头不足自动跳过 |
 | 免费友情 10 连 | 自动抽每日免费友情池 |
 | 常驻每日 1 抽 | 常驻卡池每日免费一抽 |
+| 从者技能强化 | 自动强化从者主动技能 |
+| 从者追加技能强化 | 自动强化追加技能，支持不解锁/指定等级 |
 | 种树 | 自动收集蓝苹果兑换体力 |
 
 ### 🍎 辅助功能
 
 - **智能吃苹果**：体力不足时自动补充，支持金/银/铜/蓝苹果
 - **自定义队伍**：支持预设多套队伍配置，自由切换
-- **多模拟器**：支持雷电、MuMu、新版 MuMu 及手动 ADB 连接
 
 ---
 
@@ -78,13 +79,14 @@
 
 - Windows 操作系统
 - 安卓模拟器（雷电 / MuMu）
+- **系统区域语言必须为中文**（控制面板 → 区域 → 管理 → 更改系统区域设置 → 中文（简体，中国））
 
 ### 1. 下载安装
 
 前往 [Releases](https://github.com/xlxyvergil/MaaFgo/releases) 下载最新版本。提供两种版本：
 
 | 版本 | 文件名标识 | 说明 |
-|------|-----------|------|
+| ------ | ----------- | ------ |
 | **MXU**（推荐） | `MXU.zip` | 桌面客户端，原生窗口体验，启动更快，无需浏览器 |
 | MWU | `MWU.zip` | Web 界面版，通过浏览器访问，兼容性好 |
 
@@ -131,7 +133,7 @@ MaaFgo/
 - **核心框架**: [MaaFramework](https://github.com/MaaXYZ/MaaFramework) — 图像识别自动化
 - **前端**: MWU / MXU — Web 界面与桌面客户端
 - **战斗核心**: [BBchannel](https://github.com/Meowcolm024/FGO-Automata)
-- **地图导航**: [FGO-py](https://github.com/hgjazhgj/FGO-py) — 图像匹配与坐标导航
+- **地图导航**: 基于 YOLO 检测的智能地图轮巡导航
 
 ---
 
@@ -140,11 +142,12 @@ MaaFgo/
 ### 开源项目
 
 | 项目 | 描述 |
-|:---|:---|
+| :--- | :--- |
 | [**MaaFramework**](https://github.com/MaaXYZ/MaaFramework) | 图像识别自动化框架 |
 | [**MWU**](https://github.com/ravizhan/MWU) | 基于 Vue + FastAPI 的轻量级跨平台通用 WebUI |
 | [**MXU**](https://github.com/MistEO/MXU) | 基于 Tauri 2 + React 的轻量级跨平台通用 GUI |
 | [**BBchannel**](https://github.com/Meowcolm024/FGO-Automata) | FGO 自动化战斗核心 |
+| [**FGO-py**](https://github.com/hgjazhgj/FGO-py) | 地图导航图像匹配算法参考 |
 
 ### 开发者
 
