@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 from typing import Tuple
 
+from battle.core.enums import CardColor
 from battle.core.models import (BattlePlan, MasterSkillAction, OrderChangeAction,
                                 ServantSkillAction, TurnPlan)
 from battle.core.policy import (BattlePolicy, CardPolicy, Goal, SkillPolicy,
