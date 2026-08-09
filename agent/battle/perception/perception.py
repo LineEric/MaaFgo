@@ -26,6 +26,7 @@ def build(context, img, screenshot_id: str = "") -> BattleState:
     cards: Tuple[CommandCard, ...] = ()
     np_cards: Tuple[NpCard, ...] = ()
     servants: Tuple[ServantState, ...] = ()
+    master_skills: Tuple[SkillState, ...] = ()
     unknown: List[str] = []
     if scene is Scene.COMMAND_SELECTION:
         cards = tuple(_detect_card(context, img, i) for i in range(1, 6))
@@ -43,6 +44,10 @@ def build(context, img, screenshot_id: str = "") -> BattleState:
                     unknown.append(
                         f"servant[{servant.slot}].skill[{index}].available"
                     )
+        master_skills = _detect_master_skills(context, img)
+        for index, skill in enumerate(master_skills, start=1):
+            if skill.available is None:
+                unknown.append(f"master_skill[{index}].available")
     elif scene is Scene.ORDER_CHANGE:
         # 换人界面：检测从者技能状态无意义，只识别场景即可
         pass
@@ -56,6 +61,7 @@ def build(context, img, screenshot_id: str = "") -> BattleState:
         np_cards=np_cards,
         enemies=enemies,
         servants=servants,
+        master_skills=master_skills,
         screenshot_id=screenshot_id,
         unknown_fields=tuple(unknown),
     )
@@ -152,6 +158,14 @@ def _parse_np_percent(text: str) -> Optional[int]:
         return None
 
     value = int(digits)
+
+    # 如果值超过游戏上限 300，可能是 OCR 把 % 误读为数字（如 "100%" → "1009"），
+    # 尝试去掉最后一位再判断。
+    if value > 300 and len(digits) > 1:
+        trimmed = int(digits[:-1])
+        if 0 <= trimmed <= 300:
+            return trimmed
+
     return value if 0 <= value <= 300 else None
 
 
@@ -179,8 +193,10 @@ def _count(reco) -> int:
 def _detect_servants(context, img) -> Tuple[ServantState, ...]:
     """检测前排从者的技能可用性。
 
-    识别逻辑：OCR 读取技能 CD 节点，若命中"剩余"文字则技能在 CD 中不可用，
-    否则视为可用。confidence 来自 OCR score。
+    识别逻辑：OCR 读取技能按钮上的 CD 节点，若命中数字（剩余回合数）则技能
+    在冷却、不可用；否则（没有任何 CD 数字）技能可用。FGO 里可用技能的按钮上
+    没有 CD 数字，所以"未命中 CD"就是可用的直接信号，不应再标记为未知而被
+    safety gate 跳过。
     """
     out: List[ServantState] = []
     for slot in config.FRONTLINE_SLOTS:
@@ -189,20 +205,34 @@ def _detect_servants(context, img) -> Tuple[ServantState, ...]:
             cd_node = config.SERVANT_SKILL_CD_NODE.format(servant_slot=slot, skill_index=idx)
             cd_result = _reco(context, cd_node, img)
             if cd_result and cd_result.hit:
-                # 明确命中 CD 特征 → 技能不可用。
+                # 命中 CD "剩余" 文字 → 技能在冷却，不可用。
                 score = getattr(getattr(cd_result, "best_result", None), "score", 1.0) or 1.0
                 skills.append(SkillState(False, Confidence(float(score), "ocr:cd")))
                 continue
-
-            available_node = config.SERVANT_SKILL_NODE.format(
-                servant_slot=slot, skill_index=idx
-            )
-            available_result = _reco(context, available_node, img)
-            if available_result and available_result.hit:
-                score = getattr(getattr(available_result, "best_result", None), "score", 0.0) or 0.0
-                skills.append(SkillState(True, Confidence(float(score), "ocr:available")))
-            else:
-                # CD 和可用状态都未确认，不能默认为可用，避免盲点。
-                skills.append(SkillState(None, Confidence(0.0, "ocr:unknown")))
+            # 未命中任何 CD 文字 → 技能可用。
+            skills.append(SkillState(True, Confidence(1.0, "ocr:no_cd")))
         out.append(ServantState(slot, tuple(skills), Confidence(1.0, "composite")))
+    return tuple(out)
+
+
+def _detect_master_skills(context, img) -> Tuple[SkillState, ...]:
+    """检测御主技能 1..3 的可用性。
+
+    识别逻辑与从者技能一致：命中 CD 节点（"剩余"或数字）→ 不可用；
+    否则可用。御主技能菜单默认收起，CD 文字在展开前不可见；感知层
+    仅在 MAIN_BATTLE 场景下检测，此时菜单可能收起，CD 节点 ROI 区域
+    无文字 → 不命中 → 判定为可用。这是保守行为：若技能实际在冷却但
+    菜单收起，会误判为可用，由执行层/安全门兜底。
+    """
+    out: List[SkillState] = []
+    for idx in range(1, 4):
+        cd_node = config.MASTER_SKILL_CD_NODE.format(skill_index=idx)
+        cd_result = _reco(context, cd_node, img)
+        if cd_result and cd_result.hit:
+            # 命中 CD "剩余" 文字 → 技能在冷却，不可用。
+            score = getattr(getattr(cd_result, "best_result", None), "score", 1.0) or 1.0
+            out.append(SkillState(False, Confidence(float(score), "ocr:cd")))
+            continue
+        # 未命中任何 CD 文字 → 技能可用。
+        out.append(SkillState(True, Confidence(1.0, "ocr:no_cd")))
     return tuple(out)

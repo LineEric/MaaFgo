@@ -28,6 +28,7 @@ def test_build_marks_unknown_servant_skill_fields(monkeypatch):
         perception, "_detect_scene", lambda _context, _img: (Scene.MAIN_BATTLE, 0.99)
     )
     monkeypatch.setattr(perception, "_detect_servants", lambda _context, _img: servants)
+    monkeypatch.setattr(perception, "_detect_master_skills", lambda _context, _img: ())
     monkeypatch.setattr(perception, "_detect_enemies", lambda _context, _img: ())
 
     state = perception.build(None, None, screenshot_id="shot-1")
@@ -35,3 +36,26 @@ def test_build_marks_unknown_servant_skill_fields(monkeypatch):
     assert state.unknown_fields == (
         "servant[1].skill[2].available",
     )
+
+
+def test_build_marks_unknown_master_skill_fields(monkeypatch):
+    master_skills = (
+        SkillState(True, Confidence(0.99, "ocr:available")),
+        SkillState(None, Confidence(0.0, "ocr:unknown")),
+        SkillState(False, Confidence(0.99, "ocr:cd")),
+    )
+    monkeypatch.setattr(
+        perception, "_detect_scene", lambda _context, _img: (Scene.MAIN_BATTLE, 0.99)
+    )
+    monkeypatch.setattr(perception, "_detect_servants", lambda _context, _img: ())
+    monkeypatch.setattr(
+        perception, "_detect_master_skills", lambda _context, _img: master_skills
+    )
+    monkeypatch.setattr(perception, "_detect_enemies", lambda _context, _img: ())
+
+    state = perception.build(None, None, screenshot_id="shot-1")
+
+    assert state.unknown_fields == (
+        "master_skill[2].available",
+    )
+    assert state.master_skills == master_skills

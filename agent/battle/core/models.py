@@ -76,6 +76,8 @@ class BattleState:
     np_cards: Tuple[NpCard, ...]             # 0..3 张
     enemies: Tuple[EnemyState, ...]
     servants: Tuple[ServantState, ...] = ()
+    master_skills: Tuple[SkillState, ...] = ()   # 御主技能 1..3 的可用性
+    np_slots_full: Tuple[int, ...] = ()      # 战斗界面检测到 NP 槽金色（NP 高/满）的从者槽位
     screenshot_id: str = ""
     schema_version: int = SCHEMA_VERSION
     unknown_fields: Tuple[str, ...] = ()

@@ -94,10 +94,10 @@
       "type": "OCR",
       "param": {
         "roi": [
-          222,
-          656,
-          83,
-          26
+          228,
+          658,
+          43,
+          19
         ],
         "expected": "\\d+"
       }
@@ -108,10 +108,10 @@
       "type": "OCR",
       "param": {
         "roi": [
-          540,
-          657,
-          83,
-          24
+          546,
+          658,
+          43,
+          19
         ],
         "expected": "\\d+"
       }
@@ -122,10 +122,10 @@
       "type": "OCR",
       "param": {
         "roi": [
-          865,
-          655,
-          73,
-          25
+          863,
+          658,
+          43,
+          20
         ],
         "expected": "\\d+"
       }
@@ -225,12 +225,17 @@
   "战斗_未知弹窗": {
     "action": "DoNothing"
   },
-  "战斗_从者1技能1": {
+  "战斗_技能使用弹窗": {
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [41, 546, 67, 67],
-        "expected": "\\d+"
+        "roi": [
+          547,
+          156,
+          157,
+          47
+        ],
+        "expected": "技能使用"
       }
     }
   },
@@ -238,17 +243,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [41, 546, 67, 67],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_从者1技能2": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [129, 546, 67, 67],
-        "expected": "\\d+"
+        "roi": [
+          23,
+          579,
+          94,
+          43
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -256,17 +257,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [129, 546, 67, 67],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_从者1技能3": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [218, 546, 66, 66],
-        "expected": "\\d+"
+        "roi": [
+          115,
+          578,
+          94,
+          43
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -274,17 +271,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [218, 546, 66, 66],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_从者2技能1": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [357, 544, 68, 69],
-        "expected": "\\d+"
+        "roi": [
+          206,
+          578,
+          94,
+          43
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -292,17 +285,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [357, 544, 68, 69],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_从者2技能2": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [445, 544, 68, 69],
-        "expected": "\\d+"
+        "roi": [
+          342,
+          579,
+          94,
+          43
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -310,17 +299,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [445, 544, 68, 69],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_从者2技能3": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [534, 544, 66, 66],
-        "expected": "\\d+"
+        "roi": [
+          429,
+          583,
+          94,
+          43
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -328,17 +313,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [534, 544, 66, 66],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_从者3技能1": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [675, 545, 69, 69],
-        "expected": "\\d+"
+        "roi": [
+          520,
+          578,
+          94,
+          43
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -346,17 +327,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [675, 545, 69, 69],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_从者3技能2": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [764, 545, 67, 67],
-        "expected": "\\d+"
+        "roi": [
+          658,
+          577,
+          94,
+          43
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -364,17 +341,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [764, 545, 67, 67],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_从者3技能3": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [853, 545, 66, 66],
-        "expected": "\\d+"
+        "roi": [
+          752,
+          578,
+          95,
+          44
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -382,17 +355,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [853, 545, 66, 66],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_御主技能1": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [871, 277, 71, 71],
-        "expected": "\\d+"
+        "roi": [
+          839,
+          578,
+          95,
+          44
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -400,17 +369,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [863, 317, 81, 30],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_御主技能2": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [959, 277, 73, 71],
-        "expected": "\\d+"
+        "roi": [
+          863,
+          317,
+          81,
+          30
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -418,17 +383,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [951, 317, 81, 30],
-        "expected": ["剩余"]
-      }
-    }
-  },
-  "战斗_御主技能3": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [1049, 276, 71, 72],
-        "expected": "\\d+"
+        "roi": [
+          951,
+          317,
+          81,
+          30
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -436,8 +397,13 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [1041, 317, 81, 30],
-        "expected": ["剩余"]
+        "roi": [
+          1041,
+          317,
+          81,
+          30
+        ],
+        "expected": "剩余|\\d+"
       }
     }
   },
@@ -445,7 +411,12 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [7, 2, 242, 89],
+        "roi": [
+          7,
+          2,
+          242,
+          89
+        ],
         "expected": "\\d+"
       }
     }
@@ -454,10 +425,23 @@
     "recognition": {
       "type": "ColorMatch",
       "param": {
-        "roi": [0, 0, 90, 95],
+        "roi": [
+          0,
+          0,
+          90,
+          95
+        ],
         "method": 40,
-        "lower": [95, 80, 80],
-        "upper": [115, 255, 255],
+        "lower": [
+          95,
+          80,
+          80
+        ],
+        "upper": [
+          115,
+          255,
+          255
+        ],
         "count": 100
       }
     }
@@ -466,7 +450,12 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [257, 1, 242, 90],
+        "roi": [
+          257,
+          1,
+          242,
+          90
+        ],
         "expected": "\\d+"
       }
     }
@@ -475,10 +464,23 @@
     "recognition": {
       "type": "ColorMatch",
       "param": {
-        "roi": [245, 0, 100, 95],
+        "roi": [
+          245,
+          0,
+          100,
+          95
+        ],
         "method": 40,
-        "lower": [95, 80, 80],
-        "upper": [115, 255, 255],
+        "lower": [
+          95,
+          80,
+          80
+        ],
+        "upper": [
+          115,
+          255,
+          255
+        ],
         "count": 100
       }
     }
@@ -487,7 +489,12 @@
     "recognition": {
       "type": "OCR",
       "param": {
-        "roi": [499, 0, 242, 89],
+        "roi": [
+          499,
+          0,
+          242,
+          89
+        ],
         "expected": "\\d+"
       }
     }
@@ -496,10 +503,23 @@
     "recognition": {
       "type": "ColorMatch",
       "param": {
-        "roi": [495, 0, 100, 95],
+        "roi": [
+          495,
+          0,
+          100,
+          95
+        ],
         "method": 40,
-        "lower": [95, 80, 80],
-        "upper": [115, 255, 255],
+        "lower": [
+          95,
+          80,
+          80
+        ],
+        "upper": [
+          115,
+          255,
+          255
+        ],
         "count": 100
       }
     }

@@ -12,6 +12,7 @@ from battle.core.models import (BattleAction, BattlePlan, BattleState, CardPick,
 from battle.core.policy import CardPolicy, Goal, StrategyProfile
 from battle.core.decider import RuleDecider
 from battle.core.validator import (
+    skip_unusable_master_skills,
     skip_unusable_servant_skills,
     validate,
     validate_card_action,
@@ -339,7 +340,7 @@ def _main_action(
     )
 
 
-def _main_state_with_skill(available, *, enemy_confidence=0.95):
+def _main_state_with_skill(available, *, enemy_confidence=0.95, master_available=True):
     return BattleState(
         scene=Scene.MAIN_BATTLE,
         scene_confidence=Confidence(0.97, "test"),
@@ -355,6 +356,11 @@ def _main_state_with_skill(available, *, enemy_confidence=0.95):
             ),
             confidence=Confidence(0.99, "test"),
         ),),
+        master_skills=(
+            SkillState(master_available, Confidence(0.99 if master_available is not None else 0.0, "test")),
+            SkillState(True, Confidence(0.99, "test")),
+            SkillState(True, Confidence(0.99, "test")),
+        ),
         screenshot_id="validator-main",
     )
 
@@ -442,6 +448,94 @@ def test_validate_main_action_rejects_duplicate_master_skill():
     skill = MasterSkillAction(1)
     action = _main_action(master_skills=(skill, skill))
     assert validate_main_action(action, state, PROFILE).reason == "duplicate_master_skill"
+
+
+def test_validate_main_action_rejects_master_skill_unknown_state():
+    state = _main_state_with_skill(True, master_available=None)
+    action = _main_action(master_skills=(MasterSkillAction(1),))
+    assert validate_main_action(action, state, PROFILE).reason == "master_skill_state_unknown"
+
+
+def test_validate_main_action_rejects_master_skill_unavailable():
+    state = _main_state_with_skill(True, master_available=False)
+    action = _main_action(master_skills=(MasterSkillAction(1),))
+    assert validate_main_action(action, state, PROFILE).reason == "master_skill_not_available"
+
+
+def test_validate_main_action_rejects_master_skill_missing_state():
+    state = _main_state_with_skill(True)
+    action = _main_action(master_skills=(MasterSkillAction(3),))
+    # master_skills 只有 3 个状态，skill_index=3 存在；用 4 触发 missing
+    action4 = _main_action(master_skills=(MasterSkillAction(4),))
+    assert validate_main_action(action4, state, PROFILE).reason == "invalid_master_skill"
+
+
+def test_skip_unusable_master_skills_skips_cooldown_and_unknown():
+    state = _main_state_with_skill(True, master_available=False)
+    # 覆盖 master_skills 状态：技能1 冷却、技能2 未知、技能3 可用
+    state = BattleState(
+        scene=Scene.MAIN_BATTLE,
+        scene_confidence=Confidence(0.97, "test"),
+        cards=(),
+        np_cards=(),
+        enemies=(EnemyState(1, True, True, Confidence(0.95, "test")),),
+        servants=(ServantState(
+            slot=1,
+            skills=(
+                SkillState(True, Confidence(0.99, "test")),
+                SkillState(True, Confidence(0.99, "test")),
+                SkillState(True, Confidence(0.99, "test")),
+            ),
+            confidence=Confidence(0.99, "test"),
+        ),),
+        master_skills=(
+            SkillState(False, Confidence(0.99, "ocr:cd")),
+            SkillState(None, Confidence(0.0, "ocr:unknown")),
+            SkillState(True, Confidence(0.99, "ocr:available")),
+        ),
+        screenshot_id="validator-master",
+    )
+    action = _main_action(master_skills=(
+        MasterSkillAction(1),
+        MasterSkillAction(2),
+        MasterSkillAction(3),
+    ))
+    filtered, skipped = skip_unusable_master_skills(action, state, PROFILE)
+
+    assert [s.skill_index for s in filtered.master_skills] == [3]
+    assert skipped == (
+        "master_skill[1].available:cooldown",
+        "master_skill[2].available:unknown",
+    )
+
+
+def test_skip_unusable_master_skills_keeps_all_when_available():
+    state = _main_state_with_skill(True)
+    action = _main_action(master_skills=(
+        MasterSkillAction(1),
+        MasterSkillAction(2),
+    ))
+    filtered, skipped = skip_unusable_master_skills(action, state, PROFILE)
+    assert filtered is action
+    assert skipped == ()
+
+
+def test_skip_unusable_master_skills_drops_order_change_when_skill_unavailable():
+    state = _main_state_with_skill(True, master_available=False)
+    action = _main_action(
+        master_skills=(MasterSkillAction(1),),
+        order_change=OrderChangeAction(1, 4),
+    )
+    filtered, skipped = skip_unusable_master_skills(action, state, PROFILE)
+
+    assert filtered.master_skills == ()
+    assert filtered.order_change is None
+    assert skipped == (
+        "master_skill[1].available:cooldown",
+        "order_change:master_skill_unavailable",
+    )
+    # 过滤后应能通过校验（不再因 order_change_without_master_skill 中止）
+    assert validate_main_action(filtered, state, PROFILE).ok
 
 
 def test_validate_main_action_rejects_order_change_without_master_skill():

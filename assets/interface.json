@@ -156,7 +156,8 @@
     "tasks/原生自动战斗_测试06_技能宝具选卡.json",
     "tasks/原生自动战斗_测试07_两回合TurnPlan.json",
     "tasks/原生自动战斗_测试08_胜利结算.json",
-    "tasks/原生自动战斗_测试09_1T完整链路.json"
+    "tasks/原生自动战斗_测试09_1T完整链路.json",
+    "tasks/原生自动战斗_测试10_slot3点击.json"
   ],
   "agent": {
     "child_exec": "python",

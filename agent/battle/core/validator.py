@@ -64,6 +64,62 @@ def skip_unusable_servant_skills(
     return replace(action, servant_skills=tuple(kept)), tuple(skipped)
 
 
+def skip_unusable_master_skills(
+    action: BattleAction,
+    state: BattleState,
+    profile: StrategyProfile,
+) -> tuple[BattleAction, tuple[str, ...]]:
+    """跳过无法确认可执行的御主技能，保留结构非法动作给 Validator 拒绝。
+
+    与 skip_unusable_servant_skills 对称：御主技能在冷却/未知/低置信度时
+    从 action.master_skills 中剔除，避免盲放冷却中的技能。
+
+    换人联动：若 action.order_change 依赖的御主换人技能被过滤掉（master_skills
+    过滤后为空），则同时移除 order_change——换人无法触发时跳过换人，而不是
+    让 validate_main_action 以 order_change_without_master_skill 中止整场战斗。
+    """
+    seen: set[int] = set()
+    for skill in action.master_skills:
+        if (
+            not _is_slot(skill.skill_index, 1, 3)
+            or (skill.target_ally is not None and not _is_slot(skill.target_ally, 1, 3))
+        ):
+            return action, ()
+        if skill.skill_index in seen:
+            return action, ()
+        seen.add(skill.skill_index)
+
+    master_states = {idx + 1: st for idx, st in enumerate(state.master_skills)}
+    kept = []
+    skipped: list[str] = []
+    for skill in action.master_skills:
+        field = f"master_skill[{skill.skill_index}].available"
+        skill_state = master_states.get(skill.skill_index)
+        if skill_state is None:
+            skipped.append(f"{field}:state_missing")
+            continue
+        if skill_state.available is None:
+            skipped.append(f"{field}:unknown")
+            continue
+        if not skill_state.confidence.passes(profile.min_skill_confidence):
+            skipped.append(f"{field}:low_confidence")
+            continue
+        if skill_state.available is False:
+            skipped.append(f"{field}:cooldown")
+            continue
+        kept.append(skill)
+
+    if len(kept) == len(action.master_skills):
+        return action, ()
+
+    new_action = replace(action, master_skills=tuple(kept))
+    # 换人技能被过滤 → 换人无法触发，一并跳过 order_change
+    if action.order_change is not None and not kept:
+        new_action = replace(new_action, order_change=None)
+        skipped.append("order_change:master_skill_unavailable")
+    return new_action, tuple(skipped)
+
+
 def validate_main_action(
     action: BattleAction,
     state: BattleState,
@@ -107,6 +163,7 @@ def validate_main_action(
             return Verdict(False, "skill_not_available", fatal=False)
 
     seen_master_skills: set[int] = set()
+    master_states = {idx + 1: st for idx, st in enumerate(state.master_skills)}
     for skill in action.master_skills:
         if not is_slot(skill.skill_index, 1, 3):
             return Verdict(False, "invalid_master_skill")
@@ -115,6 +172,16 @@ def validate_main_action(
         seen_master_skills.add(skill.skill_index)
         if skill.target_ally is not None and not is_slot(skill.target_ally, 1, 3):
             return Verdict(False, "invalid_skill_target")
+
+        skill_state = master_states.get(skill.skill_index)
+        if skill_state is None:
+            return Verdict(False, "master_skill_state_missing")
+        if skill_state.available is None:
+            return Verdict(False, "master_skill_state_unknown")
+        if not skill_state.confidence.passes(profile.min_skill_confidence):
+            return Verdict(False, "master_skill_state_not_confident")
+        if skill_state.available is False:
+            return Verdict(False, "master_skill_not_available")
 
     if action.order_change is not None:
         order_change = action.order_change
