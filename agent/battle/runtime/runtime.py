@@ -354,6 +354,7 @@ class AutoBattleRuntime:
                 sk.target_ally,
                 (Scene.MAIN_BATTLE,),
                 _SKILL_ANIM_TIMEOUT_S,
+                default_target=sk.servant_slot,  # 选自己
             ):
                 return False
 
@@ -414,7 +415,8 @@ class AutoBattleRuntime:
 
         return True
 
-    def _execute_skill_cast(self, label, cast_callable, target_ally, return_scenes, return_timeout):
+    def _execute_skill_cast(self, label, cast_callable, target_ally, return_scenes, return_timeout,
+                            default_target: int = 1):
         """通用技能执行核：cast → 关技能提示窗 → 选目标子屏 → 等待回到指定场景。
 
         返回 True 表示本技能处理完成（含"触发 CD 提示窗而跳过后续"）；False 表示卡死/确认失败。
@@ -423,13 +425,13 @@ class AutoBattleRuntime:
         cast_callable()
         if self._close_skill_use_dialog_if_present():
             return True
-        if target_ally is not None:
-            mfaalog.info("[AutoBattle] waiting for skill target sub-screen...")
-            if not self._wait_until((Scene.SKILL_TARGET_SELECTION,), _SKILL_TARGET_TIMEOUT_S):
-                mfaalog.info("[AutoBattle] failed to see skill target sub-screen!")
-                return False
-            mfaalog.info(f"[AutoBattle] selecting skill target ally={target_ally}")
-            self.executor.select_skill_target(target_ally)
+        # 固定等待 1 秒检查是否出现目标子屏（后续优化等待时间）
+        # 若出现，选 target_ally（有计划指定）或默认目标（自动决策：从者技能选自己）
+        if self._wait_until((Scene.SKILL_TARGET_SELECTION,), 1.0):
+            mfaalog.info("[AutoBattle] skill target sub-screen detected")
+            target = target_ally if target_ally is not None else default_target
+            mfaalog.info(f"[AutoBattle] selecting skill target ally={target}")
+            self.executor.select_skill_target(target)
         return self._wait_until(return_scenes, return_timeout)
 
     def _close_skill_use_dialog_if_present(self) -> bool:
