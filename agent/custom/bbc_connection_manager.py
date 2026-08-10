@@ -516,11 +516,20 @@ class BbcConnectionManager:
     
     # ==================== 完整重启流程 ====================
     
-    def restart_bbc_and_connect(self, connect_cmd: str, connect_args: dict, max_retries: int = 5) -> bool:
-        """重启 BBC 并连接模拟器（完整流程）"""
+    def restart_bbc_and_connect(self, connect_cmd: str, connect_args: dict, max_retries: int = 5, stop_check: Optional[callable] = None) -> bool:
+        """重启 BBC 并连接模拟器（完整流程）
+
+        stop_check: 可选回调，每次循环迭代前调用，返回 True 表示应停止（如 MXU 停止任务），
+        此时立即中止重启流程并返回 False。
+        """
         mfaalog.info(f"[BbcConnectionManager] ========== 开始重启 BBC ==========")
         
         for attempt in range(1, max_retries + 1):
+            # 停止检查：MXU post_stop 后立即中止，不再拉起 BBC
+            if stop_check is not None and stop_check():
+                mfaalog.info("[BbcConnectionManager] 检测到停止信号，中止 BBC 重启流程")
+                return False
+
             mfaalog.info(f"[BbcConnectionManager] 第{attempt}次启动尝试")
             
             # 清空本次尝试的消息队列和就绪事件
