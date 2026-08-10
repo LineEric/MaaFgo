@@ -1,4 +1,20 @@
 {
+    "自动强化-全部完成": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "从者技能强化/全部完成.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "StopTask"
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "该从者全部技能均已强化完成！"
+        }
+    },
     "自动强化-判断是否在强化界面": {
         "recognition": {
             "type": "TemplateMatch",
@@ -206,12 +222,9 @@
         "action": {
             "type": "Click"
         },
-        "post_delay": 3000,
+        "post_delay": 500,
         "next": [
-            "[JumpBack]自动强化-断网重连",
-            "自动强化-回到强化界面",
-            "[JumpBack]自动强化-点击空白跳过",
-            "自动强化-全部完成"
+            "自动强化-快速点击"
         ]
     },
     "自动强化-等级识别-满级": {
@@ -234,9 +247,9 @@
             "param": {
                 "roi": [
                     536,
-                    304,
-                    81,
-                    71
+                    306,
+                    36,
+                    66
                 ],
                 "expected": [
                     "10"
@@ -283,10 +296,10 @@
             "type": "OCR",
             "param": {
                 "roi": [
-                    537,
+                    536,
                     306,
-                    75,
-                    67
+                    36,
+                    66
                 ],
                 "expected": [
                     "10"
@@ -333,10 +346,10 @@
             "type": "OCR",
             "param": {
                 "roi": [
-                    532,
+                    536,
                     306,
-                    80,
-                    63
+                    36,
+                    66
                 ],
                 "expected": [
                     "10"
@@ -386,20 +399,26 @@
             "自动强化-界面错误"
         ]
     },
-    "自动强化-全部完成": {
-        "recognition": {
-            "type": "TemplateMatch",
+    "自动强化-快速点击": {
+        "action": {
+            "type": "Click",
             "param": {
-                "template": [
-                    "从者技能强化/全部完成.png"
+                "target": [
+                    1217,
+                    269,
+                    36,
+                    82
                 ]
             }
         },
-        "action": {
-            "type": "StopTask"
-        },
-        "focus": {
-            "Node.Recognition.Succeeded": "该从者全部技能均已强化完成！"
-        }
+        "repeat": 3,
+        "repeat_delay": 200,
+        "post_delay": 2000,
+        "next": [
+            "[JumpBack]自动强化-断网重连",
+            "自动强化-回到强化界面",
+            "自动强化-全部完成",
+            "[JumpBack]自动强化-点击空白跳过"
+        ]
     }
 }
