@@ -204,12 +204,12 @@
   "战斗_胜利": {
     "recognition": "OCR",
     "roi": [
-      502,
-      21,
-      270,
-      75
+      526,
+      30,
+      111,
+      58
     ],
-    "expected": "战斗结果"
+    "expected": "战斗"
   },
   "战斗_失败": {
     "recognition": "TemplateMatch",

@@ -25,17 +25,32 @@
             "作战成功"
         ],
         "post_wait_freezes": 1000,
-        "recognition": "OCR",
-        "roi": [
-            502,
-            21,
-            270,
-            75
+        "recognition": "Or",
+        "any_of": [
+            {
+                "recognition": "OCR",
+                "roi": [
+                    526,
+                    30,
+                    111,
+                    58
+                ],
+                "expected": "战斗"
+            },
+            {
+                "recognition": "OCR",
+                "roi": [
+                    490,
+                    88,
+                    254,
+                    134
+                ],
+                "expected": "牵绊"
+            }
         ],
-        "expected": "战斗结果",
         "target": [
-            502,
-            21,
+            526,
+            30,
             1,
             1
         ]
