@@ -117,11 +117,18 @@ class StartBbc(CustomAction):
             # 步骤2: Kill掉所有BBC进程（清理残留窗口）
             mfaalog.info("[StartBbc] 步骤2: 清理所有BBC进程...")
             self._kill_all_bbc_processes()
+            if context.tasker.stopping:
+                mfaalog.info("[StartBbc] 检测到任务停止信号，中止 BBC 启动")
+                return CustomAction.RunResult(success=False)
             time.sleep(2)
             
             # 步骤3: 调用Manager的完整重启流程
             mfaalog.info("[StartBbc] 步骤3: 调用Manager重启BBC并连接模拟器...")
-            success = manager.restart_bbc_and_connect(connect_cmd, connect_args, max_retries=5)
+            # 传入停止检查回调：MXU 点停止（post_stop）后立即中止，不再拉起 BBC
+            success = manager.restart_bbc_and_connect(
+                connect_cmd, connect_args, max_retries=5,
+                stop_check=lambda: context.tasker.stopping,
+            )
             
             if success:
                 mfaalog.info("[StartBbc] BBC启动并连接成功")

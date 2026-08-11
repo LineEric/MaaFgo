@@ -198,7 +198,7 @@ class ExecuteBbcTask(CustomAction):
             
             # 步骤3: 配置并启动战斗（同时启动回调监听）
             battle_result = self._setup_and_start_battle(
-                team_config, run_count, apple_type, battle_type,
+                context, team_config, run_count, apple_type, battle_type,
                 support_order_mismatch, team_config_error, state, manager
             )
             if battle_result is None:
@@ -399,7 +399,7 @@ class ExecuteBbcTask(CustomAction):
             mfaalog.error("[ExecuteBbcTask] BBC重启失败")
             return False
     
-    def _setup_and_start_battle(self, team_config: str, run_count: int, 
+    def _setup_and_start_battle(self, context: Context, team_config: str, run_count: int, 
                                 apple_type: str, battle_type: BattleType,
                                 support_order_mismatch: bool, team_config_error: bool,
                                 state: dict, manager) -> dict:
@@ -453,6 +453,14 @@ class ExecuteBbcTask(CustomAction):
         battle_started = False
         
         for retry in range(max_retries):
+            # MXU 点停止后立即中断启动流程
+            if context.tasker.stopping:
+                mfaalog.info("[ExecuteBbcTask] 检测到任务停止信号，中断战斗启动")
+                state['finished'] = True
+                state['popup_title'] = '脚本停止'
+                state['popup_message'] = '任务已停止'
+                return state
+
             # 发送启动命令
             result = manager.send_command('start_battle', {}, timeout=10)
             if not result.get('success'):
@@ -622,6 +630,9 @@ class ExecuteBbcTask(CustomAction):
         3. 心跳成功后截图并运行"助战错误识别"pipeline，识别到助战错误则停止BBC脚本并正常结束任务
         4. 弹窗处理由回调函数在后台线程完成，通过 state['finished'] 通知主线程
         5. 当 state['finished'] 为 True 时，返回弹窗信息
+
+        停止响应：循环内以短间隔轮询 Tasker.stopping()，
+        MXU 点停止（post_stop）后立即感知并中断等待，避免任务停不下来。
         """
 
         # 获取 manager 实例
@@ -631,9 +642,22 @@ class ExecuteBbcTask(CustomAction):
         heartbeat_interval = 30  # 30秒一次心跳
         miss_count = 0           # 连续识别到助战错误的次数
         miss_threshold = 1       # 阈值，达到则停止BBC脚本并正常结束任务
+        last_heartbeat = time.time()
 
         while not state['finished']:
-            time.sleep(heartbeat_interval)
+            # 短间隔轮询停止信号：MXU post_stop 后 stopping() 立即为 True
+            if context.tasker.stopping:
+                mfaalog.info("[ExecuteBbcTask] 检测到任务停止信号，中断战斗等待")
+                state['finished'] = True
+                state['popup_title'] = '脚本停止'
+                state['popup_message'] = '任务已停止'
+                break
+
+            # 达到心跳间隔才执行心跳检查（避免高频截图/识别）
+            if time.time() - last_heartbeat < heartbeat_interval:
+                time.sleep(1)
+                continue
+            last_heartbeat = time.time()
 
             # 心跳检查：发送 get_status 命令验证 BBC 服务是否正常
             status = manager.send_command('get_status', {}, timeout=5)
