@@ -97,6 +97,9 @@ SKILL_USE_DIALOG_TITLE_ROI = (556, 156, 146, 42)
 SKILL_USE_DIALOG_CLOSE_ROI = (1088, 166, 48, 27)
 SKILL_USE_DIALOG_CLOSE_BTN = center(SKILL_USE_DIALOG_CLOSE_ROI)
 
+# 通用右上角关闭点（用于等待时持续点击以关闭可能弹出的遮挡层）
+TOP_RIGHT_CLOSE = (1240, 20)
+
 # 换人界面（Order Change）场景识别 ROI（OCR "请从首发成员和候补成员中"）
 ORDER_CHANGE_SCENE_ROI = (339, 134, 625, 63)
 

@@ -60,6 +60,10 @@ class Executor:
         self._click(coords.SKILL_USE_DIALOG_CLOSE_BTN)
         return True
 
+    def tap_top_right_close(self) -> None:
+        """点击右上角关闭按钮，用于等待时持续点击以关闭可能弹出的遮挡层。"""
+        self._click(coords.TOP_RIGHT_CLOSE)
+
     def order_change(self, starting_member_idx: int, sub_member_idx: int) -> bool:
         self._click(coords.ORDER_CHANGE_MEMBER[starting_member_idx])
         time.sleep(_ORDER_CHANGE_STEP_DELAY_S)
