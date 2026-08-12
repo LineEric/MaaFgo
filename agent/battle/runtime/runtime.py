@@ -31,11 +31,11 @@ _ANIMATION_TIMEOUT_S = 60.0
 # 意外 UNKNOWN（加载等）的最大等待
 _UNKNOWN_TIMEOUT_S = 15.0
 # 每次轮询之间等画面静止的窗口（ms）
-_POLL_FREEZE_MS = 500
+_POLL_FREEZE_MS = 2000
 # 胜利后结算点击流（掉落/羁绊/结果多屏）的最大耗时
 _SETTLEMENT_TIMEOUT_S = 90.0
 # 每次选卡后的固定间隔，等待卡牌选中态渲染
-_PICK_DELAY_S = 1.0
+_PICK_DELAY_S = 0.3
 
 # —— 等待超时（秒）：均为真机验证过的正常时序；异常才用这些上限判定卡死 ——
 _OPEN_CARDS_TIMEOUT_S = 5.0         # 点击攻击后确认进入选卡界面
@@ -150,15 +150,18 @@ class AutoBattleRuntime:
                     return BattleResult.fail("skill_execution_failed", turns)
 
                 mfaalog.info("[AutoBattle] MAIN_BATTLE -> opening command cards (click attack)")
+                _open_t0 = time.monotonic()
                 self._mark_action("open_command_cards")
                 if not self.executor.open_command_cards():
                     mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
                     return BattleResult.fail("open_cards_failed", turns)
-                mfaalog.info("[AutoBattle] command cards clicked, confirming command selection scene...")
+                _open_t1 = time.monotonic()
+                mfaalog.info(f"[AutoBattle] command cards clicked, took={(_open_t1-_open_t0)*1000:.0f}ms, waiting for COMMAND_SELECTION...")
                 if not self._wait_until((Scene.COMMAND_SELECTION,), _OPEN_CARDS_TIMEOUT_S):
                     mfaalog.info("[AutoBattle] command selection confirmation failed; stopping safely")
                     return BattleResult.fail("open_cards_confirm_failed", turns)
-                mfaalog.info("[AutoBattle] command cards opened and confirmed")
+                _open_t2 = time.monotonic()
+                mfaalog.info(f"[AutoBattle] command cards opened and confirmed, total_wait={(_open_t2-_open_t1)*1000:.0f}ms")
                 continue
 
             if scene is Scene.ORDER_CHANGE:
@@ -222,11 +225,15 @@ class AutoBattleRuntime:
     # ---- 内部 ----
 
     def _observe(self):
+        import time as _t
+        _t0 = _t.monotonic()
         mfaalog.info("[AutoBattle] _observe() -> post_screencap")
         img = self.controller.post_screencap().wait().get()
-        mfaalog.info(f"[AutoBattle] _observe() -> screencap done, shape={img.shape if img is not None else 'None'}")
+        _t1 = _t.monotonic()
+        mfaalog.info(f"[AutoBattle] _observe() -> screencap done, shape={img.shape if img is not None else 'None'}, took={(_t1-_t0)*1000:.0f}ms")
         result = perception.build(self.ctx, img)
-        mfaalog.info(f"[AutoBattle] _observe() -> perception built, scene={result.scene.name}")
+        _t2 = _t.monotonic()
+        mfaalog.info(f"[AutoBattle] _observe() -> perception built, scene={result.scene.name}, took={(_t2-_t1)*1000:.0f}ms")
         return result
 
     def _mark_action(self, action: str) -> None:
@@ -236,31 +243,23 @@ class AutoBattleRuntime:
         picks = self._normalize_picks_for_execution(action.picks)
         mfaalog.info(f"[AutoBattle] _execute_selection() picks={picks}")
         for index, p in enumerate(picks):
+            _t0 = time.monotonic()
             if p.kind is PrimitiveKind.SELECT_NP:
                 mfaalog.info(f"[AutoBattle] select_np(slot={p.slot})")
                 ok = self.executor.select_np(p.slot)
             else:
                 mfaalog.info(f"[AutoBattle] select_card(slot={p.slot})")
                 ok = self.executor.select_card(p.slot)
-            mfaalog.info(f"[AutoBattle] pick result: ok={ok}")
+            _t1 = time.monotonic()
+            mfaalog.info(f"[AutoBattle] pick {index+1} result: ok={ok}, click_took={(_t1-_t0)*1000:.0f}ms")
             if not ok:
                 return False
-            time.sleep(_PICK_DELAY_S)
-            # 除最后一张外，点击后必须仍在选卡界面（未误点出、未弹异常界面）。
-            # 最后一张会自动发动攻击，场景切换交给 _wait_turn_settled() 处理，
-            # 因此不在此确认，避免把正常开火误判为失败。
-            if index < len(picks) - 1 and not self._confirm_still_selecting():
-                mfaalog.info(
-                    "[AutoBattle] selection confirmation failed after pick; "
-                    "left command selection unexpectedly"
-                )
-                return False
+            # 最后一张会自动发动攻击，不需要等待
+            if index < len(picks) - 1:
+                mfaalog.info(f"[AutoBattle] pick {index+1}: sleep({_PICK_DELAY_S}s) start")
+                time.sleep(_PICK_DELAY_S)
+                mfaalog.info(f"[AutoBattle] pick {index+1}: sleep done")
         return True
-
-    def _confirm_still_selecting(self) -> bool:
-        """点击一张卡后，重观测确认仍在选卡界面（未误点出 / 未弹异常界面）。"""
-        state = self._observe()
-        return state.scene is Scene.COMMAND_SELECTION
 
     def _normalize_picks_for_execution(self, picks) -> tuple[CardPick, ...]:
         """Keep command-card execution moving when perception returns partial picks."""
@@ -334,7 +333,7 @@ class AutoBattleRuntime:
             if enemy is not None and enemy.targeted:
                 mfaalog.info(f"[AutoBattle] enemy {slot} target confirmed")
                 return True
-            self.ctx.wait_freezes(_POLL_FREEZE_MS)
+            time.sleep(0.5)
         mfaalog.info(f"[AutoBattle] enemy {slot} target confirmation timed out")
         return False
 
@@ -417,33 +416,26 @@ class AutoBattleRuntime:
 
     def _execute_skill_cast(self, label, cast_callable, target_ally, return_scenes, return_timeout,
                             default_target: int = 1):
-        """通用技能执行核：cast → 关技能提示窗 → 选目标子屏 → 等待回到指定场景。
+        """通用技能执行核：cast → sleep 0.2s → 检查子界面（技能使用弹窗/目标选择/回主界面）。
 
         返回 True 表示本技能处理完成（含"触发 CD 提示窗而跳过后续"）；False 表示卡死/确认失败。
         """
         self._mark_action(label)
         cast_callable()
-        if self._close_skill_use_dialog_if_present():
+        time.sleep(0.2)
+        img = self.controller.post_screencap().wait().get()
+        # 检查技能使用弹窗（CD 技能）或技能目标选择子屏（互斥）
+        if perception.is_scene(self.ctx, img, Scene.SKILL_USE_DIALOG):
+            mfaalog.info("[AutoBattle] skill-use dialog detected; closing and continuing")
+            self.executor.close_skill_use_dialog()
+            time.sleep(0.5)
             return True
-        # 固定等待 1 秒检查是否出现目标子屏（后续优化等待时间）
-        # 若出现，选 target_ally（有计划指定）或默认目标（自动决策：从者技能选自己）
-        if self._wait_until((Scene.SKILL_TARGET_SELECTION,), 1.0):
+        elif perception.is_scene(self.ctx, img, Scene.SKILL_TARGET_SELECTION):
             mfaalog.info("[AutoBattle] skill target sub-screen detected")
             target = target_ally if target_ally is not None else default_target
             mfaalog.info(f"[AutoBattle] selecting skill target ally={target}")
             self.executor.select_skill_target(target)
-        return self._wait_until(return_scenes, return_timeout)
-
-    def _close_skill_use_dialog_if_present(self) -> bool:
-        """关闭 CD 技能提示窗，并让后续流程继续执行。"""
-        self.ctx.wait_freezes(_POLL_FREEZE_MS)
-        img = self.controller.post_screencap().wait().get()
-        if not perception.skill_use_dialog_present(self.ctx, img):
-            return False
-        mfaalog.info("[AutoBattle] skill-use dialog detected; closing and continuing")
-        self.executor.close_skill_use_dialog()
-        self.ctx.wait_freezes(_POLL_FREEZE_MS)
-        return True
+        return self._wait_until(return_scenes, return_timeout, tap_close=True)
 
     def _drive_settlement(self, turns: int) -> BattleResult:
         """胜利后点击穿过结算多屏（掉落/羁绊/结果）直到回关卡列表/主界面。
@@ -461,25 +453,33 @@ class AutoBattleRuntime:
             if not self.executor.tap_settlement_continue():
                 mfaalog.info("[AutoBattle] settlement not calibrated -> reporting victory without click-through")
                 return BattleResult.success(turns)
-            self.ctx.wait_freezes(_POLL_FREEZE_MS)
+            time.sleep(0.5)
         mfaalog.info(f"[AutoBattle] settlement did not finish within {_SETTLEMENT_TIMEOUT_S}s")
         return BattleResult.fail("settlement_timeout", turns)
 
     def _wait_turn_settled(self) -> bool:
         mfaalog.info(f"[AutoBattle] _wait_turn_settled() timeout={_ANIMATION_TIMEOUT_S}s")
-        result = self._wait_until(_TERMINAL_OR_MAIN, _ANIMATION_TIMEOUT_S)
+        result = self._wait_until(_TERMINAL_OR_MAIN, _ANIMATION_TIMEOUT_S, tap_close=True)
         mfaalog.info(f"[AutoBattle] _wait_turn_settled() result={result}")
         return result
 
-    def _wait_until(self, scenes, timeout_s: float) -> bool:
-        mfaalog.info(f"[AutoBattle] _wait_until() scenes={[s.name for s in scenes]} timeout={timeout_s}s")
+    def _wait_until(self, scenes, timeout_s: float, tap_close: bool = False) -> bool:
+        mfaalog.info(f"[AutoBattle] _wait_until() scenes={[s.name for s in scenes]} timeout={timeout_s}s tap_close={tap_close}")
         deadline = time.monotonic() + timeout_s
+        _loop_count = 0
         while time.monotonic() < deadline:
-            state = self._observe()
-            if state.scene in scenes:
-                mfaalog.info(f"[AutoBattle] _wait_until() matched scene={state.scene.name}")
+            _loop_count += 1
+            _t0 = time.monotonic()
+            img = self.controller.post_screencap().wait().get()
+            scene = perception.detect_scene(self.ctx, img)
+            _t1 = time.monotonic()
+            mfaalog.info(f"[AutoBattle] _wait_until() loop#{_loop_count} detect_scene_took={(_t1-_t0)*1000:.0f}ms, scene={scene.name}")
+            if scene in scenes:
+                mfaalog.info(f"[AutoBattle] _wait_until() matched scene={scene.name} after {_loop_count} loops")
                 return True
-            mfaalog.info(f"[AutoBattle] _wait_until() scene={state.scene.name}, waiting freezes {_POLL_FREEZE_MS}ms")
-            self.ctx.wait_freezes(_POLL_FREEZE_MS)
-        mfaalog.info(f"[AutoBattle] _wait_until() timed out")
+            if tap_close:
+                self.executor.tap_top_right_close()
+            mfaalog.info(f"[AutoBattle] _wait_until() scene={scene.name}, sleeping 0.5s")
+            time.sleep(0.5)
+        mfaalog.info(f"[AutoBattle] _wait_until() timed out after {_loop_count} loops")
         return False
