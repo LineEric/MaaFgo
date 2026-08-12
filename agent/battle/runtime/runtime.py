@@ -150,18 +150,15 @@ class AutoBattleRuntime:
                     return BattleResult.fail("skill_execution_failed", turns)
 
                 mfaalog.info("[AutoBattle] MAIN_BATTLE -> opening command cards (click attack)")
-                _open_t0 = time.monotonic()
                 self._mark_action("open_command_cards")
                 if not self.executor.open_command_cards():
                     mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
                     return BattleResult.fail("open_cards_failed", turns)
-                _open_t1 = time.monotonic()
-                mfaalog.info(f"[AutoBattle] command cards clicked, took={(_open_t1-_open_t0)*1000:.0f}ms, waiting for COMMAND_SELECTION...")
+                mfaalog.info("[AutoBattle] command cards clicked, confirming command selection scene...")
                 if not self._wait_until((Scene.COMMAND_SELECTION,), _OPEN_CARDS_TIMEOUT_S):
                     mfaalog.info("[AutoBattle] command selection confirmation failed; stopping safely")
                     return BattleResult.fail("open_cards_confirm_failed", turns)
-                _open_t2 = time.monotonic()
-                mfaalog.info(f"[AutoBattle] command cards opened and confirmed, total_wait={(_open_t2-_open_t1)*1000:.0f}ms")
+                mfaalog.info("[AutoBattle] command cards opened and confirmed")
                 continue
 
             if scene is Scene.ORDER_CHANGE:
@@ -225,15 +222,10 @@ class AutoBattleRuntime:
     # ---- 内部 ----
 
     def _observe(self):
-        import time as _t
-        _t0 = _t.monotonic()
         mfaalog.info("[AutoBattle] _observe() -> post_screencap")
         img = self.controller.post_screencap().wait().get()
-        _t1 = _t.monotonic()
-        mfaalog.info(f"[AutoBattle] _observe() -> screencap done, shape={img.shape if img is not None else 'None'}, took={(_t1-_t0)*1000:.0f}ms")
         result = perception.build(self.ctx, img)
-        _t2 = _t.monotonic()
-        mfaalog.info(f"[AutoBattle] _observe() -> perception built, scene={result.scene.name}, took={(_t2-_t1)*1000:.0f}ms")
+        mfaalog.info(f"[AutoBattle] _observe() -> perception built, scene={result.scene.name}")
         return result
 
     def _mark_action(self, action: str) -> None:
@@ -243,22 +235,18 @@ class AutoBattleRuntime:
         picks = self._normalize_picks_for_execution(action.picks)
         mfaalog.info(f"[AutoBattle] _execute_selection() picks={picks}")
         for index, p in enumerate(picks):
-            _t0 = time.monotonic()
             if p.kind is PrimitiveKind.SELECT_NP:
                 mfaalog.info(f"[AutoBattle] select_np(slot={p.slot})")
                 ok = self.executor.select_np(p.slot)
             else:
                 mfaalog.info(f"[AutoBattle] select_card(slot={p.slot})")
                 ok = self.executor.select_card(p.slot)
-            _t1 = time.monotonic()
-            mfaalog.info(f"[AutoBattle] pick {index+1} result: ok={ok}, click_took={(_t1-_t0)*1000:.0f}ms")
+            mfaalog.info(f"[AutoBattle] pick result: ok={ok}")
             if not ok:
                 return False
             # 最后一张会自动发动攻击，不需要等待
             if index < len(picks) - 1:
-                mfaalog.info(f"[AutoBattle] pick {index+1}: sleep({_PICK_DELAY_S}s) start")
                 time.sleep(_PICK_DELAY_S)
-                mfaalog.info(f"[AutoBattle] pick {index+1}: sleep done")
         return True
 
     def _normalize_picks_for_execution(self, picks) -> tuple[CardPick, ...]:
@@ -464,22 +452,16 @@ class AutoBattleRuntime:
         return result
 
     def _wait_until(self, scenes, timeout_s: float, tap_close: bool = False) -> bool:
-        mfaalog.info(f"[AutoBattle] _wait_until() scenes={[s.name for s in scenes]} timeout={timeout_s}s tap_close={tap_close}")
+        mfaalog.info(f"[AutoBattle] _wait_until() scenes={[s.name for s in scenes]} timeout={timeout_s}s")
         deadline = time.monotonic() + timeout_s
-        _loop_count = 0
         while time.monotonic() < deadline:
-            _loop_count += 1
-            _t0 = time.monotonic()
             img = self.controller.post_screencap().wait().get()
             scene = perception.detect_scene(self.ctx, img)
-            _t1 = time.monotonic()
-            mfaalog.info(f"[AutoBattle] _wait_until() loop#{_loop_count} detect_scene_took={(_t1-_t0)*1000:.0f}ms, scene={scene.name}")
             if scene in scenes:
-                mfaalog.info(f"[AutoBattle] _wait_until() matched scene={scene.name} after {_loop_count} loops")
+                mfaalog.info(f"[AutoBattle] _wait_until() matched scene={scene.name}")
                 return True
             if tap_close:
                 self.executor.tap_top_right_close()
-            mfaalog.info(f"[AutoBattle] _wait_until() scene={scene.name}, sleeping 0.5s")
             time.sleep(0.5)
-        mfaalog.info(f"[AutoBattle] _wait_until() timed out after {_loop_count} loops")
+        mfaalog.info(f"[AutoBattle] _wait_until() timed out")
         return False

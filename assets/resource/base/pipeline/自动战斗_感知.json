@@ -202,14 +202,13 @@
     "green_mask": true
   },
   "战斗_胜利": {
-    "recognition": "OCR",
-    "roi": [
-      526,
-      30,
-      111,
-      58
-    ],
-    "expected": "战斗"
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {
+        "template": "下一步.png",
+        "threshold": 0.8
+      }
+    }
   },
   "战斗_失败": {
     "recognition": "TemplateMatch",
