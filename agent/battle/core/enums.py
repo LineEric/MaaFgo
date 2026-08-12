@@ -6,6 +6,7 @@ class Scene(str, Enum):
     MAIN_BATTLE = "main_battle"           # 主界面：从者技能 + 御主技能 + 攻击钮
     COMMAND_SELECTION = "command_selection"  # 选卡界面：5 面卡 + 0~3 宝具卡
     SKILL_TARGET_SELECTION = "skill_target_selection" # 技能目标选择子屏
+    SKILL_USE_DIALOG = "skill_use_dialog"   # 技能使用弹窗（点击 CD 技能后弹出）
     ORDER_CHANGE = "order_change"           # 换人界面：首发+候补成员选择
     ANIMATION = "animation"               # 攻击/技能动画（20~40s）
     VICTORY = "victory"

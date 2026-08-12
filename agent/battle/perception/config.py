@@ -17,11 +17,11 @@ from __future__ import annotations
 SCENE_NODES = {
     "command_selection": "战斗_选卡场景",   # TemplateMatch：选卡界面特征（如卡区/返回钮）
     "skill_target_selection": "战斗_技能目标子屏",  # OCR："请选择对象"
+    "skill_use_dialog": "战斗_技能使用弹窗",        # OCR："技能使用"
     "order_change": "战斗_换人界面",          # OCR："请从首发成员和候补成员中"
     "main_battle": "战斗_主界面",            # TemplateMatch：主界面攻击钮
     "victory": "战斗_胜利",
     "defeat": "战斗_失败",
-    # "dialog": "战斗_未知弹窗",
 }
 
 # 参数化节点名模板
@@ -39,7 +39,6 @@ MASTER_SKILL_NODE = "战斗_御主技能{skill_index}"
 MASTER_SKILL_CD_NODE = "战斗_御主技能{skill_index}_CD"
 
 # 技能处于 CD 时点击后弹出的提示窗。
-SKILL_USE_DIALOG_NODE = "战斗_技能使用弹窗"
 
 # 结算流程终点识别节点：结算点击流走完、回到关卡列表/主界面的稳定特征。
 # TODO(标定): 需真机 720p 截图后在 assets/resource/.../自动战斗_感知.json 中新增此节点。

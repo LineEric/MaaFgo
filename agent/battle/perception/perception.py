@@ -36,7 +36,7 @@ def build(context, img, screenshot_id: str = "") -> BattleState:
                 unknown.append(f"card[{c.ui_slot}]")
             if c.owner_slot is None:
                 unknown.append(f"card[{c.ui_slot}].owner_slot")
-    elif scene in (Scene.MAIN_BATTLE, Scene.SKILL_TARGET_SELECTION):
+    elif scene in (Scene.MAIN_BATTLE, Scene.SKILL_TARGET_SELECTION, Scene.SKILL_USE_DIALOG):
         servants = _detect_servants(context, img)
         for servant in servants:
             for index, skill in enumerate(servant.skills, start=1):
@@ -78,10 +78,16 @@ def reached_post_battle(context, img) -> bool:
     return bool(r and r.hit)
 
 
-def skill_use_dialog_present(context, img) -> bool:
-    """是否出现"技能使用"提示窗。通常由点击 CD 中的技能触发。"""
-    r = _reco(context, config.SKILL_USE_DIALOG_NODE, img)
-    return bool(r and r.hit)
+def is_scene(context, img, target: Scene) -> bool:
+    """单帧检测当前画面是否为指定场景（不轮询）。"""
+    scene, _ = _detect_scene(context, img)
+    return scene is target
+
+
+def detect_scene(context, img) -> Scene:
+    """轻量版：只检测场景，不做卡牌/技能/敌人等完整感知。用于轮询等待。"""
+    scene, _ = _detect_scene(context, img)
+    return scene
 
 
 def _detect_scene(context, img) -> Tuple[Scene, float]:
