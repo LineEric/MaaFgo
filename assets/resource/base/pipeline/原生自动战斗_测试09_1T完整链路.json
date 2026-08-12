@@ -6,6 +6,9 @@
         "custom_action": "auto_battle",
         "custom_action_param": {
           "strategy_profile": "farm-safe-v1",
+          "skill_policy": {
+            "use_master_skills": true
+          },
           "max_turns": 3,
           "plan": {
             "turns": [

@@ -18,43 +18,6 @@
             "战斗完成-回主界面"
         ]
     },
-    "结算推进": {
-        "action": "Click",
-        "next": [
-            "[JumpBack]结算推进",
-            "作战成功"
-        ],
-        "post_wait_freezes": 1000,
-        "recognition": "Or",
-        "any_of": [
-            {
-                "recognition": "OCR",
-                "roi": [
-                    526,
-                    30,
-                    111,
-                    58
-                ],
-                "expected": "战斗"
-            },
-            {
-                "recognition": "OCR",
-                "roi": [
-                    490,
-                    88,
-                    254,
-                    134
-                ],
-                "expected": "牵绊"
-            }
-        ],
-        "target": [
-            526,
-            30,
-            1,
-            1
-        ]
-    },
     "作战成功": {
         "recognition": {
             "type": "TemplateMatch",
@@ -218,7 +181,6 @@
     },
     "结束战斗": {
         "next": [
-            "结算推进",
             "作战成功",
             "好友申请界面",
             "战斗失败",
