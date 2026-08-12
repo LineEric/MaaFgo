@@ -1,0 +1,89 @@
+{
+    "原生自动战斗调度": {
+        "next": [
+            "[JumpBack]执行回主界面",
+            "[JumpBack]执行队伍选择",
+            "[JumpBack]执行章节导航",
+            "[JumpBack]执行进本",
+            "[JumpBack]执行原生自动战斗",
+            "[JumpBack]执行战斗结束",
+            "战斗完成信息"
+        ]
+    },
+    "执行回主界面": {
+        "max_hit": 1,
+        "next": [
+            "回主界面"
+        ]
+    },
+    "执行队伍选择": {
+        "max_hit": 1,
+        "next": [
+            "队伍选择"
+        ]
+    },
+    "执行章节导航": {
+        "max_hit": 1,
+        "next": [
+            "章节导航"
+        ]
+    },
+    "执行进本": {
+        "max_hit": 1,
+        "next": [
+            "进本流程"
+        ]
+    },
+    "执行原生自动战斗": {
+        "max_hit": 1,
+        "next": [
+            "原生自动战斗入口"
+        ]
+    },
+    "执行战斗结束": {
+        "max_hit": 1,
+        "next": [
+            "结束战斗"
+        ]
+    },
+    "进本流程": {
+        "next": [
+            "进本-选择助战",
+            "[JumpBack]进本-任务开始"
+        ]
+    },
+    "进本-选择助战": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [1020, 165, 195, 545],
+                "template": "support/助战编入确认.png",
+                "threshold": 0.8,
+                "order_by": "Vertical"
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "进本-任务开始"
+        ]
+    },
+    "进本-任务开始": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": "ordealcall/任务开始.png",
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click"
+        }
+    },
+    "战斗完成信息": {
+        "next": [
+            "bbc弹窗信息输出"
+        ]
+    }
+}
