@@ -1,49 +1,90 @@
 {
-    "通用大活动-已完成副本": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "template": [
-                    "event/已完成的副本标签.png"
-                ]
-            }
-        },
-        "post_delay": 15000,
+    "通用大活动-坐标导航": {
         "focus": {
-            "Node.Recognition.Succeeded": "<span style=\"color: #FF0000;\">【警告】因为没有发现带有上次挑战标签的副本，即将在10s后进入第一个已经完成过的副本！</span>"
+            "Node.Recognition.Starting": "开始选择副本"
         },
         "next": [
-            "通用大活动-已完成副本2"
+            "通用大活动-先下滑到最上面"
         ]
     },
-    "通用大活动-循环空节点": {
-        "max_hit": 3,
-        "post_delay": 1000
-    },
-    "通用大活动-已完成副本2": {
-        "max_hit": 3,
-        "recognition": {
-            "type": "TemplateMatch",
+    "通用大活动-先下滑到最上面": {
+        "action": {
+            "type": "Swipe",
             "param": {
-                "roi": [
-                    597,
-                    83,
-                    641,
-                    266
+                "begin": [
+                    929,
+                    100,
+                    1,
+                    1
                 ],
-                "template": [
-                    "event/已完成的副本标签.png"
+                "end": [
+                    [
+                        929,
+                        580,
+                        1,
+                        1
+                    ]
                 ]
             }
         },
+        "repeat": 1,
+        "post_delay": 3000,
+        "next": [
+            "通用大活动-进入第一个副本"
+        ]
+    },
+    "通用大活动-助战确认": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "助战选择界面标记.png"
+                ]
+            }
+        }
+    },
+    "通用大活动-按次数下划": {
+        "action": {
+            "type": "Swipe",
+            "param": {
+                "begin": [
+                    1014,
+                    402,
+                    1,
+                    1
+                ],
+                "end": [
+                    [
+                        1010,
+                        212,
+                        1,
+                        1
+                    ]
+                ],
+                "duration": 1000
+            }
+        },
+        "repeat": 0,
+        "repeat_delay": 1500,
+        "next": [
+            "通用大活动-点击进副本"
+        ]
+    },
+    "通用大活动-按次数找副本": {
+        "next": [
+            "通用大活动-按次数下划"
+        ]
+    },
+    "通用大活动-点击进副本": {
+        "max_hit": 5,
         "action": {
             "type": "Click",
             "param": {
-                "target_offset": [
-                    47,
-                    -58,
-                    -1,
-                    -1
+                "target": [
+                    909,
+                    157,
+                    71,
+                    46
                 ]
             }
         },
@@ -51,7 +92,25 @@
         "next": [
             "通用大活动-助战确认",
             "[JumpBack]全局-战前吃体力",
-            "通用大活动-已完成副本2"
+            "通用大活动-点击进副本"
+        ]
+    },
+    "通用大活动-进入第一个副本": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    745,
+                    177,
+                    109,
+                    52
+                ]
+            }
+        },
+        "next": [
+            "通用大活动-助战确认",
+            "[JumpBack]全局-战前吃体力",
+            "通用大活动-进入第一个副本"
         ]
     },
     "通用大活动-开始": {
@@ -145,14 +204,59 @@
             "通用大活动-上回挑战卡片"
         ]
     },
-    "通用大活动-助战确认": {
+    "通用大活动-已完成副本": {
         "recognition": {
             "type": "TemplateMatch",
             "param": {
                 "template": [
-                    "助战选择界面标记.png"
+                    "event/已完成的副本标签.png"
                 ]
             }
-        }
+        },
+        "post_delay": 15000,
+        "focus": {
+            "Node.Recognition.Succeeded": "<span style=\"color: #FF0000;\">【警告】因为没有发现带有上次挑战标签的副本，即将在10s后进入第一个已经完成过的副本！</span>"
+        },
+        "next": [
+            "通用大活动-已完成副本2"
+        ]
+    },
+    "通用大活动-循环空节点": {
+        "max_hit": 3,
+        "post_delay": 1000
+    },
+    "通用大活动-已完成副本2": {
+        "max_hit": 3,
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    597,
+                    83,
+                    641,
+                    266
+                ],
+                "template": [
+                    "event/已完成的副本标签.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    47,
+                    -58,
+                    -1,
+                    -1
+                ]
+            }
+        },
+        "post_delay": 3000,
+        "next": [
+            "通用大活动-助战确认",
+            "[JumpBack]全局-战前吃体力",
+            "通用大活动-已完成副本2"
+        ]
     }
 }
