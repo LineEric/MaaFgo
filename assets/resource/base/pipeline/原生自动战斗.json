@@ -7,7 +7,7 @@
       }
     },
     "next": [
-      "[JumpBack]战斗结束"
+      "[JumpBack]结束战斗"
     ]
   },
   "原生自动战斗_Chaldea入口": {
@@ -22,7 +22,7 @@
       }
     },
     "next": [
-      "[JumpBack]战斗结束"
+      "[JumpBack]结束战斗"
     ]
   }
 }
