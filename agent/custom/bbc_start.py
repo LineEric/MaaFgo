@@ -11,6 +11,7 @@ if _custom_dir not in sys.path:
     sys.path.insert(0, _custom_dir)
 
 from bbc_connection_manager import get_manager
+from bbc_process_utils import is_bbc_process
 import mfaalog
 
 
@@ -149,8 +150,9 @@ class StartBbc(CustomAction):
             
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
-                    cmdline = proc.info.get('cmdline', [])
-                    if cmdline and any('BBchannel' in arg for arg in cmdline):
+                    name = proc.info.get('name') or ''
+                    cmdline = proc.info.get('cmdline') or []
+                    if is_bbc_process(name, cmdline):
                         mfaalog.info(f"[StartBbc] 终止进程: PID={proc.pid}, cmdline={cmdline}")
                         proc.kill()
                         killed_count += 1

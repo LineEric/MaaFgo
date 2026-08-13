@@ -13,6 +13,7 @@ import logging
 import psutil
 from typing import Optional
 import mfaalog
+from bbc_process_utils import is_bbc_process
 
 logger = logging.getLogger("BbcConnectionManager")
 
@@ -389,8 +390,9 @@ class BbcConnectionManager:
         try:
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
-                    cmdline = proc.info.get('cmdline', [])
-                    if cmdline and any('BBchannel.exe' in arg for arg in cmdline):
+                    name = proc.info.get('name') or ''
+                    cmdline = proc.info.get('cmdline') or []
+                    if is_bbc_process(name, cmdline):
                         return proc
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue

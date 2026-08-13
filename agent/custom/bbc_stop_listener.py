@@ -22,6 +22,8 @@ _custom_dir = os.path.dirname(os.path.abspath(__file__))
 if _custom_dir not in sys.path:
     sys.path.insert(0, _custom_dir)
 
+from bbc_process_utils import is_bbc_process
+
 # MXU 停止任务时 post_stop() 触发的内部任务 entry 名
 STOP_ENTRY = "MaaTaskerPostStop"
 
@@ -31,9 +33,9 @@ def _kill_bbc_processes() -> int:
     killed = 0
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:
-            name = (proc.info.get('name') or '').lower()
+            name = proc.info.get('name') or ''
             cmdline = proc.info.get('cmdline') or []
-            if 'bbchannel' in name or any('BBchannel' in arg for arg in cmdline):
+            if is_bbc_process(name, cmdline):
                 mfaalog.info(f"[BbcStopListener] 强制杀死 BBC 进程 PID: {proc.pid}")
                 proc.kill()
                 killed += 1

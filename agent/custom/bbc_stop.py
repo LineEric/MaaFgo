@@ -1,7 +1,17 @@
+import os
+import sys
+
 import psutil
 from maa.agent.agent_server import AgentServer
 from maa.custom_action import CustomAction
 from maa.context import Context
+
+# 确保 custom 目录在 sys.path 中
+_custom_dir = os.path.dirname(os.path.abspath(__file__))
+if _custom_dir not in sys.path:
+    sys.path.insert(0, _custom_dir)
+
+from bbc_process_utils import is_bbc_process
 import mfaalog
 
 
@@ -17,8 +27,9 @@ class StopBbc(CustomAction):
             
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
-                    cmdline = proc.info.get('cmdline', [])
-                    if cmdline and any('BBchannel' in arg for arg in cmdline):
+                    name = proc.info.get('name') or ''
+                    cmdline = proc.info.get('cmdline') or []
+                    if is_bbc_process(name, cmdline):
                         mfaalog.info(f"[StopBbc] 找到 BBC 进程 PID: {proc.pid}")
                         # 直接强制杀死进程（terminate无法关闭有弹窗的进程）
                         proc.kill()

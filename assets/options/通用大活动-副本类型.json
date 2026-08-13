@@ -4,10 +4,126 @@
       "label": "$副本类型",
       "default": "上次挑战",
       "type": "select",
-      "description": "目前仅支持挑战上次的副本",
+      "description": "选择上次挑战的副本，或自选副本（上次挑战仅支持90++）",
       "cases": [
         {
           "name": "上次挑战"
+        },
+        {
+          "name": "自选副本",
+          "option": [
+            "通用大活动-地图位置名",
+            "通用大活动-副本顺序"
+          ],
+          "pipeline_override": {
+            "通用大活动-主界面入口进入": {
+              "next": [
+                "地图轮巡"
+              ]
+            },
+            "地图轮巡-成功": {
+              "next": [
+                "通用大活动-坐标导航"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "通用大活动-地图位置名": {
+      "type": "input",
+      "label": "地图位置名",
+      "description": "填写地图上目标活动副本所在的<span style=\"color: #FF0000;\">地图点</span>的名称",
+      "inputs": [
+        {
+          "name": "map_position_name",
+          "label": "地图位置名",
+          "default": "",
+          "pipeline_type": "string",
+          "verify": ".+"
+        }
+      ],
+      "pipeline_override": {
+        "巡-找到目标": {
+          "recognition": {
+            "param": {
+              "expected": [
+                "{map_position_name}"
+              ]
+            }
+          }
+        },
+        "巡-找到目标-重试": {
+          "recognition": {
+            "param": {
+              "expected": [
+                "{map_position_name}"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "通用大活动-副本顺序": {
+      "type": "select",
+      "label": "副本顺序",
+      "description": "打开副本列表后，要打的副本是第几个",
+      "default": "第1个",
+      "cases": [
+        {
+          "name": "第1个"
+        },
+        {
+          "name": "第2个",
+          "pipeline_override": {
+            "通用大活动-先下滑到最上面": {
+              "next": [
+                "通用大活动-按次数找副本"
+              ]
+            },
+            "通用大活动-按次数下划": {
+              "repeat": 1
+            }
+          }
+        },
+        {
+          "name": "第3个",
+          "pipeline_override": {
+            "通用大活动-先下滑到最上面": {
+              "next": [
+                "通用大活动-按次数找副本"
+              ]
+            },
+            "通用大活动-按次数下划": {
+              "repeat": 2
+            }
+          }
+        },
+        {
+          "name": "第4个",
+          "pipeline_override": {
+            "通用大活动-先下滑到最上面": {
+              "next": [
+                "通用大活动-按次数找副本"
+              ]
+            },
+            "通用大活动-按次数下划": {
+              "repeat": 3
+            }
+          }
+        },
+        {
+          "name": "第5个",
+          "pipeline_override": {
+            "通用大活动-先下滑到最上面": {
+              "next": [
+                "通用大活动-按次数找副本"
+              ]
+            },
+            "通用大活动-按次数下划": {
+              "repeat": 4
+            }
+          }
         }
       ]
     }

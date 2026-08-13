@@ -27,7 +27,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左1"
@@ -53,7 +53,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右1b"
@@ -79,7 +79,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左1b"
@@ -105,7 +105,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右1c"
@@ -131,7 +131,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左1c"
@@ -159,7 +159,7 @@
         },
         "repeat": 5,
         "repeat_delay": 500,
-        "post_delay": 2000,
+        "post_delay": 1500,
         "focus": {
             "Node.Action.Succeeded": "初始化归位完成"
         },
@@ -190,7 +190,7 @@
         },
         "repeat": 5,
         "repeat_delay": 500,
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-初始化上滑"
         ]
@@ -215,7 +215,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右2"
@@ -241,7 +241,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右2b"
@@ -267,7 +267,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右2c"
@@ -293,7 +293,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右3"
@@ -319,7 +319,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右3b"
@@ -345,7 +345,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右3c"
@@ -371,7 +371,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右4"
@@ -397,7 +397,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右4b"
@@ -423,7 +423,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-右4c"
@@ -449,10 +449,10 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
-            "巡-右5"
+            "巡-下滑1"
         ]
     },
     "巡-右4b": {
@@ -475,10 +475,10 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
-            "巡-右5b"
+            "巡-下滑3"
         ]
     },
     "巡-右4c": {
@@ -501,85 +501,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
-        "next": [
-            "巡-找到目标",
-            "巡-右5c"
-        ]
-    },
-    "巡-右5": {
-        "action": {
-            "type": "Swipe",
-            "param": {
-                "begin": [
-                    765,
-                    360,
-                    1,
-                    1
-                ],
-                "end": [
-                    [
-                        515,
-                        360,
-                        1,
-                        1
-                    ]
-                ]
-            }
-        },
-        "post_delay": 2000,
-        "next": [
-            "巡-找到目标",
-            "巡-下滑1"
-        ]
-    },
-    "巡-右5b": {
-        "action": {
-            "type": "Swipe",
-            "param": {
-                "begin": [
-                    765,
-                    360,
-                    1,
-                    1
-                ],
-                "end": [
-                    [
-                        515,
-                        360,
-                        1,
-                        1
-                    ]
-                ]
-            }
-        },
-        "post_delay": 2000,
-        "next": [
-            "巡-找到目标",
-            "巡-下滑3"
-        ]
-    },
-    "巡-右5c": {
-        "action": {
-            "type": "Swipe",
-            "param": {
-                "begin": [
-                    765,
-                    360,
-                    1,
-                    1
-                ],
-                "end": [
-                    [
-                        515,
-                        360,
-                        1,
-                        1
-                    ]
-                ]
-            }
-        },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-下滑5"
@@ -605,7 +527,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左2"
@@ -631,7 +553,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左2b"
@@ -657,7 +579,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左2c"
@@ -683,7 +605,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左3"
@@ -709,7 +631,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左3b"
@@ -735,7 +657,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左3c"
@@ -761,7 +683,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左4"
@@ -787,7 +709,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左4b"
@@ -813,7 +735,7 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-左4c"
@@ -839,10 +761,10 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
-            "巡-左5"
+            "巡-下滑2"
         ]
     },
     "巡-左4b": {
@@ -865,10 +787,10 @@
                 ]
             }
         },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
-            "巡-左5b"
+            "巡-下滑4"
         ]
     },
     "巡-左4c": {
@@ -891,111 +813,111 @@
                 ]
             }
         },
-        "post_delay": 2000,
-        "next": [
-            "巡-找到目标",
-            "巡-左5c"
-        ]
-    },
-    "巡-左5": {
-        "action": {
-            "type": "Swipe",
-            "param": {
-                "begin": [
-                    515,
-                    360,
-                    1,
-                    1
-                ],
-                "end": [
-                    [
-                        765,
-                        360,
-                        1,
-                        1
-                    ]
-                ]
-            }
-        },
-        "post_delay": 2000,
-        "next": [
-            "巡-找到目标",
-            "巡-下滑2"
-        ]
-    },
-    "巡-左5b": {
-        "action": {
-            "type": "Swipe",
-            "param": {
-                "begin": [
-                    515,
-                    360,
-                    1,
-                    1
-                ],
-                "end": [
-                    [
-                        765,
-                        360,
-                        1,
-                        1
-                    ]
-                ]
-            }
-        },
-        "post_delay": 2000,
-        "next": [
-            "巡-找到目标",
-            "巡-下滑4"
-        ]
-    },
-    "巡-左5c": {
-        "action": {
-            "type": "Swipe",
-            "param": {
-                "begin": [
-                    515,
-                    360,
-                    1,
-                    1
-                ],
-                "end": [
-                    [
-                        765,
-                        360,
-                        1,
-                        1
-                    ]
-                ]
-            }
-        },
-        "post_delay": 2000,
+        "post_delay": 1500,
         "next": [
             "巡-找到目标",
             "巡-未找到"
         ]
     },
-    "巡-成功": {},
-    "巡-找到目标": {
+    "巡-成功": {
         "recognition": {
             "type": "TemplateMatch",
             "param": {
-                "template": "巡-检查目标.png"
+                "roi": [
+                    1163,
+                    112,
+                    70,
+                    484
+                ],
+                "template": [
+                    "副本打开标记-感叹号.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "已正常识别打开副本"
+        },
+        "next": [
+            "地图轮巡-成功"
+        ]
+    },
+    "巡-成功2": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "后退按钮.png"
+                ]
+            }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "已正常识别打开副本"
+        },
+        "next": [
+            "地图轮巡-成功"
+        ]
+    },
+    "巡-找到目标": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "expected": [
+                    "ニライカナイ本拠地"
+                ]
             }
         },
         "action": {
-            "type": "Click"
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            }
         },
         "focus": {
             "Node.Action.Succeeded": "找到目标，点击选择"
         },
         "next": [
-            "巡-成功"
+            "巡-成功",
+            "巡-成功2",
+            "巡-找到目标-重试"
+        ]
+    },
+    "巡-找到目标-重试": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "expected": [
+                    "ニライカナイ本拠地"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target_offset": [
+                    30,
+                    0,
+                    0,
+                    0
+                ]
+            }
+        },
+        "focus": {
+            "Node.Action.Succeeded": "找到目标，点击选择"
+        },
+        "next": [
+            "巡-成功",
+            "巡-成功2"
         ]
     },
     "巡-未找到": {
         "focus": {
             "Node.Recognition.Starting": "遍历完成，未找到目标！"
         }
-    }
+    },
+    "地图轮巡-成功": {}
 }
