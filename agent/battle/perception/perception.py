@@ -78,12 +78,6 @@ def reached_post_battle(context, img) -> bool:
     return bool(r and r.hit)
 
 
-def is_scene(context, img, target: Scene) -> bool:
-    """单帧检测当前画面是否为指定场景（不轮询）。"""
-    scene, _ = _detect_scene(context, img)
-    return scene is target
-
-
 def detect_scene(context, img) -> Scene:
     """轻量版：只检测场景，不做卡牌/技能/敌人等完整感知。用于轮询等待。"""
     scene, _ = _detect_scene(context, img)

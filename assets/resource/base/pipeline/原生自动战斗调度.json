@@ -2,27 +2,10 @@
     "原生自动战斗调度": {
         "next": [
             "[JumpBack]执行进本",
+            "[JumpBack]跳过剧情-点击跳过",
             "[JumpBack]执行原生自动战斗",
             "[JumpBack]执行战斗结束",
             "战斗完成信息"
-        ]
-    },
-    "执行回主界面": {
-        "max_hit": 1,
-        "next": [
-            "回主界面"
-        ]
-    },
-    "执行队伍选择": {
-        "max_hit": 1,
-        "next": [
-            "队伍选择"
-        ]
-    },
-    "执行章节导航": {
-        "max_hit": 1,
-        "next": [
-            "章节导航"
         ]
     },
     "执行进本": {
@@ -37,60 +20,97 @@
             "原生自动战斗入口"
         ]
     },
-    "执行战斗结束": {
-        "max_hit": 1,
-        "next": [
-            "结束战斗"
-        ]
-    },
     "进本流程": {
         "next": [
-            "进本-进入副本",
-            "[JumpBack]进本-选择助战",
-            "[JumpBack]进本-开始任务"
+            "进本-队伍确认",
+            "进本-选择助战",
+            "全局空节点"
         ]
-    },
-    "进本-进入副本": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "template": "dungeon_enter.png"
-            }
-        },
-        "action": {
-            "type": "Click"
-        },
-        "post_delay": 1500
     },
     "进本-选择助战": {
         "recognition": {
             "type": "TemplateMatch",
             "param": {
-                "roi": [1020, 165, 195, 545],
+                "roi": [
+                    1020,
+                    165,
+                    195,
+                    545
+                ],
                 "template": "support/助战编入确认.png",
                 "threshold": 0.8,
                 "order_by": "Vertical"
             }
         },
         "action": {
-            "type": "Click"
-        }
+            "type": "Click",
+            "target": [
+                591,
+                236,
+                63,
+                39
+            ]
+        },
+        "post_delay": 1500,
+        "next": [
+            "进本-队伍确认"
+        ]
     },
-    "进本-开始任务": {
+    "进本-队伍确认": {
         "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "template": "开始任务.png",
-                "threshold": 0.8
-            }
+            "type": "Or",
+            "any_of": [
+                {
+                    "recognition": "TemplateMatch",
+                    "template": "战斗开始.png",
+                    "threshold": 0.8
+                },
+                {
+                    "recognition": "TemplateMatch",
+                    "template": "开始任务.png",
+                    "threshold": 0.8
+                }
+            ]
         },
         "action": {
             "type": "Click"
         }
     },
-    "战斗完成信息": {
+    "跳过剧情-点击跳过": {
+        "max_hit": 1,
+        "recognition": {
+            "type": "OCR",
+            "expected": "跳过",
+            "roi": [
+                1143,
+                24,
+                80,
+                35
+            ],
+            "threshold": 0.5
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 100,
         "next": [
-            "bbc弹窗信息输出"
+            "跳过剧情-确认跳过"
         ]
+    },
+    "跳过剧情-确认跳过": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "template": "是.png",
+            "threshold": 0.8,
+            "roi": [
+                756,
+                535,
+                144,
+                49
+            ]
+        },
+        "action": {
+            "type": "Click"
+        }
     }
 }

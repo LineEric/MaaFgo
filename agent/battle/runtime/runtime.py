@@ -29,7 +29,7 @@ import mfaalog
 # 选完卡后等攻击动画结束（20~40s，留足余量）
 _ANIMATION_TIMEOUT_S = 60.0
 # 意外 UNKNOWN（加载等）的最大等待
-_UNKNOWN_TIMEOUT_S = 15.0
+_UNKNOWN_TIMEOUT_S = 30.0
 # 每次轮询之间等画面静止的窗口（ms）
 _POLL_FREEZE_MS = 2000
 # 胜利后结算点击流（掉落/羁绊/结果多屏）的最大耗时
@@ -412,13 +412,14 @@ class AutoBattleRuntime:
         cast_callable()
         time.sleep(0.2)
         img = self.controller.post_screencap().wait().get()
-        # 检查技能使用弹窗（CD 技能）或技能目标选择子屏（互斥）
-        if perception.is_scene(self.ctx, img, Scene.SKILL_USE_DIALOG):
+        # 一次 detect_scene 替代两次串行 is_scene，省掉一次 run_recognition
+        post_scene = perception.detect_scene(self.ctx, img)
+        if post_scene is Scene.SKILL_USE_DIALOG:
             mfaalog.info("[AutoBattle] skill-use dialog detected; closing and continuing")
             self.executor.close_skill_use_dialog()
             time.sleep(0.5)
             return True
-        elif perception.is_scene(self.ctx, img, Scene.SKILL_TARGET_SELECTION):
+        elif post_scene is Scene.SKILL_TARGET_SELECTION:
             mfaalog.info("[AutoBattle] skill target sub-screen detected")
             target = target_ally if target_ally is not None else default_target
             mfaalog.info(f"[AutoBattle] selecting skill target ally={target}")

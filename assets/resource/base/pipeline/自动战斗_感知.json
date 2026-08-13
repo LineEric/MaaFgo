@@ -226,169 +226,301 @@
   },
   "战斗_从者1技能1_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          23,
-          579,
-          94,
-          43
+          50,
+          555,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_从者1技能2_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          115,
-          578,
-          94,
-          43
+          137,
+          554,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_从者1技能3_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          206,
-          578,
-          94,
-          43
+          225,
+          555,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_从者2技能1_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          342,
-          579,
-          94,
-          43
+          368,
+          555,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_从者2技能2_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          429,
-          583,
-          94,
-          43
+          453,
+          552,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_从者2技能3_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          520,
-          578,
-          94,
-          43
+          544,
+          555,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_从者3技能1_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          658,
-          577,
-          94,
-          43
+          685,
+          554,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_从者3技能2_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          752,
-          578,
-          95,
-          44
+          772,
+          553,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_从者3技能3_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          839,
-          578,
-          95,
-          44
+          861,
+          554,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 100
       }
     }
   },
   "战斗_御主技能1_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          863,
-          317,
-          81,
-          30
+          882,
+          287,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 50
       }
     }
   },
   "战斗_御主技能2_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          951,
-          317,
-          81,
-          30
+          971,
+          285,
+          48,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 50
       }
     }
   },
   "战斗_御主技能3_CD": {
     "recognition": {
-      "type": "OCR",
+      "type": "ColorMatch",
       "param": {
         "roi": [
-          1041,
-          317,
-          81,
-          30
+          1060,
+          286,
+          49,
+          34
         ],
-        "expected": "剩余|\\d+"
+        "method": 4,
+        "lower": [
+          0,
+          0,
+          0
+        ],
+        "upper": [
+          100,
+          100,
+          100
+        ],
+        "count": 50
       }
     }
   },
