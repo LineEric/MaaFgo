@@ -334,12 +334,31 @@
         "action": {
             "type": "Click"
         },
-        "post_delay": 3000,
+        "post_delay": 500,
+        "next": [
+            "追加强化-快速点击"
+        ]
+    },
+    "追加强化-快速点击": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    1217,
+                    269,
+                    36,
+                    82
+                ]
+            }
+        },
+        "repeat": 3,
+        "repeat_delay": 400,
+        "post_delay": 2000,
         "next": [
             "[JumpBack]追加强化-断网重连",
             "追加强化-回到强化界面",
-            "[JumpBack]追加强化-点击空白跳过",
-            "追加强化-全部完成"
+            "追加强化-全部完成",
+            "[JumpBack]追加强化-点击空白跳过"
         ]
     },
     "追加强化-等级识别-满级": {
