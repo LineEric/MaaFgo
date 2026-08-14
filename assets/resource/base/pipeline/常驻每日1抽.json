@@ -75,10 +75,10 @@
             "type": "TemplateMatch",
             "param": {
                 "roi": [
-                    258,
-                    436,
-                    272,
-                    161
+                    358,
+                    490,
+                    197,
+                    68
                 ],
                 "template": [
                     "召唤2次.png",
