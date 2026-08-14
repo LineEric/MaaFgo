@@ -24,6 +24,7 @@ import bbc_stop
 import bbc_stop_listener
 import chaldea_import_action
 import general_navigation_action
+import ocr_logger
 
 
 
