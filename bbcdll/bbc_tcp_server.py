@@ -8,8 +8,6 @@ ENABLE_LOG = True
 
 import logging as _logging
 import os as _os
-import threading as _threading
-import queue as _queue
 
 _server_logger = _logging.getLogger("BbcTcpServer")
 if ENABLE_LOG and not _server_logger.handlers:
@@ -46,28 +44,6 @@ _popup_wait_lock = None
 TCP_PORT = 25001
 CALLBACK_PORT = 25002
 
-# ==================== UI 线程调度 ====================
-# tkinter 的 UI 操作必须在创建 Tk 的主线程执行，否则抛
-# 'RuntimeError: main thread is not in main loop'。而 TCP 命令由后台线程
-# 处理，因此需要把操作 UI 的命令调度回主线程执行。
-_ui_task_queue = None
-_tk_root = None
-_ui_task_lock = _threading.Lock()
-_ui_task_results = {}
-_ui_task_events = {}
-_ui_task_seq = 0
-
-# 需要操作 tkinter UI 的命令（必须在主线程执行）
-# popup_response / get_popups / wait_for_popup / get_config / save_config
-# 属于纯数据/队列/文件操作，留在后台线程执行，避免弹窗阻塞主线程时死锁。
-_UI_COMMANDS = {
-    'connect_mumu', 'connect_ld', 'connect_adb', 'disconnect',
-    'load_config',
-    'set_apple_type', 'set_run_times', 'set_battle_type', 'get_settings',
-    'start_battle', 'stop_battle',
-    'get_connection', 'get_status', 'get_ui_status',
-}
-
 # ==================== BBC 窗口注册 ====================
 
 def update_bb_window(bb_window):
@@ -79,68 +55,6 @@ def get_bb_page():
     if _bb_window_global is None:
         return None
     return _bb_window_global.pages[0]
-
-
-# ==================== 主线程任务调度 ====================
-
-def _run_on_main_thread(fn, *args, **kwargs):
-    """在 tkinter 主线程执行 fn 并同步返回结果（跨线程安全）。
-
-    tkinter 的 UI 操作必须在创建 Tk 的主线程执行，否则抛
-    'RuntimeError: main thread is not in main loop'。TCP 命令由后台线程
-    处理，因此需要把操作 UI 的命令调度回主线程执行。
-
-    通过 root.after() 由主线程轮询队列来执行任务，避免从后台线程直接
-    调用 tkinter（那同样会触发线程检查）。
-    """
-    global _tk_root, _ui_task_queue, _ui_task_seq
-    if _tk_root is None or _ui_task_queue is None:
-        # 主线程调度机制未就绪，退化为当前线程直接执行（保持原行为）
-        try:
-            return fn(*args, **kwargs)
-        except Exception as e:
-            return {'success': False, 'error': str(e)}
-
-    ev = _threading.Event()
-    with _ui_task_lock:
-        _ui_task_seq += 1
-        task_id = _ui_task_seq
-        _ui_task_events[task_id] = ev
-    _ui_task_queue.put((task_id, fn, args, kwargs))
-
-    if not ev.wait(timeout=20):
-        with _ui_task_lock:
-            _ui_task_events.pop(task_id, None)
-        return {'success': False, 'error': 'Main thread timeout (UI busy)'}
-
-    with _ui_task_lock:
-        result = _ui_task_results.pop(task_id, {'success': False, 'error': 'No result'})
-        _ui_task_events.pop(task_id, None)
-    return result
-
-
-def _ui_task_poll():
-    """主线程轮询：取出队列中的任务并执行"""
-    while True:
-        try:
-            task_id, fn, args, kwargs = _ui_task_queue.get_nowait()
-        except _queue.Empty:
-            break
-        try:
-            result = fn(*args, **kwargs)
-        except Exception as e:
-            result = {'success': False, 'error': str(e)}
-        ev = None
-        with _ui_task_lock:
-            _ui_task_results[task_id] = result
-            ev = _ui_task_events.get(task_id)
-        if ev is not None:
-            ev.set()
-    # 继续下一轮轮询
-    try:
-        _tk_root.after(30, _ui_task_poll)
-    except Exception:
-        pass
 
 # ==================== 弹窗机制 ====================
 
@@ -816,17 +730,8 @@ class ClientHandler:
                 try:
                     import json
                     cmd = json.loads(data.decode('utf-8'))
-                    if isinstance(cmd, list):
-                        cmd = cmd[0] if cmd else {}
-                    if not isinstance(cmd, dict):
-                        cmd = {}
-                    command_name = cmd.get('cmd', '')
-                    _log('debug', f'[Command] {command_name}')
-                    if command_name in _UI_COMMANDS:
-                        # 操作 UI 的命令调度到主线程执行，避免后台线程碰 tkinter
-                        response = _run_on_main_thread(CommandDispatcher.dispatch, cmd)
-                    else:
-                        response = CommandDispatcher.dispatch(cmd)
+                    _log('debug', f'[Command] {cmd.get("cmd") if isinstance(cmd, dict) else cmd}')
+                    response = CommandDispatcher.dispatch(cmd)
                 except Exception as e:
                     _log('error', f'[Command] Parse failed: {e}')
                     response = {'success': False, 'error': str(e)}
@@ -913,6 +818,7 @@ _tcp_server_instance = None
 
 def start_tcp_server(bb_window, port=25001):
     import threading
+    import queue
     from tkinter import messagebox
 
     global _bb_window_global
@@ -920,31 +826,10 @@ def start_tcp_server(bb_window, port=25001):
     global _popup_wait_lock
     global _popup_wait_dict
     global _tcp_server_instance
-    global _tk_root
-    global _ui_task_queue
 
     _bb_window_global = bb_window
-    popup_event_queue = _queue.Queue()
-    _popup_wait_lock = _threading.Lock()
-
-    # 初始化主线程任务调度：拿到 tkinter 根窗口并启动轮询
-    _ui_task_queue = _queue.Queue()
-    _tk_root = None
-    try:
-        page = get_bb_page()
-        if page is not None:
-            _tk_root = page.winfo_toplevel()
-    except Exception as e:
-        _log('warning', f'[Server] Failed to get tk root: {e}')
-        _tk_root = None
-    if _tk_root is not None:
-        try:
-            _tk_root.after(30, _ui_task_poll)
-            _log('info', '[Server] UI task poll started on main thread')
-        except Exception as e:
-            _log('warning', f'[Server] Failed to start UI poll: {e}')
-    else:
-        _log('warning', '[Server] tk root unavailable, UI commands run on caller thread')
+    popup_event_queue = queue.Queue()
+    _popup_wait_lock = threading.Lock()
 
     CONTROLLED_POPUPS = [
         "免责声明！",

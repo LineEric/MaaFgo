@@ -415,22 +415,10 @@ class ExecuteBbcTask(CustomAction):
         # 回调已在 _execute_single_battle 中设置，这里直接使用
         
         # 加载配置：从 settings 目录读取 JSON 文件
-        # BBC 刚重启时 load_config 可能因 tkinter 线程问题报
-        # 'main thread is not in main loop'，重试几次通常即可成功。
-        # （治本需 BBC 端 bbc_tcp_server.py 把 UI 命令调度回主线程）
         mfaalog.info(f"[ExecuteBbcTask] 加载配置: {team_config}")
-        load_ok = False
-        load_last_error = ''
-        for load_attempt in range(1, 4):
-            result = manager.send_command('load_config', {'filename': team_config}, timeout=10)
-            if result.get('success'):
-                load_ok = True
-                break
-            load_last_error = result.get('error', '')
-            mfaalog.warning(f"[ExecuteBbcTask] 加载配置失败(第{load_attempt}次): {load_last_error}")
-            time.sleep(1)
-        if not load_ok:
-            mfaalog.error(f"[ExecuteBbcTask] 加载配置失败: {load_last_error}")
+        result = manager.send_command('load_config', {'filename': team_config}, timeout=10)
+        if not result.get('success'):
+            mfaalog.error(f"[ExecuteBbcTask] 加载配置失败: {result.get('error')}")
             return None
         
         # 检查配置阶段是否有弹窗
