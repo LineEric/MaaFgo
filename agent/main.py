@@ -26,6 +26,7 @@ import chaldea_import_action
 import general_navigation_action
 import ocr_logger
 import auto_battle_action
+import auto_battle_repeat_action
 import slot3_click_test_action
 
 

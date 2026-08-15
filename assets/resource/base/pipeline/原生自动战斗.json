@@ -5,10 +5,7 @@
       "param": {
         "custom_action": "auto_battle"
       }
-    },
-    "next": [
-      "[JumpBack]结束战斗"
-    ]
+    }
   },
   "原生自动战斗_Chaldea入口": {
     "action": {
@@ -20,9 +17,17 @@
           "max_turns": 20
         }
       }
-    },
-    "next": [
-      "[JumpBack]结束战斗"
-    ]
+    }
+  },
+  "原生自动战斗_多次入口": {
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "auto_battle_repeat",
+        "custom_action_param": {
+          "battle_count": 1
+        }
+      }
+    }
   }
 }

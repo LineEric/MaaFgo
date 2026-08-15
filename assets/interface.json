@@ -146,7 +146,8 @@
     "options/从者追加技能强化.json",
     "options/抽卡截图.json",
     "tasks/原生自动战斗.json",
-    "tasks/原生自动战斗_测试09_1T完整链路.json"
+    "tasks/原生自动战斗_测试09_1T完整链路.json",
+    "options/原生自动战斗次数.json"
   ],
   "agent": {
     "child_exec": "python",
