@@ -83,7 +83,10 @@
         "post_delay": 1000,
         "next": [
             "整理礼物盒-导航到灵基变还完成"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "已进入灵基变还界面"
+        }
     },
     "整理礼物盒-已在灵基变还-点击缩放按钮": {
         "action": {
@@ -116,6 +119,9 @@
                     0.85
                 ]
             }
+        },
+        "focus": {
+            "Node.Recognition.Succeeded": "图标大小正常"
         }
     },
     "整理礼物盒-已在礼物盒": {
@@ -136,7 +142,10 @@
         },
         "next": [
             "整理礼物盒-导航完成"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "已进入礼物盒界面"
+        }
     },
     "整理礼物盒-执行回主界面": {
         "max_hit": 1,
@@ -165,7 +174,10 @@
         "next": [
             "整理礼物盒-点领取确认",
             "[JumpBack]整理礼物盒-一键领取循环"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "还有狗粮可领，点击「全部领取」"
+        }
     },
     "整理礼物盒-点商店到灵基变还": {
         "recognition": {
@@ -234,7 +246,10 @@
         "post_delay": 800,
         "next": [
             "整理礼物盒-点商店到灵基变还"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "找到菜单，点击进入商店"
+        }
     },
     "整理礼物盒-点领取确认": {
         "recognition": {
@@ -250,7 +265,10 @@
         "post_delay": 1000,
         "next": [
             "[JumpBack]整理礼物盒-一键领取循环"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "点击「领取」确认"
+        }
     },
     "整理礼物盒-礼物盒满结束": {
         "recognition": {
@@ -270,7 +288,10 @@
         },
         "next": [
             "整理礼物盒-一键领取完成"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "<span style=\"color: #FF0000;\">礼物盒已满，结束一键领取</span>"
+        }
     },
     "整理礼物盒-筛上划": {
         "action": {
@@ -388,7 +409,10 @@
         "post_delay": 500,
         "next": [
             "整理礼物盒-筛卖选4星"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "选择 3 星狗粮"
+        }
     },
     "整理礼物盒-筛卖点4星": {
         "recognition": {
@@ -406,7 +430,10 @@
         "post_delay": 500,
         "next": [
             "整理礼物盒-筛卖选5星"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "选择 4 星狗粮"
+        }
     },
     "整理礼物盒-筛卖点5星": {
         "recognition": {
@@ -424,7 +451,10 @@
         "post_delay": 500,
         "next": [
             "整理礼物盒-筛卖找经验值"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "选择 5 星狗粮"
+        }
     },
     "整理礼物盒-筛卖点决定": {
         "recognition": {
@@ -445,7 +475,10 @@
         "next": [
             "整理礼物盒-已在灵基图标大小检测",
             "[JumpBack]整理礼物盒-已在灵基变还-点击缩放按钮"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "筛选完成，确认决定"
+        }
     },
     "整理礼物盒-筛卖点筛选按钮": {
         "action": {
@@ -488,7 +521,10 @@
         "post_delay": 500,
         "next": [
             "整理礼物盒-筛卖点决定"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "选择「从者经验值」"
+        }
     },
     "整理礼物盒-筛卖点顶部": {
         "action": {
@@ -537,7 +573,10 @@
         "post_delay": 500,
         "next": [
             "整理礼物盒-筛卖选3星"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "重置筛选选项"
+        }
     },
     "整理礼物盒-筛点筛选按钮": {
         "action": {
@@ -597,7 +636,10 @@
         "post_delay": 1000,
         "next": [
             "整理礼物盒-贩卖确认完成"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "贩卖完成，关闭奖励弹窗"
+        }
     },
     "整理礼物盒-贩卖确认完成": {},
     "整理礼物盒-贩处理QP满": {
@@ -622,7 +664,10 @@
         "post_delay": 1000,
         "next": [
             "[JumpBack]整理礼物盒-贩等结果"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "<span style=\"color: #FF0000;\">QP 已满，自动点掉继续</span>"
+        }
     },
     "整理礼物盒-贩点贩卖": {
         "recognition": {
@@ -640,7 +685,10 @@
         "post_delay": 3000,
         "next": [
             "整理礼物盒-贩等结果"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "确认变还（销毁）"
+        }
     },
     "整理礼物盒-贩等结果": {
         "next": [
@@ -664,7 +712,10 @@
         },
         "next": [
             "整理礼物盒-一键领取完成"
-        ]
+        ],
+        "focus": {
+            "Node.Recognition.Succeeded": "全部领取按钮已变灰，一键领取完成"
+        }
     },
     "整理礼物盒完成": {}
 }
