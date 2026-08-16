@@ -2,9 +2,6 @@
 """
 整理礼物盒（理盒盒）—— 一键领取 + 按数量保留 + 贩卖狗粮
 
-移植自 BBchannel `unlimitedPool.py` 的 `tidyGiftbox` 逻辑（贩卖部分移植
-自 `expball.py` 的 `sell`/`sellDogfood`）。
-
 架构分工：
 - pipeline（整理礼物盒.json）负责「导航」「一键领取循环」等纯
   模板匹配+点击的流程（识别更稳、坐标随分辨率自适应）。
@@ -193,11 +190,19 @@ class ExecuteBoxTask(CustomAction):
             pkg = str((cfg.get("attach") or {}).get("resource_package") or "base").strip()
             layer = "cn" if pkg == "cn" else "base"
             root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            cands = [
-                os.path.join(root_dir, "assets", "resource", layer, "image", "整理礼物盒"),
-                os.path.join(root_dir, "resource", layer, "image", "整理礼物盒"),
-            ]
-            self.tpl_dir = next((c for c in cands if os.path.isdir(c)), cands[0])
+
+            def _resolve(l):
+                for c in [
+                    os.path.join(root_dir, "assets", "resource", l, "image", "整理礼物盒"),
+                    os.path.join(root_dir, "resource", l, "image", "整理礼物盒"),
+                ]:
+                    if os.path.isdir(c):
+                        return c
+                return None
+
+            self.tpl_dir = _resolve(layer) or ""
+            # base 作为兜底：cn 缺图时回退到 base（与 pipeline 资源分层行为一致）
+            self.tpl_base_dir = _resolve("base") or self.tpl_dir
             mfaalog.info(f"[整理礼物盒] 资源包={pkg} 模板目录={self.tpl_dir}")
 
             # 坐标自适应：截图拿实际分辨率算缩放系数
@@ -281,7 +286,14 @@ class ExecuteBoxTask(CustomAction):
         time.sleep(delay)
 
     def _tpl(self, name):
-        return os.path.join(self.tpl_dir, name)
+        """模板图路径：优先当前服，缺图时回退 base（与 pipeline 资源分层一致）"""
+        p = os.path.join(self.tpl_dir, name)
+        if os.path.isfile(p):
+            return p
+        pb = os.path.join(self.tpl_base_dir, name)
+        if pb != p and os.path.isfile(pb):
+            return pb
+        return p
 
     def _match(self, name, roi=None, threshold=TH_TEMPLATE):
         """模板匹配（模板图 + ROI 均按 scale 缩放）。返回 (score, cx, cy) 或 None"""
@@ -464,7 +476,7 @@ class ExecuteBoxTask(CustomAction):
                 return
             # 滚动（手指上滑，列表向下翻）
             self._controller.post_swipe(self._px(600), self._py(560),
-                                        self._px(600), self._py(260), 400).wait()
+                                        self._px(600), self._py(200), 400).wait()
             time.sleep(1.0)
         mfaalog.warning("[整理礼物盒] 按数量保留达到最大轮数")
 
