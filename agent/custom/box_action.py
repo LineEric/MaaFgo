@@ -476,7 +476,7 @@ class ExecuteBoxTask(CustomAction):
                 return
             # 滚动（手指上滑，列表向下翻）
             self._controller.post_swipe(self._px(600), self._py(560),
-                                        self._px(600), self._py(260), 400).wait()
+                                        self._px(600), self._py(200), 400).wait()
             time.sleep(1.0)
         mfaalog.warning("[整理礼物盒] 按数量保留达到最大轮数")
 
