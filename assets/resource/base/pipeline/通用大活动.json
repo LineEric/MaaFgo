@@ -242,6 +242,7 @@
         ]
     },
     "通用大活动-进入第一个副本": {
+        "max_hit": 3,
         "action": {
             "type": "Click",
             "param": {
