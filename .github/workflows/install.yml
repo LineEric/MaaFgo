@@ -219,11 +219,9 @@ jobs:
       - name: Compress artifacts
         run: |
           cd assets
-          for f in *; do
-            if [[ $f == *"win"* ]]; then
-              (cd "$f" && zip -r "../$f.zip" .)
-            fi
-          done
+          # 现在只构建 MXU 单产物，download-artifact 会直接平铺到 assets 根目录，
+          # 因此把整个目录打包成 zip 即可。
+          zip -r "MaaFgo-win-x86_64-${{ needs.meta.outputs.tag }}-MXU.zip" .
 
       - uses: softprops/action-gh-release@v2.2.2
         with:
