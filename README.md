@@ -88,7 +88,6 @@
 | 版本 | 文件名标识 | 说明 |
 | ------ | ----------- | ------ |
 | **MXU**（推荐） | `MXU.zip` | 桌面客户端，原生窗口体验，启动更快，无需浏览器 |
-| MWU | `MWU.zip` | Web 界面版，通过浏览器访问，兼容性好 |
 
 > 推荐使用 MXU 桌面版，体验更流畅。
 
@@ -131,7 +130,7 @@ MaaFgo/
 ### 技术栈
 
 - **核心框架**: [MaaFramework](https://github.com/MaaXYZ/MaaFramework) — 图像识别自动化
-- **前端**: MWU / MXU — Web 界面与桌面客户端
+- **前端**: MXU — 桌面客户端
 - **战斗核心**: [BBchannel](https://github.com/Meowcolm024/FGO-Automata)
 - **地图导航**: 基于 YOLO 检测的智能地图轮巡导航
 
@@ -144,7 +143,6 @@ MaaFgo/
 | 项目 | 描述 |
 | :--- | :--- |
 | [**MaaFramework**](https://github.com/MaaXYZ/MaaFramework) | 图像识别自动化框架 |
-| [**MWU**](https://github.com/ravizhan/MWU) | 基于 Vue + FastAPI 的轻量级跨平台通用 WebUI |
 | [**MXU**](https://github.com/MistEO/MXU) | 基于 Tauri 2 + React 的轻量级跨平台通用 GUI |
 | [**BBchannel**](https://github.com/Meowcolm024/FGO-Automata) | FGO 自动化战斗核心 |
 | [**FGO-py**](https://github.com/hgjazhgj/FGO-py) | 地图导航图像匹配算法参考 |
