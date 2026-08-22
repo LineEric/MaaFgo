@@ -4,6 +4,56 @@
             "执行强化从者"
         ]
     },
+    "强化从者-删除活动筛选": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    624,
+                    80,
+                    276,
+                    85
+                ],
+                "template": [
+                    "强化从者/无活动筛选.png"
+                ]
+            }
+        },
+        "next": [
+            "强化从者-筛选完成"
+        ]
+    },
+    "强化从者-删除活动筛选点击": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    753,
+                    118,
+                    44,
+                    17
+                ]
+            }
+        },
+        "post_delay": 1000
+    },
+    "强化从者-回到有菜单的界面": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "菜单2.png",
+                    "菜单.png"
+                ],
+                "green_mask": false,
+                "threshold": 0.65
+            }
+        },
+        "post_delay": 800,
+        "next": [
+            "强化从者-狗粮消耗完毕结束"
+        ]
+    },
     "强化从者-回菜单导航": {
         "next": [
             "强化从者-点菜单进强化",
@@ -40,6 +90,7 @@
         "next": [
             "强化从者-已在强化界面",
             "强化从者-已在强化列表",
+            "强化从者-强化快速跳转",
             "强化从者-回菜单导航"
         ]
     },
@@ -146,6 +197,7 @@
             "强化从者-突破已完成",
             "强化从者-强化完成标记",
             "[JumpBack]强化从者-断网重连",
+            "[JumpBack]强化从者-返还经验",
             "[JumpBack]强化从者-跳过动画2"
         ]
     },
@@ -164,6 +216,22 @@
         "next": [
             "强化从者-突破已完成",
             "强化从者-强化一次完成"
+        ]
+    },
+    "强化从者-强化快速跳转": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "强化从者/强化快速跳转.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "next": [
+            "强化从者-已在强化界面"
         ]
     },
     "强化从者-强化确认": {
@@ -235,12 +303,27 @@
                 ]
             }
         },
-        "action": {
-            "type": "Click"
-        },
         "next": [
             "强化从者-执行自动填充"
         ]
+    },
+    "强化从者-消耗完毕后退": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "强化从者/返回强化菜单按钮.png",
+                    "后退按钮.png"
+                ],
+                "threshold": [
+                    0.75
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 800
     },
     "强化从者-点从者强化条": {
         "recognition": {
@@ -364,7 +447,13 @@
             "强化从者-点强化按钮"
         ]
     },
-    "强化从者-狗粮消耗完毕": {},
+    "强化从者-狗粮消耗完毕": {
+        "next": [
+            "强化从者-回到有菜单的界面",
+            "[JumpBack]强化从者-消耗完毕后退"
+        ]
+    },
+    "强化从者-狗粮消耗完毕结束": {},
     "强化从者-突破已完成": {
         "recognition": {
             "type": "TemplateMatch",
@@ -539,6 +628,19 @@
             "强化从者-强化一次完成"
         ]
     },
+    "强化从者-返还经验": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "强化从者/关闭按钮.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        }
+    },
     "强化从者-还是没有狗粮": {
         "recognition": {
             "type": "TemplateMatch",
@@ -650,41 +752,5 @@
         "next": [
             "强化从者完成"
         ]
-    },
-    "强化从者-删除活动筛选": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "roi": [
-                    624,
-                    80,
-                    276,
-                    85
-                ],
-                "template": [
-                    "强化从者/无活动筛选.png"
-                ]
-            }
-        },
-        "action": {
-            "type": "Click"
-        },
-        "next": [
-            "强化从者-筛选完成"
-        ]
-    },
-    "强化从者-删除活动筛选点击": {
-        "action": {
-            "type": "Click",
-            "param": {
-                "target": [
-                    753,
-                    118,
-                    44,
-                    17
-                ]
-            }
-        },
-        "post_delay": 1000
     }
 }

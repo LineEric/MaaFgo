@@ -15,6 +15,7 @@ import os
 import re
 import time
 import json
+import traceback
 
 import numpy as np
 import cv2
@@ -25,6 +26,7 @@ from maa.context import Context
 from maa.pipeline import JOCR
 
 import mfaalog
+from box_action import ExecuteBoxTask
 
 BASE_W, BASE_H = 1280, 720
 
@@ -40,6 +42,9 @@ LEVELUP_ROI = (375, 652, 144, 63)              # 强化完成界面标志（详�
 TPL_NO_MATERIAL = ["从者技能强化/无法强化.png", "从者技能强化/道具不足.png"]
 TPL_EMPTY_SLOT = "强化从者/槽位标志.png"   # 狗粮槽空 = 狗粮用完
 SLOT_ROI = (394, 194, 80, 84)              # 槽位标志 ROI（与 pipeline 一致）
+# pipeline 在狗粮耗尽后会先退出强化界面；必须读取此终止节点的命中结果，
+# 不能等回到主界面后再依赖空槽模板判断。
+DOGFOOD_DEPLETED_END_NODE = "强化从者-狗粮消耗完毕结束"
 
 # 从者头像目录（f_{servantId}{stage}.png，stage 0-3）
 SERVANT_FACE_DIR = "servant_face"
@@ -86,7 +91,9 @@ def _norm_img(img):
         return None
     if arr.dtype != np.uint8:
         arr = arr.astype(np.uint8)
-    return arr
+    # Maa 截图对象的 native 缓冲区可能在当前调用返回后被复用或释放。
+    # 头像匹配会在同一帧上连续进行多次 cv2 运算，必须持有独立副本。
+    return arr.copy()
 
 
 def _read_tpl(path):
@@ -108,6 +115,7 @@ class ExecuteServantUp(CustomAction):
             attach = node.get("attach") or {}
             servant_id = str(attach.get("servant_id") or "").strip()
             target_level = int(attach.get("target_level", 0))
+            tidy_giftbox = bool(attach.get("tidy_giftbox", False))
 
             if target_level <= 0:
                 mfaalog.error("[强化从者] 未设置目标等级")
@@ -127,34 +135,106 @@ class ExecuteServantUp(CustomAction):
             mfaalog.info(f"[强化从者] 目标从者 {servant['name']}({servant['id']}) "
                          f"{servant['rarity']}星 {servant['class']} 目标等级 {target_level}")
 
-            # 导航到强化界面 + 进入从者选择
-            try:
-                context.run_task("强化从者-导航到强化界面")
-            except Exception as e:
-                mfaalog.warning(f"[强化从者] 导航 pipeline 异常: {e}")
-            if context.tasker.stopping:
-                return CustomAction.RunResult(success=False)
-            if not self._in_levelup() and not self._in_servant_select():
-                mfaalog.error("[强化从者] 导航失败，未到达强化界面")
-                return CustomAction.RunResult(success=False)
+            if tidy_giftbox:
+                ok = self._tidy_and_levelup_loop(servant, target_level)
+                return CustomAction.RunResult(success=ok)
 
-            # 进入从者选择界面
-            self._enter_servant_select()
-
-            # 筛选星级职介 + 头像定位
-            if not self._select_servant(servant):
-                mfaalog.error("[强化从者] 定位从者失败")
+            # 单独执行强化时，先由稳定的主界面入口开始导航；
+            # 整理礼物盒循环的页面衔接则完全交给 pipeline 处理。
+            if not self._return_to_main():
                 return CustomAction.RunResult(success=False)
-
-            # 喂狗粮升级循环
-            self._levelup_loop(servant, target_level)
+            result = self._levelup_servant(servant, target_level)
+            if result == "failed":
+                return CustomAction.RunResult(success=False)
+            if result == "dogfood_empty":
+                mfaalog.info("[强化从者] 狗粮已用完，未启用整理礼物盒循环，任务完成")
 
             mfaalog.info("[强化从者] 完成")
             return CustomAction.RunResult(success=True)
 
         except Exception as e:
-            mfaalog.error(f"[强化从者] 异常: {e}")
+            mfaalog.error(f"[强化从者] 异常: {e}\n{traceback.format_exc()}")
             return CustomAction.RunResult(success=False)
+
+    def _tidy_and_levelup_loop(self, servant, target_level):
+        """循环执行「整理礼物盒 -> 强化从者」，页面衔接由 pipeline 负责。"""
+        box_node = self._context.get_node_data("执行整理礼物盒") or {}
+        box_attach = dict(box_node.get("attach") or {})
+        # 强化循环只复用整理阶段；即使礼物盒任务保留了贩卖配置，也绝不在此执行贩卖。
+        for key in ("sell3", "sell4", "sell5"):
+            box_attach[key] = False
+
+        cycle = 0
+        while True:
+            if self._context.tasker.stopping:
+                return False
+            cycle += 1
+            mfaalog.info(f"[强化从者] ===== 第 {cycle} 轮：整理 -> 强化 =====")
+
+            box_task = ExecuteBoxTask()
+            tidy_ok, _giftbox_exhausted, received_any = box_task.run_tidy_once(
+                self._context, box_attach, reset_hit_counts=True, controller=self._controller
+            )
+            if not tidy_ok:
+                mfaalog.error("[强化从者] 礼物盒整理失败")
+                return False
+            # 停止条件以本次实际领取为准（「全部领取」或「领取选中」均可），而不是
+            # 后续筛选列表是否被扫空：同一次进入中已领过一次后再扫空，仍要继续强化。
+            if not received_any:
+                mfaalog.info(
+                    "[强化从者] 本次进入礼物盒未实际领取任何东西，任务完成"
+                )
+                return True
+            result = self._levelup_servant(servant, target_level)
+            if result == "target_reached":
+                mfaalog.info(f"[强化从者] 已达到目标等级 {target_level}，任务完成")
+                return True
+            if result == "no_material":
+                mfaalog.info("[强化从者] 道具不足，任务完成")
+                return True
+            if result == "dogfood_empty":
+                mfaalog.info("[强化从者] 狗粮已用完，进入下一轮礼物盒整理")
+                continue
+            else:
+                mfaalog.error(f"[强化从者] 强化阶段异常结束：{result}")
+                return False
+
+    def _levelup_servant(self, servant, target_level):
+        """完成一次从导航、选从者到喂狗粮的强化过程，返回结束原因。"""
+        # 导航到强化界面 + 进入从者选择
+        try:
+            self._context.run_task("强化从者-导航到强化界面")
+        except Exception as e:
+            mfaalog.warning(f"[强化从者] 导航 pipeline 异常: {e}")
+        if self._context.tasker.stopping:
+            return "stopped"
+        if not self._in_levelup() and not self._in_servant_select():
+            mfaalog.error("[强化从者] 导航失败，未到达强化界面")
+            return "failed"
+
+        # 进入从者选择界面
+        self._enter_servant_select()
+
+        # 筛选星级职介 + 头像定位
+        if not self._select_servant(servant):
+            mfaalog.error("[强化从者] 定位从者失败")
+            return "failed"
+
+        return self._levelup_loop(servant, target_level)
+
+    def _return_to_main(self):
+        """每轮强化用完狗粮后回主界面，确保下一轮能重新导航。"""
+        try:
+            detail = self._context.run_task("回主界面")
+        except Exception as e:
+            mfaalog.warning(f"[强化从者] 回主界面 pipeline 异常: {e}")
+            return False
+        if self._context.tasker.stopping:
+            return False
+        if detail is None or detail.status.failed or not detail.status.succeeded:
+            mfaalog.error("[强化从者] 回主界面失败")
+            return False
+        return True
 
     # ---------- 初始化 ----------
 
@@ -358,7 +438,7 @@ class ExecuteServantUp(CustomAction):
     def _levelup_loop(self, servant, target_level):
         for _round in range(MAX_LEVELUP_ROUND):
             if self._context.tasker.stopping:
-                return
+                return "stopped"
             level = self._read_level()
             if level is None:
                 mfaalog.warning("[强化从者] 等级识别失败，继续尝试")
@@ -367,20 +447,26 @@ class ExecuteServantUp(CustomAction):
             mfaalog.info(f"[强化从者] 当前等级 {level} / 目标 {target_level}")
             if level >= target_level:
                 mfaalog.info(f"[强化从者] 已达到目标等级 {target_level}")
-                return
+                return "target_reached"
             # 走 pipeline 强化一次
+            # 命中计数在整个 task 内共享；每次强化前清零，确保只读取本次的终止原因。
+            self._context.clear_hit_count(DOGFOOD_DEPLETED_END_NODE)
             try:
                 self._context.run_task("强化从者-强化一次")
             except Exception as e:
                 mfaalog.warning(f"[强化从者] 强化一次 pipeline 异常: {e}")
+            if self._context.get_hit_count(DOGFOOD_DEPLETED_END_NODE) > 0:
+                mfaalog.info("[强化从者] pipeline 已确认狗粮消耗完毕")
+                return "dogfood_empty"
             # 道具不足 / 狗粮用完，结束强化
             if any(self._match(t) is not None for t in TPL_NO_MATERIAL):
                 mfaalog.info("[强化从者] 道具不足，结束强化")
-                return
+                return "no_material"
             if self._match(TPL_EMPTY_SLOT, roi=SLOT_ROI) is not None:
                 mfaalog.info("[强化从者] 狗粮用完，结束强化")
-                return
+                return "dogfood_empty"
         mfaalog.warning("[强化从者] 强化达到最大轮数")
+        return "max_round"
 
     def _read_level(self):
         """OCR 识别从者当前等级"""
