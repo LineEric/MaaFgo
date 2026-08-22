@@ -15,8 +15,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：佐佐木小次郎\n\n<img src=\"resource/base/image/servant_face/f_6001000.png\" width=\"79\" height=\"79\" alt=\"佐佐木小次郎头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6001000.png"
+                    "icon": "resource/base/image/servant_face/f_6001000.png",
+                    "option": [
+                        "助战信息-600100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603800",
@@ -28,8 +31,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：夏洛特·科黛\n\n<img src=\"resource/base/image/servant_face/f_6038000.png\" width=\"79\" height=\"79\" alt=\"夏洛特·科黛头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6038000.png"
+                    "icon": "resource/base/image/servant_face/f_6038000.png",
+                    "option": [
+                        "助战信息-603800",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601400",
@@ -41,8 +47,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：玛塔·哈丽\n\n<img src=\"resource/base/image/servant_face/f_6014000.png\" width=\"79\" height=\"79\" alt=\"玛塔·哈丽头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6014000.png"
+                    "icon": "resource/base/image/servant_face/f_6014000.png",
+                    "option": [
+                        "助战信息-601400",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601300",
@@ -54,8 +63,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：剧院魅影\n\n<img src=\"resource/base/image/servant_face/f_6013000.png\" width=\"79\" height=\"79\" alt=\"剧院魅影头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6013000.png"
+                    "icon": "resource/base/image/servant_face/f_6013000.png",
+                    "option": [
+                        "助战信息-601300",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "600200",
@@ -67,8 +79,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：咒腕哈桑\n\n<img src=\"resource/base/image/servant_face/f_6002000.png\" width=\"79\" height=\"79\" alt=\"咒腕哈桑头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6002000.png"
+                    "icon": "resource/base/image/servant_face/f_6002000.png",
+                    "option": [
+                        "助战信息-600200",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601200",
@@ -80,8 +95,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：夏尔·亨利·桑松\n\n<img src=\"resource/base/image/servant_face/f_6012000.png\" width=\"79\" height=\"79\" alt=\"夏尔·亨利·桑松头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6012000.png"
+                    "icon": "resource/base/image/servant_face/f_6012000.png",
+                    "option": [
+                        "助战信息-601200",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "600700",
@@ -93,8 +111,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：亨利·杰基尔＆海德\n\n<img src=\"resource/base/image/servant_face/f_6007000.png\" width=\"79\" height=\"79\" alt=\"亨利·杰基尔＆海德头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6007000.png"
+                    "icon": "resource/base/image/servant_face/f_6007000.png",
+                    "option": [
+                        "助战信息-600700",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603300",
@@ -106,8 +127,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：冈田以藏\n\n<img src=\"resource/base/image/servant_face/f_6033000.png\" width=\"79\" height=\"79\" alt=\"冈田以藏头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6033000.png"
+                    "icon": "resource/base/image/servant_face/f_6033000.png",
+                    "option": [
+                        "助战信息-603300",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601100",
@@ -119,8 +143,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：匕见\n\n<img src=\"resource/base/image/servant_face/f_6011000.png\" width=\"79\" height=\"79\" alt=\"匕见头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6011000.png"
+                    "icon": "resource/base/image/servant_face/f_6011000.png",
+                    "option": [
+                        "助战信息-601100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "600300",
@@ -132,8 +159,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：百貌哈桑\n\n<img src=\"resource/base/image/servant_face/f_6003000.png\" width=\"79\" height=\"79\" alt=\"百貌哈桑头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6003000.png"
+                    "icon": "resource/base/image/servant_face/f_6003000.png",
+                    "option": [
+                        "助战信息-600300",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "600900",
@@ -145,8 +175,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：静谧哈桑\n\n<img src=\"resource/base/image/servant_face/f_6009000.png\" width=\"79\" height=\"79\" alt=\"静谧哈桑头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6009000.png"
+                    "icon": "resource/base/image/servant_face/f_6009000.png",
+                    "option": [
+                        "助战信息-600900",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601900",
@@ -158,8 +191,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：风魔小太郎\n\n<img src=\"resource/base/image/servant_face/f_6019000.png\" width=\"79\" height=\"79\" alt=\"风魔小太郎头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6019000.png"
+                    "icon": "resource/base/image/servant_face/f_6019000.png",
+                    "option": [
+                        "助战信息-601900",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "602300",
@@ -171,8 +207,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：两仪式\n\n<img src=\"resource/base/image/servant_face/f_6023000.png\" width=\"79\" height=\"79\" alt=\"两仪式头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6023000.png"
+                    "icon": "resource/base/image/servant_face/f_6023000.png",
+                    "option": [
+                        "助战信息-602300",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604000",
@@ -184,8 +223,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：冲田·J·总司\n\n<img src=\"resource/base/image/servant_face/f_6040000.png\" width=\"79\" height=\"79\" alt=\"冲田·J·总司头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6040000.png"
+                    "icon": "resource/base/image/servant_face/f_6040000.png",
+                    "option": [
+                        "助战信息-604000",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603000",
@@ -197,8 +239,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：加藤段藏\n\n<img src=\"resource/base/image/servant_face/f_6030000.png\" width=\"79\" height=\"79\" alt=\"加藤段藏头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6030000.png"
+                    "icon": "resource/base/image/servant_face/f_6030000.png",
+                    "option": [
+                        "助战信息-603000",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601700",
@@ -210,8 +255,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：卡米拉\n\n<img src=\"resource/base/image/servant_face/f_6017000.png\" width=\"79\" height=\"79\" alt=\"卡米拉头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6017000.png"
+                    "icon": "resource/base/image/servant_face/f_6017000.png",
+                    "option": [
+                        "助战信息-601700",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601500",
@@ -223,8 +271,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：卫宫〔Assassin〕\n\n<img src=\"resource/base/image/servant_face/f_6015000.png\" width=\"79\" height=\"79\" alt=\"卫宫〔Assassin〕头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6015000.png"
+                    "icon": "resource/base/image/servant_face/f_6015000.png",
+                    "option": [
+                        "助战信息-601500",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "602700",
@@ -236,8 +287,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：周照\n\n<img src=\"resource/base/image/servant_face/f_6027000.png\" width=\"79\" height=\"79\" alt=\"周照头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6027000.png"
+                    "icon": "resource/base/image/servant_face/f_6027000.png",
+                    "option": [
+                        "助战信息-602700",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604300",
@@ -249,8 +303,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：奥特琳德\n\n<img src=\"resource/base/image/servant_face/f_6043000.png\" width=\"79\" height=\"79\" alt=\"奥特琳德头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6043000.png"
+                    "icon": "resource/base/image/servant_face/f_6043000.png",
+                    "option": [
+                        "助战信息-604300",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "602800",
@@ -262,8 +319,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：尼托克丽丝\n\n<img src=\"resource/base/image/servant_face/f_6028000.png\" width=\"79\" height=\"79\" alt=\"尼托克丽丝头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6028000.png"
+                    "icon": "resource/base/image/servant_face/f_6028000.png",
+                    "option": [
+                        "助战信息-602800",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604400",
@@ -275,8 +335,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：希露德\n\n<img src=\"resource/base/image/servant_face/f_6044000.png\" width=\"79\" height=\"79\" alt=\"希露德头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6044000.png"
+                    "icon": "resource/base/image/servant_face/f_6044000.png",
+                    "option": [
+                        "助战信息-604400",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "602400",
@@ -288,8 +351,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：斯卡哈\n\n<img src=\"resource/base/image/servant_face/f_6024000.png\" width=\"79\" height=\"79\" alt=\"斯卡哈头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6024000.png"
+                    "icon": "resource/base/image/servant_face/f_6024000.png",
+                    "option": [
+                        "助战信息-602400",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601000",
@@ -301,8 +367,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：斯忒诺\n\n<img src=\"resource/base/image/servant_face/f_6010000.png\" width=\"79\" height=\"79\" alt=\"斯忒诺头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6010000.png"
+                    "icon": "resource/base/image/servant_face/f_6010000.png",
+                    "option": [
+                        "助战信息-601000",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604500",
@@ -314,8 +383,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：斯露德\n\n<img src=\"resource/base/image/servant_face/f_6045000.png\" width=\"79\" height=\"79\" alt=\"斯露德头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6045000.png"
+                    "icon": "resource/base/image/servant_face/f_6045000.png",
+                    "option": [
+                        "助战信息-604500",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "602900",
@@ -327,8 +399,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：望月千代女\n\n<img src=\"resource/base/image/servant_face/f_6029000.png\" width=\"79\" height=\"79\" alt=\"望月千代女头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6029000.png"
+                    "icon": "resource/base/image/servant_face/f_6029000.png",
+                    "option": [
+                        "助战信息-602900",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603900",
@@ -340,8 +415,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：格蕾\n\n<img src=\"resource/base/image/servant_face/f_6039000.png\" width=\"79\" height=\"79\" alt=\"格蕾头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6039000.png"
+                    "icon": "resource/base/image/servant_face/f_6039000.png",
+                    "option": [
+                        "助战信息-603900",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604800",
@@ -353,8 +431,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：洛库斯塔\n\n<img src=\"resource/base/image/servant_face/f_6048000.png\" width=\"79\" height=\"79\" alt=\"洛库斯塔头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6048000.png"
+                    "icon": "resource/base/image/servant_face/f_6048000.png",
+                    "option": [
+                        "助战信息-604800",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "602600",
@@ -366,8 +447,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：燕青\n\n<img src=\"resource/base/image/servant_face/f_6026000.png\" width=\"79\" height=\"79\" alt=\"燕青头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6026000.png"
+                    "icon": "resource/base/image/servant_face/f_6026000.png",
+                    "option": [
+                        "助战信息-602600",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603400",
@@ -379,8 +463,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：牛若丸\n\n<img src=\"resource/base/image/servant_face/f_6034000.png\" width=\"79\" height=\"79\" alt=\"牛若丸头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6034000.png"
+                    "icon": "resource/base/image/servant_face/f_6034000.png",
+                    "option": [
+                        "助战信息-603400",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "605000",
@@ -392,8 +479,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：耀星哈桑\n\n<img src=\"resource/base/image/servant_face/f_6050000.png\" width=\"79\" height=\"79\" alt=\"耀星哈桑头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6050000.png"
+                    "icon": "resource/base/image/servant_face/f_6050000.png",
+                    "option": [
+                        "助战信息-605000",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "605200",
@@ -405,8 +495,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：蛇女房\n\n<img src=\"resource/base/image/servant_face/f_6052000.png\" width=\"79\" height=\"79\" alt=\"蛇女房头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6052000.png"
+                    "icon": "resource/base/image/servant_face/f_6052000.png",
+                    "option": [
+                        "助战信息-605200",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603500",
@@ -418,8 +511,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：雏罂\n\n<img src=\"resource/base/image/servant_face/f_6035000.png\" width=\"79\" height=\"79\" alt=\"雏罂头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6035000.png"
+                    "icon": "resource/base/image/servant_face/f_6035000.png",
+                    "option": [
+                        "助战信息-603500",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604100",
@@ -431,8 +527,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：鬼一法眼\n\n<img src=\"resource/base/image/servant_face/f_6041000.png\" width=\"79\" height=\"79\" alt=\"鬼一法眼头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6041000.png"
+                    "icon": "resource/base/image/servant_face/f_6041000.png",
+                    "option": [
+                        "助战信息-604100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "602500",
@@ -444,8 +543,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：“山中老人”\n\n<img src=\"resource/base/image/servant_face/f_6025000.png\" width=\"79\" height=\"79\" alt=\"“山中老人”头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6025000.png"
+                    "icon": "resource/base/image/servant_face/f_6025000.png",
+                    "option": [
+                        "助战信息-602500",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604200",
@@ -457,8 +559,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：光之高扬斯卡娅\n\n<img src=\"resource/base/image/servant_face/f_6042000.png\" width=\"79\" height=\"79\" alt=\"光之高扬斯卡娅头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6042000.png"
+                    "icon": "resource/base/image/servant_face/f_6042000.png",
+                    "option": [
+                        "助战信息-604200",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "600800",
@@ -470,8 +575,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：克娄巴特拉\n\n<img src=\"resource/base/image/servant_face/f_6008000.png\" width=\"79\" height=\"79\" alt=\"克娄巴特拉头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6008000.png"
+                    "icon": "resource/base/image/servant_face/f_6008000.png",
+                    "option": [
+                        "助战信息-600800",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603100",
@@ -483,8 +591,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：刑部姬\n\n<img src=\"resource/base/image/servant_face/f_6031000.png\" width=\"79\" height=\"79\" alt=\"刑部姬头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6031000.png"
+                    "icon": "resource/base/image/servant_face/f_6031000.png",
+                    "option": [
+                        "助战信息-603100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604600",
@@ -496,8 +607,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：吾绰\n\n<img src=\"resource/base/image/servant_face/f_6046000.png\" width=\"79\" height=\"79\" alt=\"吾绰头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6046000.png"
+                    "icon": "resource/base/image/servant_face/f_6046000.png",
+                    "option": [
+                        "助战信息-604600",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603200",
@@ -509,8 +623,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：塞弥拉弥斯\n\n<img src=\"resource/base/image/servant_face/f_6032000.png\" width=\"79\" height=\"79\" alt=\"塞弥拉弥斯头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6032000.png"
+                    "icon": "resource/base/image/servant_face/f_6032000.png",
+                    "option": [
+                        "助战信息-603200",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603600",
@@ -522,8 +639,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：李书文\n\n<img src=\"resource/base/image/servant_face/f_6036000.png\" width=\"79\" height=\"79\" alt=\"李书文头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6036000.png"
+                    "icon": "resource/base/image/servant_face/f_6036000.png",
+                    "option": [
+                        "助战信息-603600",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604900",
@@ -535,8 +655,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：果心居士\n\n<img src=\"resource/base/image/servant_face/f_6049000.png\" width=\"79\" height=\"79\" alt=\"果心居士头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6049000.png"
+                    "icon": "resource/base/image/servant_face/f_6049000.png",
+                    "option": [
+                        "助战信息-604900",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "605100",
@@ -548,8 +671,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：河上彦斋\n\n<img src=\"resource/base/image/servant_face/f_6051000.png\" width=\"79\" height=\"79\" alt=\"河上彦斋头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6051000.png"
+                    "icon": "resource/base/image/servant_face/f_6051000.png",
+                    "option": [
+                        "助战信息-605100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "604700",
@@ -561,8 +687,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：特斯卡特利波卡\n\n<img src=\"resource/base/image/servant_face/f_6047000.png\" width=\"79\" height=\"79\" alt=\"特斯卡特利波卡头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6047000.png"
+                    "icon": "resource/base/image/servant_face/f_6047000.png",
+                    "option": [
+                        "助战信息-604700",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "601800",
@@ -574,8 +703,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：谜之女主角X\n\n<img src=\"resource/base/image/servant_face/f_6018000.png\" width=\"79\" height=\"79\" alt=\"谜之女主角X头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6018000.png"
+                    "icon": "resource/base/image/servant_face/f_6018000.png",
+                    "option": [
+                        "助战信息-601800",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "603700",
@@ -587,8 +719,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：迦摩\n\n<img src=\"resource/base/image/servant_face/f_6037000.png\" width=\"79\" height=\"79\" alt=\"迦摩头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6037000.png"
+                    "icon": "resource/base/image/servant_face/f_6037000.png",
+                    "option": [
+                        "助战信息-603700",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "602100",
@@ -600,8 +735,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：酒吞童子\n\n<img src=\"resource/base/image/servant_face/f_6021000.png\" width=\"79\" height=\"79\" alt=\"酒吞童子头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6021000.png"
+                    "icon": "resource/base/image/servant_face/f_6021000.png",
+                    "option": [
+                        "助战信息-602100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "600500",
@@ -613,8 +751,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：雾都弃子\n\n<img src=\"resource/base/image/servant_face/f_6005000.png\" width=\"79\" height=\"79\" alt=\"雾都弃子头像\" />",
-                    "icon": "resource/base/image/servant_face/f_6005000.png"
+                    "icon": "resource/base/image/servant_face/f_6005000.png",
+                    "option": [
+                        "助战信息-600500",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "1002100",
@@ -626,10 +767,1021 @@
                             }
                         }
                     },
-                    "description": "已选助战：哈桑·萨巴赫\n\n<img src=\"resource/base/image/servant_face/f_10021000.png\" width=\"79\" height=\"79\" alt=\"哈桑·萨巴赫头像\" />",
-                    "icon": "resource/base/image/servant_face/f_10021000.png"
+                    "icon": "resource/base/image/servant_face/f_10021000.png",
+                    "option": [
+                        "助战信息-1002100",
+                        "宝具等级"
+                    ]
                 }
             ]
+        },
+        "助战信息-600100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：佐佐木小次郎\n\n<img src=\"resource/base/image/servant_face/f_6001000.png\" width=\"79\" height=\"79\" alt=\"佐佐木小次郎头像\" />",
+            "icon": "resource/base/image/servant_face/f_6001000.png",
+            "inputs": [
+                {
+                    "name": "support_level_600100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_600100}"
+                    }
+                }
+            }
+        },
+        "助战信息-603800": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：夏洛特·科黛\n\n<img src=\"resource/base/image/servant_face/f_6038000.png\" width=\"79\" height=\"79\" alt=\"夏洛特·科黛头像\" />",
+            "icon": "resource/base/image/servant_face/f_6038000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603800",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603800}"
+                    }
+                }
+            }
+        },
+        "助战信息-601400": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：玛塔·哈丽\n\n<img src=\"resource/base/image/servant_face/f_6014000.png\" width=\"79\" height=\"79\" alt=\"玛塔·哈丽头像\" />",
+            "icon": "resource/base/image/servant_face/f_6014000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601400",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601400}"
+                    }
+                }
+            }
+        },
+        "助战信息-601300": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：剧院魅影\n\n<img src=\"resource/base/image/servant_face/f_6013000.png\" width=\"79\" height=\"79\" alt=\"剧院魅影头像\" />",
+            "icon": "resource/base/image/servant_face/f_6013000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601300",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601300}"
+                    }
+                }
+            }
+        },
+        "助战信息-600200": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：咒腕哈桑\n\n<img src=\"resource/base/image/servant_face/f_6002000.png\" width=\"79\" height=\"79\" alt=\"咒腕哈桑头像\" />",
+            "icon": "resource/base/image/servant_face/f_6002000.png",
+            "inputs": [
+                {
+                    "name": "support_level_600200",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_600200}"
+                    }
+                }
+            }
+        },
+        "助战信息-601200": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：夏尔·亨利·桑松\n\n<img src=\"resource/base/image/servant_face/f_6012000.png\" width=\"79\" height=\"79\" alt=\"夏尔·亨利·桑松头像\" />",
+            "icon": "resource/base/image/servant_face/f_6012000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601200",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601200}"
+                    }
+                }
+            }
+        },
+        "助战信息-600700": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：亨利·杰基尔＆海德\n\n<img src=\"resource/base/image/servant_face/f_6007000.png\" width=\"79\" height=\"79\" alt=\"亨利·杰基尔＆海德头像\" />",
+            "icon": "resource/base/image/servant_face/f_6007000.png",
+            "inputs": [
+                {
+                    "name": "support_level_600700",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_600700}"
+                    }
+                }
+            }
+        },
+        "助战信息-603300": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：冈田以藏\n\n<img src=\"resource/base/image/servant_face/f_6033000.png\" width=\"79\" height=\"79\" alt=\"冈田以藏头像\" />",
+            "icon": "resource/base/image/servant_face/f_6033000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603300",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603300}"
+                    }
+                }
+            }
+        },
+        "助战信息-601100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：匕见\n\n<img src=\"resource/base/image/servant_face/f_6011000.png\" width=\"79\" height=\"79\" alt=\"匕见头像\" />",
+            "icon": "resource/base/image/servant_face/f_6011000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601100}"
+                    }
+                }
+            }
+        },
+        "助战信息-600300": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：百貌哈桑\n\n<img src=\"resource/base/image/servant_face/f_6003000.png\" width=\"79\" height=\"79\" alt=\"百貌哈桑头像\" />",
+            "icon": "resource/base/image/servant_face/f_6003000.png",
+            "inputs": [
+                {
+                    "name": "support_level_600300",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_600300}"
+                    }
+                }
+            }
+        },
+        "助战信息-600900": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：静谧哈桑\n\n<img src=\"resource/base/image/servant_face/f_6009000.png\" width=\"79\" height=\"79\" alt=\"静谧哈桑头像\" />",
+            "icon": "resource/base/image/servant_face/f_6009000.png",
+            "inputs": [
+                {
+                    "name": "support_level_600900",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_600900}"
+                    }
+                }
+            }
+        },
+        "助战信息-601900": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：风魔小太郎\n\n<img src=\"resource/base/image/servant_face/f_6019000.png\" width=\"79\" height=\"79\" alt=\"风魔小太郎头像\" />",
+            "icon": "resource/base/image/servant_face/f_6019000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601900",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601900}"
+                    }
+                }
+            }
+        },
+        "助战信息-602300": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：两仪式\n\n<img src=\"resource/base/image/servant_face/f_6023000.png\" width=\"79\" height=\"79\" alt=\"两仪式头像\" />",
+            "icon": "resource/base/image/servant_face/f_6023000.png",
+            "inputs": [
+                {
+                    "name": "support_level_602300",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_602300}"
+                    }
+                }
+            }
+        },
+        "助战信息-604000": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：冲田·J·总司\n\n<img src=\"resource/base/image/servant_face/f_6040000.png\" width=\"79\" height=\"79\" alt=\"冲田·J·总司头像\" />",
+            "icon": "resource/base/image/servant_face/f_6040000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604000",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604000}"
+                    }
+                }
+            }
+        },
+        "助战信息-603000": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：加藤段藏\n\n<img src=\"resource/base/image/servant_face/f_6030000.png\" width=\"79\" height=\"79\" alt=\"加藤段藏头像\" />",
+            "icon": "resource/base/image/servant_face/f_6030000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603000",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603000}"
+                    }
+                }
+            }
+        },
+        "助战信息-601700": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：卡米拉\n\n<img src=\"resource/base/image/servant_face/f_6017000.png\" width=\"79\" height=\"79\" alt=\"卡米拉头像\" />",
+            "icon": "resource/base/image/servant_face/f_6017000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601700",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601700}"
+                    }
+                }
+            }
+        },
+        "助战信息-601500": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：卫宫〔Assassin〕\n\n<img src=\"resource/base/image/servant_face/f_6015000.png\" width=\"79\" height=\"79\" alt=\"卫宫〔Assassin〕头像\" />",
+            "icon": "resource/base/image/servant_face/f_6015000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601500",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601500}"
+                    }
+                }
+            }
+        },
+        "助战信息-602700": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：周照\n\n<img src=\"resource/base/image/servant_face/f_6027000.png\" width=\"79\" height=\"79\" alt=\"周照头像\" />",
+            "icon": "resource/base/image/servant_face/f_6027000.png",
+            "inputs": [
+                {
+                    "name": "support_level_602700",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_602700}"
+                    }
+                }
+            }
+        },
+        "助战信息-604300": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：奥特琳德\n\n<img src=\"resource/base/image/servant_face/f_6043000.png\" width=\"79\" height=\"79\" alt=\"奥特琳德头像\" />",
+            "icon": "resource/base/image/servant_face/f_6043000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604300",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604300}"
+                    }
+                }
+            }
+        },
+        "助战信息-602800": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：尼托克丽丝\n\n<img src=\"resource/base/image/servant_face/f_6028000.png\" width=\"79\" height=\"79\" alt=\"尼托克丽丝头像\" />",
+            "icon": "resource/base/image/servant_face/f_6028000.png",
+            "inputs": [
+                {
+                    "name": "support_level_602800",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_602800}"
+                    }
+                }
+            }
+        },
+        "助战信息-604400": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：希露德\n\n<img src=\"resource/base/image/servant_face/f_6044000.png\" width=\"79\" height=\"79\" alt=\"希露德头像\" />",
+            "icon": "resource/base/image/servant_face/f_6044000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604400",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604400}"
+                    }
+                }
+            }
+        },
+        "助战信息-602400": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：斯卡哈\n\n<img src=\"resource/base/image/servant_face/f_6024000.png\" width=\"79\" height=\"79\" alt=\"斯卡哈头像\" />",
+            "icon": "resource/base/image/servant_face/f_6024000.png",
+            "inputs": [
+                {
+                    "name": "support_level_602400",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_602400}"
+                    }
+                }
+            }
+        },
+        "助战信息-601000": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：斯忒诺\n\n<img src=\"resource/base/image/servant_face/f_6010000.png\" width=\"79\" height=\"79\" alt=\"斯忒诺头像\" />",
+            "icon": "resource/base/image/servant_face/f_6010000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601000",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601000}"
+                    }
+                }
+            }
+        },
+        "助战信息-604500": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：斯露德\n\n<img src=\"resource/base/image/servant_face/f_6045000.png\" width=\"79\" height=\"79\" alt=\"斯露德头像\" />",
+            "icon": "resource/base/image/servant_face/f_6045000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604500",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604500}"
+                    }
+                }
+            }
+        },
+        "助战信息-602900": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：望月千代女\n\n<img src=\"resource/base/image/servant_face/f_6029000.png\" width=\"79\" height=\"79\" alt=\"望月千代女头像\" />",
+            "icon": "resource/base/image/servant_face/f_6029000.png",
+            "inputs": [
+                {
+                    "name": "support_level_602900",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_602900}"
+                    }
+                }
+            }
+        },
+        "助战信息-603900": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：格蕾\n\n<img src=\"resource/base/image/servant_face/f_6039000.png\" width=\"79\" height=\"79\" alt=\"格蕾头像\" />",
+            "icon": "resource/base/image/servant_face/f_6039000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603900",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603900}"
+                    }
+                }
+            }
+        },
+        "助战信息-604800": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：洛库斯塔\n\n<img src=\"resource/base/image/servant_face/f_6048000.png\" width=\"79\" height=\"79\" alt=\"洛库斯塔头像\" />",
+            "icon": "resource/base/image/servant_face/f_6048000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604800",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604800}"
+                    }
+                }
+            }
+        },
+        "助战信息-602600": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：燕青\n\n<img src=\"resource/base/image/servant_face/f_6026000.png\" width=\"79\" height=\"79\" alt=\"燕青头像\" />",
+            "icon": "resource/base/image/servant_face/f_6026000.png",
+            "inputs": [
+                {
+                    "name": "support_level_602600",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_602600}"
+                    }
+                }
+            }
+        },
+        "助战信息-603400": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：牛若丸\n\n<img src=\"resource/base/image/servant_face/f_6034000.png\" width=\"79\" height=\"79\" alt=\"牛若丸头像\" />",
+            "icon": "resource/base/image/servant_face/f_6034000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603400",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603400}"
+                    }
+                }
+            }
+        },
+        "助战信息-605000": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：耀星哈桑\n\n<img src=\"resource/base/image/servant_face/f_6050000.png\" width=\"79\" height=\"79\" alt=\"耀星哈桑头像\" />",
+            "icon": "resource/base/image/servant_face/f_6050000.png",
+            "inputs": [
+                {
+                    "name": "support_level_605000",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_605000}"
+                    }
+                }
+            }
+        },
+        "助战信息-605200": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：蛇女房\n\n<img src=\"resource/base/image/servant_face/f_6052000.png\" width=\"79\" height=\"79\" alt=\"蛇女房头像\" />",
+            "icon": "resource/base/image/servant_face/f_6052000.png",
+            "inputs": [
+                {
+                    "name": "support_level_605200",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_605200}"
+                    }
+                }
+            }
+        },
+        "助战信息-603500": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：雏罂\n\n<img src=\"resource/base/image/servant_face/f_6035000.png\" width=\"79\" height=\"79\" alt=\"雏罂头像\" />",
+            "icon": "resource/base/image/servant_face/f_6035000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603500",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603500}"
+                    }
+                }
+            }
+        },
+        "助战信息-604100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：鬼一法眼\n\n<img src=\"resource/base/image/servant_face/f_6041000.png\" width=\"79\" height=\"79\" alt=\"鬼一法眼头像\" />",
+            "icon": "resource/base/image/servant_face/f_6041000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604100}"
+                    }
+                }
+            }
+        },
+        "助战信息-602500": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：“山中老人”\n\n<img src=\"resource/base/image/servant_face/f_6025000.png\" width=\"79\" height=\"79\" alt=\"“山中老人”头像\" />",
+            "icon": "resource/base/image/servant_face/f_6025000.png",
+            "inputs": [
+                {
+                    "name": "support_level_602500",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_602500}"
+                    }
+                }
+            }
+        },
+        "助战信息-604200": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：光之高扬斯卡娅\n\n<img src=\"resource/base/image/servant_face/f_6042000.png\" width=\"79\" height=\"79\" alt=\"光之高扬斯卡娅头像\" />",
+            "icon": "resource/base/image/servant_face/f_6042000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604200",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604200}"
+                    }
+                }
+            }
+        },
+        "助战信息-600800": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：克娄巴特拉\n\n<img src=\"resource/base/image/servant_face/f_6008000.png\" width=\"79\" height=\"79\" alt=\"克娄巴特拉头像\" />",
+            "icon": "resource/base/image/servant_face/f_6008000.png",
+            "inputs": [
+                {
+                    "name": "support_level_600800",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_600800}"
+                    }
+                }
+            }
+        },
+        "助战信息-603100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：刑部姬\n\n<img src=\"resource/base/image/servant_face/f_6031000.png\" width=\"79\" height=\"79\" alt=\"刑部姬头像\" />",
+            "icon": "resource/base/image/servant_face/f_6031000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603100}"
+                    }
+                }
+            }
+        },
+        "助战信息-604600": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：吾绰\n\n<img src=\"resource/base/image/servant_face/f_6046000.png\" width=\"79\" height=\"79\" alt=\"吾绰头像\" />",
+            "icon": "resource/base/image/servant_face/f_6046000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604600",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604600}"
+                    }
+                }
+            }
+        },
+        "助战信息-603200": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：塞弥拉弥斯\n\n<img src=\"resource/base/image/servant_face/f_6032000.png\" width=\"79\" height=\"79\" alt=\"塞弥拉弥斯头像\" />",
+            "icon": "resource/base/image/servant_face/f_6032000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603200",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603200}"
+                    }
+                }
+            }
+        },
+        "助战信息-603600": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：李书文\n\n<img src=\"resource/base/image/servant_face/f_6036000.png\" width=\"79\" height=\"79\" alt=\"李书文头像\" />",
+            "icon": "resource/base/image/servant_face/f_6036000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603600",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603600}"
+                    }
+                }
+            }
+        },
+        "助战信息-604900": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：果心居士\n\n<img src=\"resource/base/image/servant_face/f_6049000.png\" width=\"79\" height=\"79\" alt=\"果心居士头像\" />",
+            "icon": "resource/base/image/servant_face/f_6049000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604900",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604900}"
+                    }
+                }
+            }
+        },
+        "助战信息-605100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：河上彦斋\n\n<img src=\"resource/base/image/servant_face/f_6051000.png\" width=\"79\" height=\"79\" alt=\"河上彦斋头像\" />",
+            "icon": "resource/base/image/servant_face/f_6051000.png",
+            "inputs": [
+                {
+                    "name": "support_level_605100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_605100}"
+                    }
+                }
+            }
+        },
+        "助战信息-604700": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：特斯卡特利波卡\n\n<img src=\"resource/base/image/servant_face/f_6047000.png\" width=\"79\" height=\"79\" alt=\"特斯卡特利波卡头像\" />",
+            "icon": "resource/base/image/servant_face/f_6047000.png",
+            "inputs": [
+                {
+                    "name": "support_level_604700",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_604700}"
+                    }
+                }
+            }
+        },
+        "助战信息-601800": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：谜之女主角X\n\n<img src=\"resource/base/image/servant_face/f_6018000.png\" width=\"79\" height=\"79\" alt=\"谜之女主角X头像\" />",
+            "icon": "resource/base/image/servant_face/f_6018000.png",
+            "inputs": [
+                {
+                    "name": "support_level_601800",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_601800}"
+                    }
+                }
+            }
+        },
+        "助战信息-603700": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：迦摩\n\n<img src=\"resource/base/image/servant_face/f_6037000.png\" width=\"79\" height=\"79\" alt=\"迦摩头像\" />",
+            "icon": "resource/base/image/servant_face/f_6037000.png",
+            "inputs": [
+                {
+                    "name": "support_level_603700",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_603700}"
+                    }
+                }
+            }
+        },
+        "助战信息-602100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：酒吞童子\n\n<img src=\"resource/base/image/servant_face/f_6021000.png\" width=\"79\" height=\"79\" alt=\"酒吞童子头像\" />",
+            "icon": "resource/base/image/servant_face/f_6021000.png",
+            "inputs": [
+                {
+                    "name": "support_level_602100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_602100}"
+                    }
+                }
+            }
+        },
+        "助战信息-600500": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：雾都弃子\n\n<img src=\"resource/base/image/servant_face/f_6005000.png\" width=\"79\" height=\"79\" alt=\"雾都弃子头像\" />",
+            "icon": "resource/base/image/servant_face/f_6005000.png",
+            "inputs": [
+                {
+                    "name": "support_level_600500",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_600500}"
+                    }
+                }
+            }
+        },
+        "助战信息-1002100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：哈桑·萨巴赫\n\n<img src=\"resource/base/image/servant_face/f_10021000.png\" width=\"79\" height=\"79\" alt=\"哈桑·萨巴赫头像\" />",
+            "icon": "resource/base/image/servant_face/f_10021000.png",
+            "inputs": [
+                {
+                    "name": "support_level_1002100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_1002100}"
+                    }
+                }
+            }
         }
     }
 }

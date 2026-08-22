@@ -15,8 +15,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：BB\n\n<img src=\"resource/base/image/servant_face/f_23001000.png\" width=\"79\" height=\"79\" alt=\"BB头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23001000.png"
+                    "icon": "resource/base/image/servant_face/f_23001000.png",
+                    "option": [
+                        "助战信息-2300100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2300700",
@@ -28,8 +31,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：岸波白野\n\n<img src=\"resource/base/image/servant_face/f_23007000.png\" width=\"79\" height=\"79\" alt=\"岸波白野头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23007000.png"
+                    "icon": "resource/base/image/servant_face/f_23007000.png",
+                    "option": [
+                        "助战信息-2300700",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2300800",
@@ -41,8 +47,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：岸波白野\n\n<img src=\"resource/base/image/servant_face/f_23008000.png\" width=\"79\" height=\"79\" alt=\"岸波白野头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23008000.png"
+                    "icon": "resource/base/image/servant_face/f_23008000.png",
+                    "option": [
+                        "助战信息-2300800",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2301000",
@@ -54,8 +63,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：特诺奇蒂特兰\n\n<img src=\"resource/base/image/servant_face/f_23010000.png\" width=\"79\" height=\"79\" alt=\"特诺奇蒂特兰头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23010000.png"
+                    "icon": "resource/base/image/servant_face/f_23010000.png",
+                    "option": [
+                        "助战信息-2301000",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2300500",
@@ -67,8 +79,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：Archetype：Earth\n\n<img src=\"resource/base/image/servant_face/f_23005000.png\" width=\"79\" height=\"79\" alt=\"Archetype：Earth头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23005000.png"
+                    "icon": "resource/base/image/servant_face/f_23005000.png",
+                    "option": [
+                        "助战信息-2300500",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2300200",
@@ -80,8 +95,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：BB\n\n<img src=\"resource/base/image/servant_face/f_23002000.png\" width=\"79\" height=\"79\" alt=\"BB头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23002000.png"
+                    "icon": "resource/base/image/servant_face/f_23002000.png",
+                    "option": [
+                        "助战信息-2300200",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2300300",
@@ -93,8 +111,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：伟大的石像神\n\n<img src=\"resource/base/image/servant_face/f_23003000.png\" width=\"79\" height=\"79\" alt=\"伟大的石像神头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23003000.png"
+                    "icon": "resource/base/image/servant_face/f_23003000.png",
+                    "option": [
+                        "助战信息-2300300",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2301100",
@@ -106,8 +127,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：玉兔\n\n<img src=\"resource/base/image/servant_face/f_23011000.png\" width=\"79\" height=\"79\" alt=\"玉兔头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23011000.png"
+                    "icon": "resource/base/image/servant_face/f_23011000.png",
+                    "option": [
+                        "助战信息-2301100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2300400",
@@ -119,8 +143,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：瞑生院祈荒\n\n<img src=\"resource/base/image/servant_face/f_23004000.png\" width=\"79\" height=\"79\" alt=\"瞑生院祈荒头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23004000.png"
+                    "icon": "resource/base/image/servant_face/f_23004000.png",
+                    "option": [
+                        "助战信息-2300400",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2300900",
@@ -132,8 +159,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：谜之代行者C.I.E.L\n\n<img src=\"resource/base/image/servant_face/f_23009000.png\" width=\"79\" height=\"79\" alt=\"谜之代行者C.I.E.L头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23009000.png"
+                    "icon": "resource/base/image/servant_face/f_23009000.png",
+                    "option": [
+                        "助战信息-2300900",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "2300600",
@@ -145,10 +175,244 @@
                             }
                         }
                     },
-                    "description": "已选助战：ＢＢ迪拜\n\n<img src=\"resource/base/image/servant_face/f_23006000.png\" width=\"79\" height=\"79\" alt=\"ＢＢ迪拜头像\" />",
-                    "icon": "resource/base/image/servant_face/f_23006000.png"
+                    "icon": "resource/base/image/servant_face/f_23006000.png",
+                    "option": [
+                        "助战信息-2300600",
+                        "宝具等级"
+                    ]
                 }
             ]
+        },
+        "助战信息-2300100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：BB\n\n<img src=\"resource/base/image/servant_face/f_23001000.png\" width=\"79\" height=\"79\" alt=\"BB头像\" />",
+            "icon": "resource/base/image/servant_face/f_23001000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300100}"
+                    }
+                }
+            }
+        },
+        "助战信息-2300700": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：岸波白野\n\n<img src=\"resource/base/image/servant_face/f_23007000.png\" width=\"79\" height=\"79\" alt=\"岸波白野头像\" />",
+            "icon": "resource/base/image/servant_face/f_23007000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300700",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300700}"
+                    }
+                }
+            }
+        },
+        "助战信息-2300800": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：岸波白野\n\n<img src=\"resource/base/image/servant_face/f_23008000.png\" width=\"79\" height=\"79\" alt=\"岸波白野头像\" />",
+            "icon": "resource/base/image/servant_face/f_23008000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300800",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300800}"
+                    }
+                }
+            }
+        },
+        "助战信息-2301000": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：特诺奇蒂特兰\n\n<img src=\"resource/base/image/servant_face/f_23010000.png\" width=\"79\" height=\"79\" alt=\"特诺奇蒂特兰头像\" />",
+            "icon": "resource/base/image/servant_face/f_23010000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2301000",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2301000}"
+                    }
+                }
+            }
+        },
+        "助战信息-2300500": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：Archetype：Earth\n\n<img src=\"resource/base/image/servant_face/f_23005000.png\" width=\"79\" height=\"79\" alt=\"Archetype：Earth头像\" />",
+            "icon": "resource/base/image/servant_face/f_23005000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300500",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300500}"
+                    }
+                }
+            }
+        },
+        "助战信息-2300200": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：BB\n\n<img src=\"resource/base/image/servant_face/f_23002000.png\" width=\"79\" height=\"79\" alt=\"BB头像\" />",
+            "icon": "resource/base/image/servant_face/f_23002000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300200",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300200}"
+                    }
+                }
+            }
+        },
+        "助战信息-2300300": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：伟大的石像神\n\n<img src=\"resource/base/image/servant_face/f_23003000.png\" width=\"79\" height=\"79\" alt=\"伟大的石像神头像\" />",
+            "icon": "resource/base/image/servant_face/f_23003000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300300",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300300}"
+                    }
+                }
+            }
+        },
+        "助战信息-2301100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：玉兔\n\n<img src=\"resource/base/image/servant_face/f_23011000.png\" width=\"79\" height=\"79\" alt=\"玉兔头像\" />",
+            "icon": "resource/base/image/servant_face/f_23011000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2301100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2301100}"
+                    }
+                }
+            }
+        },
+        "助战信息-2300400": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：瞑生院祈荒\n\n<img src=\"resource/base/image/servant_face/f_23004000.png\" width=\"79\" height=\"79\" alt=\"瞑生院祈荒头像\" />",
+            "icon": "resource/base/image/servant_face/f_23004000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300400",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300400}"
+                    }
+                }
+            }
+        },
+        "助战信息-2300900": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：谜之代行者C.I.E.L\n\n<img src=\"resource/base/image/servant_face/f_23009000.png\" width=\"79\" height=\"79\" alt=\"谜之代行者C.I.E.L头像\" />",
+            "icon": "resource/base/image/servant_face/f_23009000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300900",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300900}"
+                    }
+                }
+            }
+        },
+        "助战信息-2300600": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：ＢＢ迪拜\n\n<img src=\"resource/base/image/servant_face/f_23006000.png\" width=\"79\" height=\"79\" alt=\"ＢＢ迪拜头像\" />",
+            "icon": "resource/base/image/servant_face/f_23006000.png",
+            "inputs": [
+                {
+                    "name": "support_level_2300600",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_2300600}"
+                    }
+                }
+            }
         }
     }
 }

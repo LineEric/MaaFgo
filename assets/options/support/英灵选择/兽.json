@@ -15,8 +15,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：埃列什基伽勒\n\n<img src=\"resource/base/image/servant_face/f_33002000.png\" width=\"79\" height=\"79\" alt=\"埃列什基伽勒头像\" />",
-                    "icon": "resource/base/image/servant_face/f_33002000.png"
+                    "icon": "resource/base/image/servant_face/f_33002000.png",
+                    "option": [
+                        "助战信息-3300200",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "3300100",
@@ -28,8 +31,11 @@
                             }
                         }
                     },
-                    "description": "已选助战：所多玛之兽／德拉科\n\n<img src=\"resource/base/image/servant_face/f_33001000.png\" width=\"79\" height=\"79\" alt=\"所多玛之兽／德拉科头像\" />",
-                    "icon": "resource/base/image/servant_face/f_33001000.png"
+                    "icon": "resource/base/image/servant_face/f_33001000.png",
+                    "option": [
+                        "助战信息-3300100",
+                        "宝具等级"
+                    ]
                 },
                 {
                     "name": "4000100",
@@ -41,10 +47,76 @@
                             }
                         }
                     },
-                    "description": "已选助战：Ｕ－奥尔加玛丽\n\n<img src=\"resource/base/image/servant_face/f_40001000.png\" width=\"79\" height=\"79\" alt=\"Ｕ－奥尔加玛丽头像\" />",
-                    "icon": "resource/base/image/servant_face/f_40001000.png"
+                    "icon": "resource/base/image/servant_face/f_40001000.png",
+                    "option": [
+                        "助战信息-4000100",
+                        "宝具等级"
+                    ]
                 }
             ]
+        },
+        "助战信息-3300200": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：埃列什基伽勒\n\n<img src=\"resource/base/image/servant_face/f_33002000.png\" width=\"79\" height=\"79\" alt=\"埃列什基伽勒头像\" />",
+            "icon": "resource/base/image/servant_face/f_33002000.png",
+            "inputs": [
+                {
+                    "name": "support_level_3300200",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_3300200}"
+                    }
+                }
+            }
+        },
+        "助战信息-3300100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：所多玛之兽／德拉科\n\n<img src=\"resource/base/image/servant_face/f_33001000.png\" width=\"79\" height=\"79\" alt=\"所多玛之兽／德拉科头像\" />",
+            "icon": "resource/base/image/servant_face/f_33001000.png",
+            "inputs": [
+                {
+                    "name": "support_level_3300100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_3300100}"
+                    }
+                }
+            }
+        },
+        "助战信息-4000100": {
+            "type": "input",
+            "label": "英灵等级",
+            "description": "已选助战：Ｕ－奥尔加玛丽\n\n<img src=\"resource/base/image/servant_face/f_40001000.png\" width=\"79\" height=\"79\" alt=\"Ｕ－奥尔加玛丽头像\" />",
+            "icon": "resource/base/image/servant_face/f_40001000.png",
+            "inputs": [
+                {
+                    "name": "support_level_4000100",
+                    "label": "英灵等级",
+                    "default": "90",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "助战action": {
+                    "attach": {
+                        "level": "{support_level_4000100}"
+                    }
+                }
+            }
         }
     }
 }
