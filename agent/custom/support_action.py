@@ -118,8 +118,8 @@ VIEW_SWITCH_POS = (846, 127)
 SWIPE_START = (559, 669)        # 滑动起点(全屏): 点击后单指移动到终点
 SWIPE_END = (559, 269)           # 滑动终点(全屏): 垂直向上滑动 400px
 SWIPE_DURATION = 500            # 滑动持续时间(ms)
-SWIPE_SETTLE = 0.8              # 滑动结束后等待列表稳定再识别(秒), 避免惯性滚动导致识别不准
-MAX_SWIPE_BEFORE_REFRESH = 6    # 连续滑动6次未匹配 -> 执行"助战刷新"流水线
+SWIPE_SETTLE = 1              # 滑动结束后等待列表稳定再识别(秒), 避免惯性滚动导致识别不准
+MAX_SWIPE_BEFORE_REFRESH = 12    # 连续滑动6次未匹配 -> 执行"助战刷新"流水线
 REFRESH_TASK = "助战刷新"        # 刷新流水线(由外部提供, 直接 run_task 调用)
 CONNECT_ROI = (1158, 623, 101, 86)  # 连接中检测区域: x1158-1259 y623-709
 TH_WHITE = 245                  # 纯白判定阈值(灰度 >= 该值视为白)
