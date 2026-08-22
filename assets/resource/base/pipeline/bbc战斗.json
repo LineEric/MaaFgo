@@ -20,6 +20,7 @@
         "custom_action": "import_chaldea_team"
     },
     "启动bbc": {
+        "max_hit": 1,
         "action": "Custom",
         "attach": {
             "connect": "auto",

@@ -4,9 +4,10 @@
             "Node.Recognition.Starting": "开始蛇形遍历地图"
         },
         "next": [
-            "巡-初始化左滑"
+            "巡-能看到菜单"
         ]
     },
+    "地图轮巡-成功": {},
     "巡-下滑1": {
         "action": {
             "type": "Swipe",
@@ -919,5 +920,18 @@
             "Node.Recognition.Starting": "遍历完成，未找到目标！"
         }
     },
-    "地图轮巡-成功": {}
+    "巡-能看到菜单": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "菜单.png",
+                    "菜单2.png"
+                ]
+            }
+        },
+        "next": [
+            "巡-初始化左滑"
+        ]
+    }
 }

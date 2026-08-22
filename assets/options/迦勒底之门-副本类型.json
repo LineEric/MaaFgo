@@ -11,13 +11,8 @@
           "option": [
             "chaldea_gate_quest_subtype_ember",
             "team_index",
-            "team_config",
-            "bbc_run_count",
-            "apple_type",
             "战前吃苹果",
-            "bbc_battle_type",
-            "support_order_mismatch",
-            "team_config_error"
+            "battle_mode"
           ]
         },
         {
@@ -26,13 +21,8 @@
           "option": [
             "chaldea_gate_quest_subtype_training",
             "team_index",
-            "team_config",
-            "bbc_run_count",
-            "apple_type",
             "战前吃苹果",
-            "bbc_battle_type",
-            "support_order_mismatch",
-            "team_config_error"
+            "battle_mode"
           ]
         },
         {
@@ -41,13 +31,8 @@
           "option": [
             "chaldea_gate_quest_subtype_qp",
             "team_index",
-            "team_config",
-            "bbc_run_count",
-            "apple_type",
             "战前吃苹果",
-            "bbc_battle_type",
-            "support_order_mismatch",
-            "team_config_error"
+            "battle_mode"
           ]
         }
       ]

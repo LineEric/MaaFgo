@@ -1,0 +1,56 @@
+{
+    "option": {
+        "battle_mode": {
+            "type": "select",
+            "label": "战斗方式",
+            "description": "选择使用 BBC 战斗还是原生自动战斗。使用 BBC 前请单独启用“启动bbc”任务。",
+            "default": "bbc",
+            "cases": [
+                {
+                    "name": "bbc",
+                    "label": "BBC战斗",
+                    "option": [
+                        "team_config",
+                        "bbc_run_count",
+                        "apple_type",
+                        "bbc_battle_type",
+                        "support_order_mismatch",
+                        "team_config_error"
+                    ],
+                    "pipeline_override": {
+                        "通用战斗调度": {
+                            "next": [
+                                "[JumpBack]执行回主界面",
+                                "[JumpBack]执行队伍选择",
+                                "[JumpBack]执行章节导航",
+                                "[JumpBack]执行bbc战斗",
+                                "[JumpBack]执行战斗结束",
+                                "战斗完成信息"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "native",
+                    "label": "原生自动战斗",
+                    "option": [
+                        "原生自动战斗Chaldea导入",
+                        "原生自动战斗次数",
+                        "原生自动战斗跳过剧情"
+                    ],
+                    "pipeline_override": {
+                        "通用战斗调度": {
+                            "next": [
+                                "[JumpBack]执行回主界面",
+                                "[JumpBack]执行队伍选择",
+                                "[JumpBack]执行章节导航",
+                                "[JumpBack]原生自动战斗_多次入口",
+                                "战斗完成信息"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
