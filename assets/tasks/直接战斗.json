@@ -3,7 +3,7 @@
         {
             "name": "直接bbc战斗",
             "label": "直接战斗",
-            "description": "直接进入战斗后端，请确保当前已经处于助战、编队或战斗界面",
+            "description": "直接进入战斗后端，请确保当前已经处于助战、编队或战斗界面。\n\n<img src=\"resource/base/image/errorcode/指南2.png\" width=\"614\" height=\"344\" alt=\"直接 BBC 战斗指南\" />",
             "entry": "直接bbc战斗",
             "controller": [
                 "安卓设备"
