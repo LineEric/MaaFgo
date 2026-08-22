@@ -3,7 +3,7 @@
         "普通助战-礼装": {
             "type": "select",
             "label": "礼装",
-            "description": "选择助战礼装是否满破，并选择对应礼装图片（resource/base/image/lizhuang/满破 或 非满破 下）",
+            "description": "选择助战礼装是否满破",
             "default": "满破",
             "cases": [
                 {
