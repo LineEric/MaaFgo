@@ -3,7 +3,7 @@
         {
             "name": "冠位戴冠战",
             "label": "冠位戴冠战",
-            "description": "bbchannel的安装方法请查看 <https://www.bilibili.com/video/BV1GsjW6wEej> 。全版本使用bbc的方式一致。",
+            "description": "选择职介和难度后，可使用 BBC 战斗或原生自动战斗。",
             "entry": "冠位戴冠战",
             "controller": [
                 "安卓设备"
@@ -12,13 +12,8 @@
                 "选择冠位职介",
                 "选择冠位难度",
                 "team_index",
-                "team_config",
-                "bbc_run_count",
-                "apple_type",
                 "战前吃苹果",
-                "bbc_battle_type",
-                "support_order_mismatch",
-                "team_config_error"
+                "battle_mode"
             ],
             "pipeline_override": {
                 "执行章节导航": {

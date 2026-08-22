@@ -1,7 +1,7 @@
 {
     "bbc弹窗信息输出": {
         "focus": {
-            "Node.Recognition.Starting": "<span style=\"color: #FF0000;\">BBC任务正常完成！</span>"
+            "Node.Recognition.Starting": "<span style=\"color: #008000;\">战斗任务正常完成！</span>"
         }
     },
     "冠位戴冠战": {

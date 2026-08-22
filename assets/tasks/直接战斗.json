@@ -2,19 +2,15 @@
     "task": [
         {
             "name": "直接bbc战斗",
-            "label": "直接bbc战斗",
-            "description": "直接打开bbc运行战斗，请确保当前已经处于助战或者编队界面（建议搭配启动bbc）",
+            "label": "直接战斗",
+            "description": "直接进入战斗后端，请确保当前已经处于助战、编队或战斗界面",
             "entry": "直接bbc战斗",
             "controller": [
                 "安卓设备"
             ],
             "option": [
-                "team_config",
-                "bbc_run_count",
-                "apple_type",
-                "bbc_battle_type",
-                "support_order_mismatch",
-                "team_config_error"
+                "战前吃苹果",
+                "battle_mode"
             ],
             "pipeline_override": {
                 "执行章节导航": {

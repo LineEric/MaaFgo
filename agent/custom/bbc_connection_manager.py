@@ -50,7 +50,8 @@ class BbcConnectionManager:
         self._message_queue = []  # 消息队列：缓存所有回调消息
         self._queue_lock = threading.Lock()  # 消息队列锁
         self._popup_callback = None  # 弹窗回调函数
-        self._bbc_ready_event = threading.Event()  # BBC就绪事件：用于异步通知
+        self._bbc_ready_event = threading.Event()  # BBC TCP服务已启动
+        self._bbc_ui_ready_event = threading.Event()  # BBC UI初始化完成（免责声明已关闭）
         self._state = {
             'connected': False,  # TCP 连接状态
             'callback_listening': False,  # 回调监听状态
@@ -159,11 +160,14 @@ class BbcConnectionManager:
                 else:
                     mfaalog.debug(f"[BbcConnectionManager] 收到回调: {msg}")
                 
-                # 触发BBC就绪事件
+                # server_started 只代表 TCP 服务可用；disclaimer_closed 才代表 UI 可以安全操作。
                 if event in ['server_started', 'disclaimer_closed']:
                     mfaalog.info(f"[BbcConnectionManager] BBC就绪信号: {event}, Event对象ID: {id(self._bbc_ready_event)}, Event状态: {self._bbc_ready_event.is_set()}")
                     self._bbc_ready_event.set()
                     mfaalog.info(f"[BbcConnectionManager] 已触发事件, Event状态: {self._bbc_ready_event.is_set()}")
+                    if event == 'disclaimer_closed':
+                        self._bbc_ui_ready_event.set()
+                        mfaalog.info("[BbcConnectionManager] BBC UI 初始化完成")
                 
                 # 放入消息队列
                 with self._queue_lock:
@@ -473,6 +477,18 @@ class BbcConnectionManager:
         else:
             mfaalog.warning(f"[BbcConnectionManager] 等待 BBC 就绪超时 ({timeout}s)")
             return False
+
+    def _wait_for_bbc_ui_ready(self, timeout: int = 15) -> bool:
+        """等待 BBC UI 完成初始化，避免在免责声明弹窗仍存在时调用 page.reset。"""
+        mfaalog.info(f"[BbcConnectionManager] 等待 BBC UI 初始化完成 (超时{timeout}s)...")
+        ready = self._bbc_ui_ready_event.wait(timeout=timeout)
+        if ready:
+            mfaalog.info("[BbcConnectionManager] BBC UI 已初始化完成")
+            return True
+
+        # 某些 BBC 配置可能不会弹免责声明，此时不能无限阻塞；交给后续连接检查兜底。
+        mfaalog.warning("[BbcConnectionManager] 等待免责声明关闭超时，将继续进行连接检查")
+        return False
     
     # ==================== 模拟器连接 ====================
     
@@ -481,9 +497,28 @@ class BbcConnectionManager:
         try:
             # auto模式不发送连接命令，直接等待
             if connect_args.get('mode') == 'auto':
-                mfaalog.info("[BbcConnectionManager] Auto模式，等待BBC自动连接...")
-                time.sleep(5)
-                return True
+                mfaalog.info("[BbcConnectionManager] Auto模式，等待BBC UI初始化...")
+                connect_deadline = time.monotonic() + timeout
+                ui_wait_timeout = min(15, max(1, timeout))
+                self._wait_for_bbc_ui_ready(timeout=ui_wait_timeout)
+
+                # 不再使用固定5秒等待，轮询BBC真实连接状态，避免后续 load_config 抢跑。
+                mfaalog.info("[BbcConnectionManager] 等待BBC自动连接...")
+                while time.monotonic() < connect_deadline:
+                    status_result = self.send_command('get_connection', {}, timeout=5)
+                    if isinstance(status_result, dict):
+                        device_available = status_result.get('available', False)
+                        device_connected = status_result.get('connected', False)
+                        if device_available or device_connected:
+                            mfaalog.info(
+                                f"[BbcConnectionManager] BBC自动连接成功 "
+                                f"(available={device_available}, connected={device_connected})"
+                            )
+                            return True
+                    time.sleep(1)
+
+                mfaalog.warning("[BbcConnectionManager] BBC自动连接超时")
+                return False
             
             # 先等待 BBC UI 完全就绪
             mfaalog.info("[BbcConnectionManager] 等待 BBC UI 完全就绪...")
@@ -538,6 +573,7 @@ class BbcConnectionManager:
             mfaalog.info(f"[BbcConnectionManager] 清空消息队列和就绪事件 (尝试 {attempt})")
             self.clear_message_queue()
             self._bbc_ready_event.clear()
+            self._bbc_ui_ready_event.clear()
             
             # 1. 杀掉旧进程
             mfaalog.info(f"[BbcConnectionManager] 终止旧BBC进程 (尝试 {attempt})")
@@ -654,4 +690,3 @@ def get_manager() -> BbcConnectionManager:
             if _manager_instance is None:
                 _manager_instance = BbcConnectionManager()
     return _manager_instance
-
