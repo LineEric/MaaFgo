@@ -14,7 +14,9 @@
                                 "servant": "3300200"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：埃列什基伽勒\n\n<img src=\"resource/base/image/servant_face/f_33002000.png\" width=\"79\" height=\"79\" alt=\"埃列什基伽勒头像\" />",
+                    "icon": "resource/base/image/servant_face/f_33002000.png"
                 },
                 {
                     "name": "3300100",
@@ -25,7 +27,9 @@
                                 "servant": "3300100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：所多玛之兽／德拉科\n\n<img src=\"resource/base/image/servant_face/f_33001000.png\" width=\"79\" height=\"79\" alt=\"所多玛之兽／德拉科头像\" />",
+                    "icon": "resource/base/image/servant_face/f_33001000.png"
                 },
                 {
                     "name": "4000100",
@@ -36,7 +40,9 @@
                                 "servant": "4000100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：Ｕ－奥尔加玛丽\n\n<img src=\"resource/base/image/servant_face/f_40001000.png\" width=\"79\" height=\"79\" alt=\"Ｕ－奥尔加玛丽头像\" />",
+                    "icon": "resource/base/image/servant_face/f_40001000.png"
                 }
             ]
         }

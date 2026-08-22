@@ -14,7 +14,9 @@
                                 "servant": "800100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：玛修·基列莱特\n\n<img src=\"resource/base/image/servant_face/f_8001000.png\" width=\"79\" height=\"79\" alt=\"玛修·基列莱特头像\" />",
+                    "icon": "resource/base/image/servant_face/f_8001000.png"
                 }
             ]
         }

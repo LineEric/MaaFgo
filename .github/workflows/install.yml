@@ -58,115 +58,6 @@ jobs:
       is_prerelease: ${{ steps.set_tag.outputs.is_prerelease }}
       repo_name: ${{ steps.set_tag.outputs.repo_name }}
 
-  build-mwu:
-    env:
-      UV_INDEX: https://pypi.org/simple
-      repo_name: ${{ needs.meta.outputs.repo_name }}
-      tag: ${{ needs.meta.outputs.tag }}
-    permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-2025
-            platform: win
-            arch: x86_64
-    runs-on: ${{ matrix.os }}
-    name: Build MWU (${{ matrix.platform }}-${{ matrix.arch }})
-    needs: meta
-
-    steps:
-      - name: Check-out repository
-        uses: actions/checkout@v6
-        with:
-          submodules: true
-
-      - name: 'Workaround for missing zstd in windows-11-arm'
-        if: false # Disabled as ARM64 build is removed
-        run: choco install zstandard
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7.5.0
-        with:
-          enable-cache: true
-
-      - name: Download MaaFramework
-        id: download_mfw
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: MaaXYZ/MaaFramework
-          fileName: "MAA-${{ matrix.platform }}-${{ matrix.arch }}*"
-          latest: true
-          out-file-path: "deps"
-          extract: true
-
-      - name: Flatten MaaFramework directory
-        shell: bash
-        run: |
-          # 查找解压后的 MaaFramework 目录并移动内容到 deps 根目录
-          MFW_DIR=$(find deps -maxdepth 1 -type d -name "MAA-*" | head -n 1)
-          if [ -n "$MFW_DIR" ] && [ "$MFW_DIR" != "deps" ]; then
-            echo "Moving contents from $MFW_DIR to deps/"
-            mv "$MFW_DIR"/* deps/
-            mv "$MFW_DIR"/.* deps/ 2>/dev/null || true
-            rmdir "$MFW_DIR"
-          fi
-          ls -la deps/
-
-      - name: Setup Python
-        uses: actions/setup-python@v6.2.0
-        with:
-          python-version: "3.12.10"
-
-      - name: Copy Resources
-        shell: bash
-        run: |
-          # 使用 MWU 官方的资源复制脚本
-          curl -L https://github.com/ravizhan/MWU/raw/refs/heads/main/deploy/copy_resources.py -o ./copy_resources.py
-          uv run ./copy_resources.py
-
-      - name: Download Python Dependencies
-        shell: bash
-        run: |
-          # 使用 MWU 官方的依赖下载脚本
-          curl -L https://github.com/ravizhan/MWU/raw/refs/heads/main/deploy/download_deps.py -o ./download_deps.py
-          uv run ./download_deps.py
-
-      - name: Download MWU Artifact
-        id: download_mwu
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: ravizhan/MWU
-          latest: true
-          fileName: MWU-${{ matrix.platform }}-${{ matrix.arch }}-*.7z
-          out-file-path: ./
-
-      - name: Setup & Install MWU
-        shell: bash
-        run: |
-          # 1. 解压 MWU (MWU 自身包含 Nuitka 编译好的 Python 环境)
-          MWU_FILE=$(ls MWU-*.7z | head -n 1)
-          7z x "$MWU_FILE" -obuild -y
-          
-          # 2. 调用脚本完成资源组装与 deps 依赖注入
-          # install-MWU.py 现在会自动在 build/deps 中安装 cv2 和 numpy
-          python tools/install-MWU.py ${{ env.tag }} ${{ matrix.platform }} ${{ matrix.arch }}
-
-      - name: Get clean version
-        id: get_version
-        shell: bash
-        run: |
-          tag="${{ env.tag }}"
-          version=$(echo "$tag" | sed 's/^v//; s/MWU$//')
-          echo "clean_version=$version" >> $GITHUB_OUTPUT
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ env.repo_name }}-${{ matrix.platform }}-${{ matrix.arch }}-v${{ steps.get_version.outputs.clean_version }}-MWU
-          path: "./build/*"
-
   build-mxu:
     env:
       repo_name: ${{ needs.meta.outputs.repo_name }}
@@ -268,7 +159,7 @@ jobs:
         shell: bash
         run: |
           tag="${{ env.tag }}"
-          version=$(echo "$tag" | sed 's/^v//; s/MWU$//')
+          version=$(echo "$tag" | sed 's/^v//')
           echo "clean_version=$version" >> $GITHUB_OUTPUT
 
       - name: Upload MXU Artifacts
@@ -306,7 +197,7 @@ jobs:
   debug:
     if: ${{ needs.meta.outputs.is_release == 'false' }}
     runs-on: ubuntu-slim
-    needs: [meta, build-mwu, build-mxu, changelog]
+    needs: [meta, build-mxu, changelog]
     steps:
       - name: Show Outputs
         run: |
@@ -318,7 +209,7 @@ jobs:
 
   release:
     if: ${{ needs.meta.outputs.is_release == 'true' }}
-    needs: [meta, build-mwu, build-mxu, changelog]
+    needs: [meta, build-mxu, changelog]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v8.0.1

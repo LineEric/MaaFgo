@@ -14,7 +14,9 @@
                                 "servant": "403400"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：巴沙洛缪·罗伯茨\n\n<img src=\"resource/base/image/servant_face/f_4034000.png\" width=\"79\" height=\"79\" alt=\"巴沙洛缪·罗伯茨头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4034000.png"
                 },
                 {
                     "name": "400600",
@@ -25,7 +27,9 @@
                                 "servant": "400600"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：乔尔乔斯\n\n<img src=\"resource/base/image/servant_face/f_4006000.png\" width=\"79\" height=\"79\" alt=\"乔尔乔斯头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4006000.png"
                 },
                 {
                     "name": "400800",
@@ -36,7 +40,9 @@
                                 "servant": "400800"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：爱迪·萨奇\n\n<img src=\"resource/base/image/servant_face/f_4008000.png\" width=\"79\" height=\"79\" alt=\"爱迪·萨奇头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4008000.png"
                 },
                 {
                     "name": "403100",
@@ -47,7 +53,9 @@
                                 "servant": "403100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：丹驹\n\n<img src=\"resource/base/image/servant_face/f_4031000.png\" width=\"79\" height=\"79\" alt=\"丹驹头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4031000.png"
                 },
                 {
                     "name": "401500",
@@ -58,7 +66,9 @@
                                 "servant": "401500"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：亚历山大\n\n<img src=\"resource/base/image/servant_face/f_4015000.png\" width=\"79\" height=\"79\" alt=\"亚历山大头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4015000.png"
                 },
                 {
                     "name": "402500",
@@ -69,7 +79,9 @@
                                 "servant": "402500"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：克里斯托弗·哥伦布\n\n<img src=\"resource/base/image/servant_face/f_4025000.png\" width=\"79\" height=\"79\" alt=\"克里斯托弗·哥伦布头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4025000.png"
                 },
                 {
                     "name": "401100",
@@ -80,7 +92,9 @@
                                 "servant": "401100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：布狄卡\n\n<img src=\"resource/base/image/servant_face/f_4011000.png\" width=\"79\" height=\"79\" alt=\"布狄卡头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4011000.png"
                 },
                 {
                     "name": "403900",
@@ -91,7 +105,9 @@
                                 "servant": "403900"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：曼迪卡尔多\n\n<img src=\"resource/base/image/servant_face/f_4039000.png\" width=\"79\" height=\"79\" alt=\"曼迪卡尔多头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4039000.png"
                 },
                 {
                     "name": "400100",
@@ -102,7 +118,9 @@
                                 "servant": "400100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：歌果\n\n<img src=\"resource/base/image/servant_face/f_4001000.png\" width=\"79\" height=\"79\" alt=\"歌果头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4001000.png"
                 },
                 {
                     "name": "401400",
@@ -113,7 +131,9 @@
                                 "servant": "401400"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：牛若丸\n\n<img src=\"resource/base/image/servant_face/f_4014000.png\" width=\"79\" height=\"79\" alt=\"牛若丸头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4014000.png"
                 },
                 {
                     "name": "404600",
@@ -124,7 +144,9 @@
                                 "servant": "404600"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：伊丽莎白·巴托里〔灰姑娘〕\n\n<img src=\"resource/base/image/servant_face/f_4046000.png\" width=\"79\" height=\"79\" alt=\"伊丽莎白·巴托里〔灰姑娘〕头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4046000.png"
                 },
                 {
                     "name": "402600",
@@ -135,7 +157,9 @@
                                 "servant": "402600"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：伊什塔尔\n\n<img src=\"resource/base/image/servant_face/f_4026000.png\" width=\"79\" height=\"79\" alt=\"伊什塔尔头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4026000.png"
                 },
                 {
                     "name": "405800",
@@ -146,7 +170,9 @@
                                 "servant": "405800"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：克里姆希尔德\n\n<img src=\"resource/base/image/servant_face/f_4058000.png\" width=\"79\" height=\"79\" alt=\"克里姆希尔德头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4058000.png"
                 },
                 {
                     "name": "404500",
@@ -157,7 +183,9 @@
                                 "servant": "404500"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：凯妮斯\n\n<img src=\"resource/base/image/servant_face/f_4045000.png\" width=\"79\" height=\"79\" alt=\"凯妮斯头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4045000.png"
                 },
                 {
                     "name": "403600",
@@ -168,7 +196,9 @@
                                 "servant": "403600"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：卡米拉\n\n<img src=\"resource/base/image/servant_face/f_4036000.png\" width=\"79\" height=\"79\" alt=\"卡米拉头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4036000.png"
                 },
                 {
                     "name": "404200",
@@ -179,7 +209,9 @@
                                 "servant": "404200"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：哈贝特洛特\n\n<img src=\"resource/base/image/servant_face/f_4042000.png\" width=\"79\" height=\"79\" alt=\"哈贝特洛特头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4042000.png"
                 },
                 {
                     "name": "403000",
@@ -190,7 +222,9 @@
                                 "servant": "403000"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：坂本龙马\n\n<img src=\"resource/base/image/servant_face/f_4030000.png\" width=\"79\" height=\"79\" alt=\"坂本龙马头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4030000.png"
                 },
                 {
                     "name": "402300",
@@ -201,7 +235,9 @@
                                 "servant": "402300"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：坂田金时\n\n<img src=\"resource/base/image/servant_face/f_4023000.png\" width=\"79\" height=\"79\" alt=\"坂田金时头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4023000.png"
                 },
                 {
                     "name": "404400",
@@ -212,7 +248,9 @@
                                 "servant": "404400"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：多布雷尼亚·尼基季奇\n\n<img src=\"resource/base/image/servant_face/f_4044000.png\" width=\"79\" height=\"79\" alt=\"多布雷尼亚·尼基季奇头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4044000.png"
                 },
                 {
                     "name": "400900",
@@ -223,7 +261,9 @@
                                 "servant": "400900"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：安妮·伯妮＆玛莉·瑞德\n\n<img src=\"resource/base/image/servant_face/f_4009000.png\" width=\"79\" height=\"79\" alt=\"安妮·伯妮＆玛莉·瑞德头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4009000.png"
                 },
                 {
                     "name": "405300",
@@ -234,7 +274,9 @@
                                 "servant": "405300"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：尼莫〔圣诞〕\n\n<img src=\"resource/base/image/servant_face/f_4053000.png\" width=\"79\" height=\"79\" alt=\"尼莫〔圣诞〕头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4053000.png"
                 },
                 {
                     "name": "405600",
@@ -245,7 +287,9 @@
                                 "servant": "405600"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：希波吕忒\n\n<img src=\"resource/base/image/servant_face/f_4056000.png\" width=\"79\" height=\"79\" alt=\"希波吕忒头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4056000.png"
                 },
                 {
                     "name": "401700",
@@ -256,7 +300,9 @@
                                 "servant": "401700"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：玛丽·安托瓦内特\n\n<img src=\"resource/base/image/servant_face/f_4017000.png\" width=\"79\" height=\"79\" alt=\"玛丽·安托瓦内特头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4017000.png"
                 },
                 {
                     "name": "401900",
@@ -267,7 +313,9 @@
                                 "servant": "401900"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：玛尔达\n\n<img src=\"resource/base/image/servant_face/f_4019000.png\" width=\"79\" height=\"79\" alt=\"玛尔达头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4019000.png"
                 },
                 {
                     "name": "404100",
@@ -278,7 +326,9 @@
                                 "servant": "404100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：紫式部\n\n<img src=\"resource/base/image/servant_face/f_4041000.png\" width=\"79\" height=\"79\" alt=\"紫式部头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4041000.png"
                 },
                 {
                     "name": "402400",
@@ -289,7 +339,9 @@
                                 "servant": "402400"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：莫德雷德\n\n<img src=\"resource/base/image/servant_face/f_4024000.png\" width=\"79\" height=\"79\" alt=\"莫德雷德头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4024000.png"
                 },
                 {
                     "name": "405000",
@@ -300,7 +352,9 @@
                                 "servant": "405000"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：铃鹿御前〔暑假〕\n\n<img src=\"resource/base/image/servant_face/f_4050000.png\" width=\"79\" height=\"79\" alt=\"铃鹿御前〔暑假〕头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4050000.png"
                 },
                 {
                     "name": "402200",
@@ -311,7 +365,9 @@
                                 "servant": "402200"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：阿尔托莉雅·潘德拉贡〔圣诞Alter〕\n\n<img src=\"resource/base/image/servant_face/f_4022000.png\" width=\"79\" height=\"79\" alt=\"阿尔托莉雅·潘德拉贡〔圣诞Alter〕头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4022000.png"
                 },
                 {
                     "name": "400400",
@@ -322,7 +378,9 @@
                                 "servant": "400400"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：阿斯托尔福\n\n<img src=\"resource/base/image/servant_face/f_4004000.png\" width=\"79\" height=\"79\" alt=\"阿斯托尔福头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4004000.png"
                 },
                 {
                     "name": "404900",
@@ -333,7 +391,9 @@
                                 "servant": "404900"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：黄飞虎\n\n<img src=\"resource/base/image/servant_face/f_4049000.png\" width=\"79\" height=\"79\" alt=\"黄飞虎头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4049000.png"
                 },
                 {
                     "name": "402800",
@@ -344,7 +404,9 @@
                                 "servant": "402800"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：伊凡雷帝\n\n<img src=\"resource/base/image/servant_face/f_4028000.png\" width=\"79\" height=\"79\" alt=\"伊凡雷帝头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4028000.png"
                 },
                 {
                     "name": "400200",
@@ -355,7 +417,9 @@
                                 "servant": "400200"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：伊斯坎达尔\n\n<img src=\"resource/base/image/servant_face/f_4002000.png\" width=\"79\" height=\"79\" alt=\"伊斯坎达尔头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4002000.png"
                 },
                 {
                     "name": "404700",
@@ -366,7 +430,9 @@
                                 "servant": "404700"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：君士坦丁十一世\n\n<img src=\"resource/base/image/servant_face/f_4047000.png\" width=\"79\" height=\"79\" alt=\"君士坦丁十一世头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4047000.png"
                 },
                 {
                     "name": "404300",
@@ -377,7 +443,9 @@
                                 "servant": "404300"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：太公望\n\n<img src=\"resource/base/image/servant_face/f_4043000.png\" width=\"79\" height=\"79\" alt=\"太公望头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4043000.png"
                 },
                 {
                     "name": "403800",
@@ -388,7 +456,9 @@
                                 "servant": "403800"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：奥德修斯\n\n<img src=\"resource/base/image/servant_face/f_4038000.png\" width=\"79\" height=\"79\" alt=\"奥德修斯头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4038000.png"
                 },
                 {
                     "name": "401200",
@@ -399,7 +469,9 @@
                                 "servant": "401200"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：奥斯曼狄斯\n\n<img src=\"resource/base/image/servant_face/f_4012000.png\" width=\"79\" height=\"79\" alt=\"奥斯曼狄斯头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4012000.png"
                 },
                 {
                     "name": "401300",
@@ -410,7 +482,9 @@
                                 "servant": "401300"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：女王梅芙\n\n<img src=\"resource/base/image/servant_face/f_4013000.png\" width=\"79\" height=\"79\" alt=\"女王梅芙头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4013000.png"
                 },
                 {
                     "name": "405500",
@@ -421,7 +495,9 @@
                                 "servant": "405500"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：安德洛墨达\n\n<img src=\"resource/base/image/servant_face/f_4055000.png\" width=\"79\" height=\"79\" alt=\"安德洛墨达头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4055000.png"
                 },
                 {
                     "name": "403700",
@@ -432,7 +508,9 @@
                                 "servant": "403700"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：尼莫\n\n<img src=\"resource/base/image/servant_face/f_4037000.png\" width=\"79\" height=\"79\" alt=\"尼莫头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4037000.png"
                 },
                 {
                     "name": "405700",
@@ -443,7 +521,9 @@
                                 "servant": "405700"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：尼莫／诺亚\n\n<img src=\"resource/base/image/servant_face/f_4057000.png\" width=\"79\" height=\"79\" alt=\"尼莫／诺亚头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4057000.png"
                 },
                 {
                     "name": "400300",
@@ -454,7 +534,9 @@
                                 "servant": "400300"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：弗朗西斯·德雷克\n\n<img src=\"resource/base/image/servant_face/f_4003000.png\" width=\"79\" height=\"79\" alt=\"弗朗西斯·德雷克头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4003000.png"
                 },
                 {
                     "name": "404800",
@@ -465,7 +547,9 @@
                                 "servant": "404800"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：曲亭马琴\n\n<img src=\"resource/base/image/servant_face/f_4048000.png\" width=\"79\" height=\"79\" alt=\"曲亭马琴头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4048000.png"
                 },
                 {
                     "name": "404000",
@@ -476,7 +560,9 @@
                                 "servant": "404000"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：欧罗巴\n\n<img src=\"resource/base/image/servant_face/f_4040000.png\" width=\"79\" height=\"79\" alt=\"欧罗巴头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4040000.png"
                 },
                 {
                     "name": "405200",
@@ -487,7 +573,9 @@
                                 "servant": "405200"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：武田晴信\n\n<img src=\"resource/base/image/servant_face/f_4052000.png\" width=\"79\" height=\"79\" alt=\"武田晴信头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4052000.png"
                 },
                 {
                     "name": "403200",
@@ -498,7 +586,9 @@
                                 "servant": "403200"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：莱妮丝\n\n<img src=\"resource/base/image/servant_face/f_4032000.png\" width=\"79\" height=\"79\" alt=\"莱妮丝头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4032000.png"
                 },
                 {
                     "name": "403500",
@@ -509,7 +599,9 @@
                                 "servant": "403500"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：莱昂纳多·达·芬奇\n\n<img src=\"resource/base/image/servant_face/f_4035000.png\" width=\"79\" height=\"79\" alt=\"莱昂纳多·达·芬奇头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4035000.png"
                 },
                 {
                     "name": "402900",
@@ -520,7 +612,9 @@
                                 "servant": "402900"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：阿喀琉斯\n\n<img src=\"resource/base/image/servant_face/f_4029000.png\" width=\"79\" height=\"79\" alt=\"阿喀琉斯头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4029000.png"
                 },
                 {
                     "name": "402700",
@@ -531,7 +625,9 @@
                                 "servant": "402700"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：阿尔托莉雅·潘德拉贡〔Alter〕\n\n<img src=\"resource/base/image/servant_face/f_4027000.png\" width=\"79\" height=\"79\" alt=\"阿尔托莉雅·潘德拉贡〔Alter〕头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4027000.png"
                 },
                 {
                     "name": "401800",
@@ -542,7 +638,9 @@
                                 "servant": "401800"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：魁札尔·科亚特尔\n\n<img src=\"resource/base/image/servant_face/f_4018000.png\" width=\"79\" height=\"79\" alt=\"魁札尔·科亚特尔头像\" />",
+                    "icon": "resource/base/image/servant_face/f_4018000.png"
                 }
             ]
         }
