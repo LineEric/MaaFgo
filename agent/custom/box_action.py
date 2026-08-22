@@ -59,6 +59,9 @@ _CYCLE_RESET_HIT_NODES = [
     "判断是否要初始化",
 ]
 
+# 在强化循环中，此节点命中代表通过「全部领取」实际领到过东西。
+_ALL_RECEIVE_NODE = "整理礼物盒-点全部领取"
+
 # ==================== 坐标（基准 720p，运行时 × scale 自适应）====================
 # 筛选固定动作（点筛选、重置、从者经验值、下滑）已移到 pipeline「整理礼物盒-筛选准备」，
 # 这里只保留必须用 cv2 取色判断的星级相关坐标：
@@ -67,6 +70,7 @@ STAR_TAP = [(640, 483), (453, 483), (265, 483)]                          # 3/4/5
 # 按数量保留
 ROI_DF_COL = (100, 183, 107, 553)          # 狗粮图标列（左侧竖列）
 TAP_GET_CHOSEN = (1150, 372)               # 「领取选中」按钮
+TAP_GIFT_FULL_CLOSE = (640, 560)           # 持有上限提示的「关闭」按钮
 # 数字 OCR（相对狗粮图标中心 p 的偏移）
 NUM_ROI_DX = 179                           # 数字区左偏移
 NUM_ROI_DY = -51                           # 数字区上偏移
@@ -85,7 +89,8 @@ RGB_UNSELECTED = (61, 112, 196)   # 蓝
 RGB_SELECTED = (215, 215, 215)    # 灰
 
 TH_TEMPLATE = 0.65     # 模板匹配阈值
-MAX_FILTER_GET_ROUND = 60  # 按数量保留最大滚动轮数
+FILTER_GET_SCROLLS_PER_BATCH = 10  # 每批累计勾选时固定下滑次数
+MAX_FILTER_GET_BATCH = 60           # 按数量保留最多处理的批次数
 
 # ==================== 贩卖狗粮（灵基变还）坐标（基准 720p，待实测校准）====================
 # 滑动全选轨迹：长按第一张卡片 → 右滑到最右 → 下滑到最下（框选整屏宫格）
@@ -196,25 +201,7 @@ class ExecuteBoxTask(CustomAction):
                 mfaalog.error("[整理礼物盒] 未选择任何操作（一键领取/按数量保留/贩卖均为关）")
                 return CustomAction.RunResult(success=False)
 
-            # 资源包区分服务器 -> 模板目录
-            cfg = context.get_node_data("资源包配置") or {}
-            pkg = str((cfg.get("attach") or {}).get("resource_package") or "base").strip()
-            layer = "cn" if pkg == "cn" else "base"
-            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-            def _resolve(l):
-                for c in [
-                    os.path.join(root_dir, "assets", "resource", l, "image", "整理礼物盒"),
-                    os.path.join(root_dir, "resource", l, "image", "整理礼物盒"),
-                ]:
-                    if os.path.isdir(c):
-                        return c
-                return None
-
-            self.tpl_dir = _resolve(layer) or ""
-            # base 作为兜底：cn 缺图时回退到 base（与 pipeline 资源分层行为一致）
-            self.tpl_base_dir = _resolve("base") or self.tpl_dir
-            mfaalog.info(f"[整理礼物盒] 资源包={pkg} 模板目录={self.tpl_dir}")
+            self._init_dirs()
 
             # 坐标自适应：截图拿实际分辨率算缩放系数
             self._init_scale()
@@ -233,15 +220,20 @@ class ExecuteBoxTask(CustomAction):
                 if repeat_cycle:
                     mfaalog.info(f"[整理礼物盒] ===== 第 {cycle} 轮：整理 -> 贩卖 =====")
 
-                tidy_ok, giftbox_exhausted = self._tidy_giftbox(
+                # 「全部领取」的命中计数会跨循环保留，必须按每次进入礼物盒清零。
+                self._context.clear_hit_count(_ALL_RECEIVE_NODE)
+                tidy_ok, _giftbox_exhausted = self._tidy_giftbox(
                     one_key3, one_key4, one_key5,
                     keep3, keep4, keep5,
                     keep3_num, keep4_num, keep5_num,
                 ) if do_tidy else (True, False)
                 if not tidy_ok:
                     return CustomAction.RunResult(success=False)
-                if giftbox_exhausted:
-                    mfaalog.info("[整理礼物盒] 礼物盒已无更多待整理内容，任务完成")
+                # 停止条件与「整理 -> 强化」一致：本次进入礼物盒若一次也没有
+                # 成功提交领取，则不再进入贩卖。已经领过后再扫空属于同一轮整理，
+                # 仍要完成贩卖并继续下一轮。
+                if do_tidy and not self._received_any_this_entry():
+                    mfaalog.info("[整理礼物盒] 本次进入礼物盒未领取任何内容，任务完成")
                     break
 
                 if do_sell:
@@ -264,6 +256,75 @@ class ExecuteBoxTask(CustomAction):
             return CustomAction.RunResult(success=False)
 
     # ---------- 坐标自适应 ----------
+
+    def run_tidy_once(self, context: Context, attach, reset_hit_counts=False, controller=None):
+        """供其它 action 复用的一轮礼物盒整理。
+
+        返回 (是否成功, 是否已无更多待整理内容, 本次是否实际领取过东西)。
+        """
+        self._context = context
+        # 跨 action 复用时必须沿用调用方持有的 Controller 包装对象。
+        # context.tasker.controller 会创建新的包装对象，其析构可能关闭同一底层句柄。
+        self._controller = controller if controller is not None else context.tasker.controller
+        if reset_hit_counts:
+            self._reset_cycle_hit_counts()
+        # 命中计数在整个 task 生命周期内共享；这里必须按「每次进入礼物盒」清零，
+        # 否则上一轮已领取会误判本轮也领取过。
+        self._context.clear_hit_count(_ALL_RECEIVE_NODE)
+        self._init_dirs()
+        self._init_scale()
+
+        one_key3 = bool(attach.get("one_key3", True))
+        one_key4 = bool(attach.get("one_key4", True))
+        one_key5 = bool(attach.get("one_key5", True))
+        keep3 = bool(attach.get("keep3", False))
+        keep4 = bool(attach.get("keep4", False))
+        keep5 = bool(attach.get("keep5", False))
+        keep3_num = int(attach.get("keep3_num", 5))
+        keep4_num = int(attach.get("keep4_num", 5))
+        keep5_num = int(attach.get("keep5_num", 5))
+
+        if not (one_key3 or one_key4 or one_key5 or keep3 or keep4 or keep5):
+            mfaalog.error("[整理礼物盒] 未选择任何整理操作")
+            return False, False, False
+        tidy_ok, giftbox_exhausted = self._tidy_giftbox(
+            one_key3, one_key4, one_key5,
+            keep3, keep4, keep5,
+            keep3_num, keep4_num, keep5_num,
+        )
+        received_any = self._received_any_this_entry()
+        return tidy_ok, giftbox_exhausted, received_any
+
+    def _received_any_this_entry(self):
+        """汇总本次进入礼物盒的全部领取与按数量领取结果。"""
+        all_received_count = self._context.get_hit_count(_ALL_RECEIVE_NODE)
+        selected_received_count = getattr(self, "_selected_received_count", 0)
+        mfaalog.info(
+            "[整理礼物盒] 本次进入礼物盒领取次数："
+            f"全部领取={all_received_count}，领取选中={selected_received_count}"
+        )
+        return (all_received_count + selected_received_count) > 0
+
+    def _init_dirs(self):
+        """按资源包配置初始化礼物盒模板目录。"""
+        cfg = self._context.get_node_data("资源包配置") or {}
+        pkg = str((cfg.get("attach") or {}).get("resource_package") or "base").strip()
+        layer = "cn" if pkg == "cn" else "base"
+        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+        def _resolve(resource_layer):
+            for candidate in [
+                os.path.join(root_dir, "assets", "resource", resource_layer, "image", "整理礼物盒"),
+                os.path.join(root_dir, "resource", resource_layer, "image", "整理礼物盒"),
+            ]:
+                if os.path.isdir(candidate):
+                    return candidate
+            return None
+
+        self.tpl_dir = _resolve(layer) or ""
+        # base 作为兜底：cn 缺图时回退到 base（与 pipeline 资源分层行为一致）
+        self.tpl_base_dir = _resolve("base") or self.tpl_dir
+        mfaalog.info(f"[整理礼物盒] 资源包={pkg} 模板目录={self.tpl_dir}")
 
     def _reset_cycle_hit_counts(self):
         """重置跨轮复用 pipeline 节点的 max_hit 计数。"""
@@ -291,6 +352,10 @@ class ExecuteBoxTask(CustomAction):
     def _tidy_giftbox(self, one_key3, one_key4, one_key5,
                       keep3, keep4, keep5, keep3_num, keep4_num, keep5_num):
         """执行一轮礼物盒整理，返回 (是否成功, 是否已无更多待整理内容)。"""
+        # 手动勾选并提交领取可作为有领取内容的依据。持有上限提示表示已经
+        # 部分领取，仅停止继续整理并交给后续强化/贩卖阶段处理。
+        self._selected_received_count = 0
+        self._giftbox_full = False
         mfaalog.info("[整理礼物盒] 导航到礼物盒...")
         try:
             self._context.run_task("整理礼物盒-导航到礼物盒")
@@ -309,6 +374,11 @@ class ExecuteBoxTask(CustomAction):
             self._filter_giftbox([1 if f else 0 for f in ok_flags])
             if self._in_giftbox():
                 self._context.run_task("整理礼物盒-一键领取循环")
+            if self._match(TPL_GIFT_FULL) is not None:
+                self._giftbox_full = True
+                mfaalog.info("[整理礼物盒] 持有上限已满，停止继续整理并进入后续流程")
+                self._dismiss_giftbox_full()
+                return not self._context.tasker.stopping, False
 
         # 按数量保留：筛选目标星级 -> 数量 < 阈值才领取
         if keep3 or keep4 or keep5:
@@ -497,65 +567,84 @@ class ExecuteBoxTask(CustomAction):
     # ---------- 按数量保留 ----------
 
     def _filter_get(self, keep_flags, keep_nums):
-        """逐行读狗粮数量，数量 < 保留阈值则勾选领取，滚动遍历。
+        """按数量勾选狗粮；每批下滑十次后统一点击「领取选中」。
 
-        连续十次扫描均没有可领取目标时返回 True，供外层结束循环任务。
+        一批下滑十次后仍未勾选到任何目标时，视为礼物盒已整理完毕。
         """
         active = [i for i in range(3) if keep_flags[i]]
         if not active:
             return False
-        no_pick_rounds = 0
-        for _round in range(MAX_FILTER_GET_ROUND):
-            if self._context.tasker.stopping:
-                return False
-            img = self._shot()
-            if img is None:
-                continue
-            if self._match(TPL_GIFT_FULL) is not None:
-                mfaalog.info("[整理礼物盒] 礼物盒已满，停止")
-                return False
-            picked = 0
-            for i in active:
-                pts = self._match_many(TPL_DF[i], ROI_DF_COL)
-                for (cx, cy, _sc) in pts:
-                    roi = (cx + self._px(NUM_ROI_DX), cy + self._py(NUM_ROI_DY),
-                           self._px(NUM_ROI_W), self._py(NUM_ROI_H))
-                    num = _ocr_number(self._context, roi, img)
-                    if num is None:
-                        mfaalog.warning(f"[整理礼物盒] {i + 3}星狗粮({cx},{cy}) 数字识别失败")
-                        continue
-                    if num >= keep_nums[i]:
-                        continue
-                    if self._is_chosen(img, cx, cy):
-                        continue
-                    # 点击勾选（cx/cy 是实际坐标，勾选框偏移再 ×scale）
-                    self._controller.post_click(cx + self._px(CHOSEN_TAP_DX),
-                                                cy + self._py(CHOSEN_TAP_DY)).wait()
-                    time.sleep(0.1)
-                    picked += 1
-            if picked > 0:
-                no_pick_rounds = 0
-                self._tap(*TAP_GET_CHOSEN, delay=1.0)
-                for _ in range(3):
-                    if self._context.tasker.stopping:
-                        return False
-                    m = self._match(TPL_RECEIVE)
-                    if m is not None:
-                        self._controller.post_click(m[1], m[2]).wait()
-                        time.sleep(1.0)
-                        break
-                    time.sleep(0.5)
-                continue
-            no_pick_rounds += 1
-            if no_pick_rounds >= 10:
-                mfaalog.info("[整理礼物盒] 连续多轮无待领取狗粮，礼物盒已整理完毕")
+        for batch in range(MAX_FILTER_GET_BATCH):
+            batch_picked = 0
+            # 先扫描当前页；之后固定下滑十次，并扫描每次下滑后的页面。
+            for page in range(FILTER_GET_SCROLLS_PER_BATCH + 1):
+                if self._context.tasker.stopping:
+                    return False
+                img = self._shot()
+                if img is None:
+                    continue
+                if self._match(TPL_GIFT_FULL) is not None:
+                    self._giftbox_full = True
+                    mfaalog.info("[整理礼物盒] 持有上限已满，停止继续整理")
+                    self._dismiss_giftbox_full()
+                    return False
+                for i in active:
+                    pts = self._match_many(TPL_DF[i], ROI_DF_COL)
+                    for (cx, cy, _sc) in pts:
+                        roi = (cx + self._px(NUM_ROI_DX), cy + self._py(NUM_ROI_DY),
+                               self._px(NUM_ROI_W), self._py(NUM_ROI_H))
+                        num = _ocr_number(self._context, roi, img)
+                        if num is None:
+                            mfaalog.warning(f"[整理礼物盒] {i + 3}星狗粮({cx},{cy}) 数字识别失败")
+                            continue
+                        if num >= keep_nums[i] or self._is_chosen(img, cx, cy):
+                            continue
+                        # 点击勾选（cx/cy 是实际坐标，勾选框偏移再 ×scale）
+                        self._controller.post_click(cx + self._px(CHOSEN_TAP_DX),
+                                                    cy + self._py(CHOSEN_TAP_DY)).wait()
+                        time.sleep(0.1)
+                        batch_picked += 1
+
+                if page < FILTER_GET_SCROLLS_PER_BATCH:
+                    # 滚动（手指上滑，列表向下翻）；本批不因发现目标而提前领取。
+                    self._controller.post_swipe(self._px(600), self._py(560),
+                                                self._px(600), self._py(200), 400).wait()
+                    time.sleep(1.0)
+
+            if batch_picked == 0:
+                mfaalog.info(
+                    "[整理礼物盒] 连续下滑 10 次均无待领取狗粮，礼物盒已整理完毕"
+                )
                 return True
-            # 滚动（手指上滑，列表向下翻）
-            self._controller.post_swipe(self._px(600), self._py(560),
-                                        self._px(600), self._py(200), 400).wait()
-            time.sleep(1.0)
-        mfaalog.warning("[整理礼物盒] 按数量保留达到最大轮数")
+
+            self._tap(*TAP_GET_CHOSEN, delay=1.0)
+            mfaalog.info(
+                f"[整理礼物盒] 第 {batch + 1} 批下滑 10 次后，统一提交领取 {batch_picked} 个目标"
+            )
+            for _ in range(3):
+                if self._context.tasker.stopping:
+                    return False
+                if self._match(TPL_GIFT_FULL) is not None:
+                    self._giftbox_full = True
+                    # 该提示代表已领取一部分、其余因持有上限未能领取；仍要视为
+                    # 本次进入礼物盒有收获，以便继续强化或贩卖。
+                    self._selected_received_count += batch_picked
+                    mfaalog.warning("[整理礼物盒] 持有上限已满，停止继续整理并进入后续流程")
+                    self._dismiss_giftbox_full()
+                    return False
+                m = self._match(TPL_RECEIVE)
+                if m is not None:
+                    self._controller.post_click(m[1], m[2]).wait()
+                    time.sleep(1.0)
+                    break
+                time.sleep(0.5)
+            self._selected_received_count += batch_picked
+        mfaalog.warning("[整理礼物盒] 按数量保留达到最大批次数")
         return False
+
+    def _dismiss_giftbox_full(self):
+        """关闭持有上限提示，露出礼物盒界面供后续阶段导航。"""
+        self._tap(*TAP_GIFT_FULL_CLOSE, delay=0.8)
 
     def _is_chosen(self, img, cx, cy):
         """判断狗粮勾选框是否已选中：比对 chosen/unchosen 模板的归一化距离"""

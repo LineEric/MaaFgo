@@ -1,5 +1,37 @@
 {
     "option": {
+        "强化从者-整理礼物盒循环": {
+            "type": "select",
+            "label": "自动从礼物盒获取经验",
+            "default": "off",
+            "cases": [
+                {
+                    "name": "off",
+                    "label": "不自动获取",
+                    "pipeline_override": {
+                        "执行强化从者": {
+                            "attach": {
+                                "tidy_giftbox": false
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "on",
+                    "label": "自动获取并强化",
+                    "option": [
+                        "整理礼物盒-整理大类"
+                    ],
+                    "pipeline_override": {
+                        "执行强化从者": {
+                            "attach": {
+                                "tidy_giftbox": true
+                            }
+                        }
+                    }
+                }
+            ]
+        },
         "强化从者-选择方式": {
             "type": "select",
             "label": "从者选择方式",
