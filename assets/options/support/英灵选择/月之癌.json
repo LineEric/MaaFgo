@@ -14,7 +14,9 @@
                                 "servant": "2300100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：BB\n\n<img src=\"resource/base/image/servant_face/f_23001000.png\" width=\"79\" height=\"79\" alt=\"BB头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23001000.png"
                 },
                 {
                     "name": "2300700",
@@ -25,7 +27,9 @@
                                 "servant": "2300700"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：岸波白野\n\n<img src=\"resource/base/image/servant_face/f_23007000.png\" width=\"79\" height=\"79\" alt=\"岸波白野头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23007000.png"
                 },
                 {
                     "name": "2300800",
@@ -36,7 +40,9 @@
                                 "servant": "2300800"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：岸波白野\n\n<img src=\"resource/base/image/servant_face/f_23008000.png\" width=\"79\" height=\"79\" alt=\"岸波白野头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23008000.png"
                 },
                 {
                     "name": "2301000",
@@ -47,7 +53,9 @@
                                 "servant": "2301000"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：特诺奇蒂特兰\n\n<img src=\"resource/base/image/servant_face/f_23010000.png\" width=\"79\" height=\"79\" alt=\"特诺奇蒂特兰头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23010000.png"
                 },
                 {
                     "name": "2300500",
@@ -58,7 +66,9 @@
                                 "servant": "2300500"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：Archetype：Earth\n\n<img src=\"resource/base/image/servant_face/f_23005000.png\" width=\"79\" height=\"79\" alt=\"Archetype：Earth头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23005000.png"
                 },
                 {
                     "name": "2300200",
@@ -69,7 +79,9 @@
                                 "servant": "2300200"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：BB\n\n<img src=\"resource/base/image/servant_face/f_23002000.png\" width=\"79\" height=\"79\" alt=\"BB头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23002000.png"
                 },
                 {
                     "name": "2300300",
@@ -80,7 +92,9 @@
                                 "servant": "2300300"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：伟大的石像神\n\n<img src=\"resource/base/image/servant_face/f_23003000.png\" width=\"79\" height=\"79\" alt=\"伟大的石像神头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23003000.png"
                 },
                 {
                     "name": "2301100",
@@ -91,7 +105,9 @@
                                 "servant": "2301100"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：玉兔\n\n<img src=\"resource/base/image/servant_face/f_23011000.png\" width=\"79\" height=\"79\" alt=\"玉兔头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23011000.png"
                 },
                 {
                     "name": "2300400",
@@ -102,7 +118,9 @@
                                 "servant": "2300400"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：瞑生院祈荒\n\n<img src=\"resource/base/image/servant_face/f_23004000.png\" width=\"79\" height=\"79\" alt=\"瞑生院祈荒头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23004000.png"
                 },
                 {
                     "name": "2300900",
@@ -113,7 +131,9 @@
                                 "servant": "2300900"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：谜之代行者C.I.E.L\n\n<img src=\"resource/base/image/servant_face/f_23009000.png\" width=\"79\" height=\"79\" alt=\"谜之代行者C.I.E.L头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23009000.png"
                 },
                 {
                     "name": "2300600",
@@ -124,7 +144,9 @@
                                 "servant": "2300600"
                             }
                         }
-                    }
+                    },
+                    "description": "已选助战：ＢＢ迪拜\n\n<img src=\"resource/base/image/servant_face/f_23006000.png\" width=\"79\" height=\"79\" alt=\"ＢＢ迪拜头像\" />",
+                    "icon": "resource/base/image/servant_face/f_23006000.png"
                 }
             ]
         }
