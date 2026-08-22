@@ -50,6 +50,15 @@ TPL_UNCHOSEN = "勾选框未选中.png"
 TPL_LJBH = "灵基变还界面标志.png"         # 判断已进入灵基变还界面
 TPL_QP_FULL = "QP已满提示.png"            # QP 已满弹窗
 
+# Context 的命中计数会在同一个 task 内跨 run_task 调用保留。下列节点在每轮
+# 「整理礼物盒 -> 贩卖 -> 回主界面」开始前必须重置，否则达到 max_hit 后会被跳过。
+_CYCLE_RESET_HIT_NODES = [
+    "整理礼物盒-执行回主界面",
+    "整理礼物盒-筛卖下滑找经验值",
+    "初始化界面",
+    "判断是否要初始化",
+]
+
 # ==================== 坐标（基准 720p，运行时 × scale 自适应）====================
 # 筛选固定动作（点筛选、重置、从者经验值、下滑）已移到 pipeline「整理礼物盒-筛选准备」，
 # 这里只保留必须用 cv2 取色判断的星级相关坐标：
@@ -86,6 +95,8 @@ SWIPE_SELECT_BOTTOM = 700          # 下滑终点 y（贴近屏幕底，触发�
 SWIPE_SCROLL_TIMES = 3             # 停在底部触发滚动后，再补滑的次数
 TAP_SELL_JD = (1153, 671)          # 「决定」按钮（多选后点它，判断是否选中）
 MAX_SELL_ROUND = 300               # 贩卖最大循环轮数
+LJBH_NAV_TIMEOUT = 10.0            # 导航到灵基变还后的最大等待时间（秒）
+LJBH_NAV_POLL_INTERVAL = 0.5       # 灵基变还界面检测轮询间隔（秒）
 
 
 # ==================== 模块级原语 ====================
@@ -212,39 +223,38 @@ class ExecuteBoxTask(CustomAction):
             do_tidy = one_key3 or one_key4 or one_key5 or keep3 or keep4 or keep5
             do_sell = sell3 or sell4 or sell5
 
-            # 整理（一键领取 + 按数量保留）：需先导航到礼物盒
-            if do_tidy:
-                mfaalog.info("[整理礼物盒] 导航到礼物盒...")
-                try:
-                    context.run_task("整理礼物盒-导航到礼物盒")
-                except Exception as e:
-                    mfaalog.warning(f"[整理礼物盒] 导航 pipeline 异常: {e}")
-                if context.tasker.stopping:
+            # 同时开启整理和贩卖时，持续循环至用户手动停止；单独开启其中
+            # 一项时保留原来的单轮行为。
+            repeat_cycle = do_tidy and do_sell
+            cycle = 0
+            while True:
+                cycle += 1
+                self._reset_cycle_hit_counts()
+                if repeat_cycle:
+                    mfaalog.info(f"[整理礼物盒] ===== 第 {cycle} 轮：整理 -> 贩卖 =====")
+
+                tidy_ok, giftbox_exhausted = self._tidy_giftbox(
+                    one_key3, one_key4, one_key5,
+                    keep3, keep4, keep5,
+                    keep3_num, keep4_num, keep5_num,
+                ) if do_tidy else (True, False)
+                if not tidy_ok:
                     return CustomAction.RunResult(success=False)
-                if not self._in_giftbox():
-                    mfaalog.error("[整理礼物盒] 导航失败，未到达礼物盒界面")
+                if giftbox_exhausted:
+                    mfaalog.info("[整理礼物盒] 礼物盒已无更多待整理内容，任务完成")
+                    break
+
+                if do_sell:
+                    mfaalog.info("[整理礼物盒] ===== 贩卖狗粮 =====")
+                    self._sell_dogfood(sell3, sell4, sell5, aqf)
+                    if context.tasker.stopping:
+                        return CustomAction.RunResult(success=False)
+
+                if not repeat_cycle:
+                    break
+
+                if not self._return_to_main():
                     return CustomAction.RunResult(success=False)
-
-                # 一键领取：筛选勾选的星级 -> pipeline 循环领空
-                if one_key3 or one_key4 or one_key5:
-                    mfaalog.info("[整理礼物盒] ===== 一键领取 =====")
-                    ok_flags = [one_key3, one_key4, one_key5]
-                    self._filter_giftbox([1 if f else 0 for f in ok_flags])
-                    if self._in_giftbox():
-                        context.run_task("整理礼物盒-一键领取循环")
-
-                # 按数量保留：筛选目标星级 -> 数量 < 阈值才领取
-                if keep3 or keep4 or keep5:
-                    mfaalog.info("[整理礼物盒] ===== 按数量保留 =====")
-                    keep_flags = [keep3, keep4, keep5]
-                    nums = [keep3_num, keep4_num, keep5_num]
-                    self._filter_giftbox([1 if f else 0 for f in keep_flags])
-                    self._filter_get(keep_flags, nums)
-
-            # 贩卖狗粮：直接去灵基变还（不依赖礼物盒）
-            if do_sell:
-                mfaalog.info("[整理礼物盒] ===== 贩卖狗粮 =====")
-                self._sell_dogfood(sell3, sell4, sell5, aqf)
 
             mfaalog.info("[整理礼物盒] 完成")
             return CustomAction.RunResult(success=True)
@@ -254,6 +264,61 @@ class ExecuteBoxTask(CustomAction):
             return CustomAction.RunResult(success=False)
 
     # ---------- 坐标自适应 ----------
+
+    def _reset_cycle_hit_counts(self):
+        """重置跨轮复用 pipeline 节点的 max_hit 计数。"""
+        for node_name in _CYCLE_RESET_HIT_NODES:
+            self._context.clear_hit_count(node_name)
+        mfaalog.debug(
+            f"[整理礼物盒] 已重置 {len(_CYCLE_RESET_HIT_NODES)} 个 pipeline 命中计数"
+        )
+
+    def _return_to_main(self):
+        """完成一轮贩卖后回主界面，为下一轮重新导航做准备。"""
+        mfaalog.info("[整理礼物盒] 回主界面，准备下一轮...")
+        try:
+            detail = self._context.run_task("回主界面")
+        except Exception as e:
+            mfaalog.warning(f"[整理礼物盒] 回主界面 pipeline 异常: {e}")
+            return False
+        if self._context.tasker.stopping:
+            return False
+        if detail is None or detail.status.failed or not detail.status.succeeded:
+            mfaalog.error("[整理礼物盒] 回主界面失败")
+            return False
+        return True
+
+    def _tidy_giftbox(self, one_key3, one_key4, one_key5,
+                      keep3, keep4, keep5, keep3_num, keep4_num, keep5_num):
+        """执行一轮礼物盒整理，返回 (是否成功, 是否已无更多待整理内容)。"""
+        mfaalog.info("[整理礼物盒] 导航到礼物盒...")
+        try:
+            self._context.run_task("整理礼物盒-导航到礼物盒")
+        except Exception as e:
+            mfaalog.warning(f"[整理礼物盒] 导航 pipeline 异常: {e}")
+        if self._context.tasker.stopping:
+            return False, False
+        if not self._in_giftbox():
+            mfaalog.error("[整理礼物盒] 导航失败，未到达礼物盒界面")
+            return False, False
+
+        # 一键领取：筛选勾选的星级 -> pipeline 循环领空
+        if one_key3 or one_key4 or one_key5:
+            mfaalog.info("[整理礼物盒] ===== 一键领取 =====")
+            ok_flags = [one_key3, one_key4, one_key5]
+            self._filter_giftbox([1 if f else 0 for f in ok_flags])
+            if self._in_giftbox():
+                self._context.run_task("整理礼物盒-一键领取循环")
+
+        # 按数量保留：筛选目标星级 -> 数量 < 阈值才领取
+        if keep3 or keep4 or keep5:
+            mfaalog.info("[整理礼物盒] ===== 按数量保留 =====")
+            keep_flags = [keep3, keep4, keep5]
+            nums = [keep3_num, keep4_num, keep5_num]
+            self._filter_giftbox([1 if f else 0 for f in keep_flags])
+            giftbox_exhausted = self._filter_get(keep_flags, nums)
+            return not self._context.tasker.stopping, giftbox_exhausted
+        return not self._context.tasker.stopping, False
 
     def _init_scale(self):
         """截图获取实际分辨率，计算缩放系数（基准 1280x720）。"""
@@ -421,23 +486,34 @@ class ExecuteBoxTask(CustomAction):
             self._controller.post_click(m[1], m[2]).wait()
             time.sleep(1.0)
 
+        # 筛选完成后确保列表按预期排序；检测节点在不符合时会点击排序按钮。
+        # 后续的一键领取或按数量选择均依赖这个列表顺序。
+        try:
+            self._context.run_task("整理礼物盒-礼物盒排序检测")
+        except Exception as e:
+            mfaalog.warning(f"[整理礼物盒] 礼物盒排序检测 pipeline 异常: {e}")
+        time.sleep(0.5)
+
     # ---------- 按数量保留 ----------
 
     def _filter_get(self, keep_flags, keep_nums):
-        """逐行读狗粮数量，数量 < 保留阈值则勾选领取，滚动遍历"""
+        """逐行读狗粮数量，数量 < 保留阈值则勾选领取，滚动遍历。
+
+        连续十次扫描均没有可领取目标时返回 True，供外层结束循环任务。
+        """
         active = [i for i in range(3) if keep_flags[i]]
         if not active:
-            return
+            return False
         no_pick_rounds = 0
         for _round in range(MAX_FILTER_GET_ROUND):
             if self._context.tasker.stopping:
-                return
+                return False
             img = self._shot()
             if img is None:
                 continue
             if self._match(TPL_GIFT_FULL) is not None:
                 mfaalog.info("[整理礼物盒] 礼物盒已满，停止")
-                return
+                return False
             picked = 0
             for i in active:
                 pts = self._match_many(TPL_DF[i], ROI_DF_COL)
@@ -462,7 +538,7 @@ class ExecuteBoxTask(CustomAction):
                 self._tap(*TAP_GET_CHOSEN, delay=1.0)
                 for _ in range(3):
                     if self._context.tasker.stopping:
-                        return
+                        return False
                     m = self._match(TPL_RECEIVE)
                     if m is not None:
                         self._controller.post_click(m[1], m[2]).wait()
@@ -471,14 +547,15 @@ class ExecuteBoxTask(CustomAction):
                     time.sleep(0.5)
                 continue
             no_pick_rounds += 1
-            if no_pick_rounds >= 5:
-                mfaalog.info("[整理礼物盒] 连续多轮无待领取狗粮，结束")
-                return
+            if no_pick_rounds >= 10:
+                mfaalog.info("[整理礼物盒] 连续多轮无待领取狗粮，礼物盒已整理完毕")
+                return True
             # 滚动（手指上滑，列表向下翻）
             self._controller.post_swipe(self._px(600), self._py(560),
                                         self._px(600), self._py(200), 400).wait()
             time.sleep(1.0)
         mfaalog.warning("[整理礼物盒] 按数量保留达到最大轮数")
+        return False
 
     def _is_chosen(self, img, cx, cy):
         """判断狗粮勾选框是否已选中：比对 chosen/unchosen 模板的归一化距离"""
@@ -515,8 +592,10 @@ class ExecuteBoxTask(CustomAction):
             mfaalog.warning(f"[整理礼物盒] 导航到灵基变还 pipeline 异常: {e}")
         if self._context.tasker.stopping:
             return
-        if not self._in_ljbh():
-            mfaalog.error("[整理礼物盒] 导航失败，未到达灵基变还界面")
+        if not self._wait_in_ljbh():
+            mfaalog.error(
+                f"[整理礼物盒] 导航失败，{LJBH_NAV_TIMEOUT:.0f} 秒内未到达灵基变还界面"
+            )
             return
         # 筛选（pipeline：点筛选按钮→点顶部→选星级(option override 控制)→下滑找经验值→决定）
         try:
@@ -531,6 +610,18 @@ class ExecuteBoxTask(CustomAction):
     def _in_ljbh(self):
         """判断当前是否在灵基变还界面"""
         return self._match(TPL_LJBH, roi=(0, 0, 1280, 200)) is not None
+
+    def _wait_in_ljbh(self):
+        """等待快捷跳转等页面转场完成，并确认已到达灵基变还界面。"""
+        deadline = time.monotonic() + LJBH_NAV_TIMEOUT
+        while True:
+            if self._context.tasker.stopping:
+                return False
+            if self._in_ljbh():
+                return True
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(LJBH_NAV_POLL_INTERVAL)
 
     def _sell_loop(self, aqf, target_stars):
         """判断有无目标狗粮 → 滑动全选 → 点决定 → pipeline(贩卖→QP满轮巡→关闭) → 循环"""
@@ -573,6 +664,6 @@ class ExecuteBoxTask(CustomAction):
         self._controller.post_touch_move(x2, y1).wait()  # 右滑过第一行
         time.sleep(0.2)
         self._controller.post_touch_move(x2, y3).wait()  # 下滑到屏幕底部
-        time.sleep(0.8)  # 停在底部，触发列表自动滚动
+        time.sleep(2.0)  # 停在底部，触发列表自动滚动
         self._controller.post_touch_up().wait()
         time.sleep(0.5)
