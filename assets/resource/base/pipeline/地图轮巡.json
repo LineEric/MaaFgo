@@ -878,6 +878,7 @@
                 ]
             }
         },
+        "post_delay": 800,
         "focus": {
             "Node.Action.Succeeded": "找到目标，点击选择"
         },
@@ -907,6 +908,7 @@
                 ]
             }
         },
+        "post_delay": 800,
         "focus": {
             "Node.Action.Succeeded": "找到目标，点击选择"
         },
