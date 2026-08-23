@@ -175,6 +175,28 @@
         },
         "post_delay": 1000
     },
+    "常驻每日1抽-检测是否有次数": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "每日免费1抽有次数.png"
+                ],
+                "green_mask": false,
+                "threshold": [
+                    0.6
+                ]
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 500,
+        "next": [
+            "常驻每日1抽-召唤",
+            "常驻每日1抽-召唤开始"
+        ]
+    },
     "常驻每日1抽-点击空白": {
         "action": {
             "type": "Click",
@@ -245,9 +267,10 @@
         "action": {
             "type": "Click"
         },
+        "post_delay": 500,
         "next": [
             "常驻每日1抽-检测是否有次数",
-            "常驻每日1抽-完成"
+            "回主界面"
         ]
     },
     "常驻每日1抽开始": {
@@ -258,27 +281,6 @@
             "常驻每日1抽-已经在抽卡界面",
             "[JumpBack]常驻每日1抽-先回主界面",
             "常驻每日1抽-菜单"
-        ]
-    },
-    "常驻每日1抽-检测是否有次数": {
-        "recognition": {
-            "type": "TemplateMatch",
-            "param": {
-                "template": [
-                    "每日免费1抽有次数.png"
-                ],
-                "green_mask": false,
-                "threshold": [
-                    0.6
-                ]
-            }
-        },
-        "action": {
-            "type": "Click"
-        },
-        "next": [
-            "常驻每日1抽-召唤",
-            "常驻每日1抽-召唤开始"
         ]
     }
 }
