@@ -79,6 +79,15 @@
               ]
             }
           }
+        },
+        "巡-找到目标-设为中心": {
+          "recognition": {
+            "param": {
+              "expected": [
+                "{map_position_name}"
+              ]
+            }
+          }
         }
       }
     },
@@ -184,6 +193,15 @@
                   ]
                 }
               }
+            },
+            "巡-找到目标-设为中心": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "アラハビーチ"
+                  ]
+                }
+              }
             }
           }
         },
@@ -200,6 +218,15 @@
               }
             },
             "巡-找到目标-重试": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "国際通り"
+                  ]
+                }
+              }
+            },
+            "巡-找到目标-设为中心": {
               "recognition": {
                 "param": {
                   "expected": [
@@ -230,6 +257,15 @@
                   ]
                 }
               }
+            },
+            "巡-找到目标-设为中心": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "海の家くらくら"
+                  ]
+                }
+              }
             }
           }
         },
@@ -246,6 +282,15 @@
               }
             },
             "巡-找到目标-重试": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "ニライカナイ本拠地"
+                  ]
+                }
+              }
+            },
+            "巡-找到目标-设为中心": {
               "recognition": {
                 "param": {
                   "expected": [
@@ -276,6 +321,15 @@
                   ]
                 }
               }
+            },
+            "巡-找到目标-设为中心": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "ふるさん村"
+                  ]
+                }
+              }
             }
           }
         },
@@ -292,6 +346,15 @@
               }
             },
             "巡-找到目标-重试": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "百名ビーチ"
+                  ]
+                }
+              }
+            },
+            "巡-找到目标-设为中心": {
               "recognition": {
                 "param": {
                   "expected": [
@@ -322,6 +385,15 @@
                   ]
                 }
               }
+            },
+            "巡-找到目标-设为中心": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "やんばるの森"
+                  ]
+                }
+              }
             }
           }
         },
@@ -338,6 +410,15 @@
               }
             },
             "巡-找到目标-重试": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "巨大樹の泉"
+                  ]
+                }
+              }
+            },
+            "巡-找到目标-设为中心": {
               "recognition": {
                 "param": {
                   "expected": [
@@ -368,6 +449,15 @@
                   ]
                 }
               }
+            },
+            "巡-找到目标-设为中心": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "うちなー水族館"
+                  ]
+                }
+              }
             }
           }
         },
@@ -384,6 +474,15 @@
               }
             },
             "巡-找到目标-重试": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "城址公園"
+                  ]
+                }
+              }
+            },
+            "巡-找到目标-设为中心": {
               "recognition": {
                 "param": {
                   "expected": [
@@ -414,6 +513,15 @@
                   ]
                 }
               }
+            },
+            "巡-找到目标-设为中心": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "名城ビーチ"
+                  ]
+                }
+              }
             }
           }
         },
@@ -437,6 +545,15 @@
                   ]
                 }
               }
+            },
+            "巡-找到目标-设为中心": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "やちむんの里"
+                  ]
+                }
+              }
             }
           }
         },
@@ -453,6 +570,15 @@
               }
             },
             "巡-找到目标-重试": {
+              "recognition": {
+                "param": {
+                  "expected": [
+                    "那覇港"
+                  ]
+                }
+              }
+            },
+            "巡-找到目标-设为中心": {
               "recognition": {
                 "param": {
                   "expected": [
