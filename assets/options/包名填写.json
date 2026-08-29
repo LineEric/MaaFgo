@@ -36,6 +36,36 @@
                     }
                 },
                 {
+                    "name": "4399服",
+                    "label": "4399服",
+                    "pipeline_override": {
+                        "打开游戏": {
+                            "action": {
+                                "type": "StartApp",
+                                "param": {
+                                    "package": "com.bilibili.fgo.m4399"
+                                }
+                            }
+                        },
+                        "关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.bilibili.fgo.m4399"
+                                }
+                            }
+                        },
+                        "登录-关闭游戏": {
+                            "action": {
+                                "type": "StopApp",
+                                "param": {
+                                    "package": "com.bilibili.fgo.m4399"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
                     "name": "享游服",
                     "label": "享游服",
                     "pipeline_override": {
