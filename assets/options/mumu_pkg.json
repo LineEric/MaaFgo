@@ -17,6 +17,17 @@
           }
         },
         {
+          "name": "4399服",
+          "label": "4399服",
+          "pipeline_override": {
+            "启动bbc": {
+              "attach": {
+                "mumu_pkg": "com.bilibili.fgo.m4399"
+              }
+            }
+          }
+        },
+        {
           "name": "享游服",
           "label": "享游服",
           "pipeline_override": {
