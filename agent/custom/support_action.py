@@ -66,6 +66,7 @@ LEVEL_ROI = (62, 15, 118, 27)      # 英灵等级: x62-180 y15-42 -> (x,y,w,h)
 # 英灵头像多边形(相对框顶点), 裁剪区域是 servant_face 大模板(158x158)的子区域:
 # 用该截图在模板上滑动匹配找最高分
 FACE_POLY = [(58, 40), (161, 42), (162, 84), (143, 85), (142, 105), (35, 109), (35, 60)]
+FACE_CUT = 30               # 英灵头像多边形右下角向内收 px: 物理排除特殊覆盖 UI(金星/职介/等级/星级等)
 TH_FACE = 0.75
 CE_ANCHOR_NORMAL = (9, 131)        # 普通助战 礼装 左上角(160x50 窗口)
 CE_ANCHOR_GRAND = [(182, 35), (182, 129)]   # 冠位助战 礼装1/礼装2 左上角(160x50 窗口)
@@ -216,6 +217,24 @@ class SupportAction(CustomAction):
 
     _servant_map = None
     _detector = None
+    _face_mask = None
+
+    @classmethod
+    def _get_face_mask(cls):
+        """构建英灵头像多边形 mask(右下角向内收 FACE_CUT), 缓存复用;
+        用于物理排除覆盖在头像上的特殊 UI(金星/职介/等级/星级)"""
+        if cls._face_mask is None:
+            import cv2
+            fxs = [p[0] for p in FACE_POLY]; fys = [p[1] for p in FACE_POLY]
+            xmin, xmax, ymin, ymax = min(fxs), max(fxs), min(fys), max(fys)
+            bw, bh = xmax - xmin + 1, ymax - ymin + 1
+            m = np.zeros((bh, bw), np.uint8)
+            poly = np.array([(x - xmin, y - ymin) for (x, y) in FACE_POLY], np.int32)
+            cv2.fillPoly(m, [poly], 255)
+            cutx, cuty = (xmax - xmin) - FACE_CUT, (ymax - ymin) - FACE_CUT
+            m[cuty + 1:, cutx + 1:] = 0
+            cls._face_mask = m
+        return cls._face_mask
 
     @classmethod
     def _get_detector(cls):
@@ -234,21 +253,28 @@ class SupportAction(CustomAction):
 
     # ---------- 英灵匹配 ----------
     def _match_servant(self, img, face_dir, bx, by, images, support_type):
-        # 头像匹配: 多边形截图在 servant_face 模板上滑动(截图是模板的子区域)
+        # 头像匹配: 裁剪框内头像区域, 用多边形 mask 物理排除覆盖 UI(金星/职介/等级/星级),
+        # 再把多边形外像素设为脸部均值(中性化, 不参与相关度), 最后在 servant_face 模板上滑动匹配
         import cv2
         fxs = [p[0] for p in FACE_POLY]; fys = [p[1] for p in FACE_POLY]
-        poly = cv2.cvtColor(
-            img[by + min(fys):by + max(fys) + 1, bx + min(fxs):bx + max(fxs) + 1],
-            cv2.COLOR_BGR2GRAY)
-        if poly.size:
-            for f in images:
-                tpl = _imread(os.path.join(face_dir, f), gray=True)
-                if tpl is None or poly.shape[0] > tpl.shape[0] or poly.shape[1] > tpl.shape[1]:
-                    continue
-                s = float(cv2.matchTemplate(tpl, poly, cv2.TM_CCOEFF_NORMED).max())
-                mfaalog.info(f"[SupportAction] 英灵头像 {f}: score={s:.3f}")
-                if s >= TH_FACE:
-                    return True
+        xmin, xmax, ymin, ymax = min(fxs), max(fxs), min(fys), max(fys)
+        poly = img[by + ymin:by + ymax + 1, bx + xmin:bx + xmax + 1]
+        if poly.size == 0:
+            return False
+        cg = cv2.cvtColor(poly, cv2.COLOR_BGR2GRAY)
+        mask = self._get_face_mask()
+        sel = mask > 0
+        face_mean = int(round(float(cg[sel].mean())))
+        cg = cg.copy()
+        cg[~sel] = face_mean   # 多边形外(特殊覆盖UI)设为脸部均值, 中性化排除
+        for f in images:
+            tpl = _imread(os.path.join(face_dir, f), gray=True)
+            if tpl is None or cg.shape[0] > tpl.shape[0] or cg.shape[1] > tpl.shape[1]:
+                continue
+            s = float(cv2.matchTemplate(tpl, cg, cv2.TM_CCOEFF_NORMED).max())
+            mfaalog.info(f"[SupportAction] 英灵头像 {f}: score={s:.3f}")
+            if s >= TH_FACE:
+                return True
         return False
 
     # ---------- 礼装匹配 ----------
