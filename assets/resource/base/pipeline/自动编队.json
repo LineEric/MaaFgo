@@ -1,0 +1,124 @@
+{
+  "自动编队": {
+    "next": ["执行自动编队"]
+  },
+  "执行自动编队": {
+    "action": {
+      "type": "Custom",
+      "param": {"custom_action": "auto_formation_from_chaldea"}
+    },
+    "attach": {"chaldea_import_source": ""},
+    "next": ["自动编队完成"]
+  },
+  "自动编队完成": {},
+  "自动编队-打开配置": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {"template": "battle/配置变更.png", "threshold": 0.8}
+    },
+    "action": {"type": "Click"},
+    "post_delay": 1000
+  },
+  "自动编队-编队决定": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {"template": "battle/编队决定.png", "threshold": 0.8}
+    },
+    "action": {"type": "Click"},
+    "post_delay": 1000
+  },
+  "自动编队-确认从者选择界面": {
+    "recognition": "DirectHit"
+  },
+  "自动编队-筛选准备": {
+    "next": ["自动编队-筛点筛选按钮"]
+  },
+  "自动编队-筛点筛选按钮": {
+    "action": {"type": "Click", "param": {"target": [972, 122, 19, 10]}},
+    "post_delay": 1200,
+    "next": ["自动编队-筛点顶部"]
+  },
+  "自动编队-筛点顶部": {
+    "action": {"type": "Click", "param": {"target": [1135, 99, 1, 1]}},
+    "post_delay": 500,
+    "next": ["自动编队-筛重置"]
+  },
+  "自动编队-筛重置": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {"template": "整理礼物盒/初始设定按钮.png", "threshold": 0.8}
+    },
+    "action": {"type": "Click"},
+    "post_delay": 500,
+    "next": ["自动编队-筛选星级"]
+  },
+  "自动编队-筛选星级": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {"template": "整理礼物盒/5星未选中.png", "threshold": 0.9}
+    },
+    "action": {"type": "Click"},
+    "post_delay": 500,
+    "next": ["自动编队-筛选职介"]
+  },
+  "自动编队-筛选职介": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {"template": "强化从者/职介-剑士.png", "threshold": 0.8}
+    },
+    "action": {"type": "Click"},
+    "post_delay": 500,
+    "next": ["自动编队-筛点决定"]
+  },
+  "自动编队-筛点决定": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {"template": "整理礼物盒/贩卖-筛选决定按钮.png", "threshold": 0.8}
+    },
+    "action": {"type": "Click"},
+    "post_delay": 1000,
+    "next": ["自动编队-筛选完成"]
+  },
+  "自动编队-筛选完成": {},
+  "自动编队-准备从者列表": {
+    "next": [
+      "自动编队-图标大小检测",
+      "[JumpBack]自动编队-点击缩放按钮"
+    ]
+  },
+  "自动编队-图标大小检测": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {
+        "roi": [2, 598, 110, 122],
+        "template": ["整理礼物盒/图标缩放按钮大.png"],
+        "threshold": [0.85]
+      }
+    },
+    "next": [
+      "自动编队-删除活动筛选",
+      "[JumpBack]自动编队-删除活动筛选点击",
+      "自动编队-从者列表准备完成"
+    ]
+  },
+  "自动编队-点击缩放按钮": {
+    "action": {"type": "Click", "param": {"target": [19, 670, 11, 10]}},
+    "post_delay": 1000
+  },
+  "自动编队-删除活动筛选": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {
+        "roi": [624, 80, 276, 85],
+        "template": ["强化从者/无活动筛选.png"]
+      }
+    },
+    "next": ["自动编队-从者列表准备完成"]
+  },
+  "自动编队-删除活动筛选点击": {
+    "max_hit": 5,
+    "action": {"type": "Click", "param": {"target": [753, 118, 44, 17]}},
+    "post_delay": 1000
+  },
+  "自动编队-从者列表准备完成": {}
+}

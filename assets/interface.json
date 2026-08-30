@@ -92,6 +92,7 @@
     "tasks/从者追加技能强化.json",
     "tasks/整理礼物盒.json",
     "tasks/强化从者.json",
+    "tasks/Chaldea自动编队.json",
     "options/选择队伍配置.json",
     "options/战斗方式.json",
     "options/chaldea_team_config.json",
@@ -177,7 +178,8 @@
     "options/原生自动战斗次数.json",
     "options/原生自动战斗跳过剧情.json",
     "options/原生自动战斗助战方式.json",
-    "options/原生自动战斗Chaldea导入.json"
+    "options/原生自动战斗Chaldea导入.json",
+    "options/自动编队Chaldea导入.json"
   ],
   "agent": {
     "child_exec": "python",
