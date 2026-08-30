@@ -199,7 +199,9 @@ class SupportDetector:
             boxes = self.model.detect(img, conf=LOW_CONF)
         # 按 y 排序(条目顺序)
         boxes.sort(key=lambda b: (b[1], b[0]))
-        return [(x1, y1, x2, y2, c) for (x1, y1, x2, y2, c, _cl) in boxes]
+        # 坐标统一取整: YOLO/ONNX 输出的框坐标可能是 float, 直接用于切片会触发
+        # "TypeError: slice indices must be integers"
+        return [(int(x1), int(y1), int(x2), int(y2), c) for (x1, y1, x2, y2, c, _cl) in boxes]
 
 
 # ---------------- 助战 Action ----------------
@@ -248,6 +250,7 @@ class SupportAction(CustomAction):
         # 头像匹配: 裁剪框内头像区域, 用多边形 mask 物理排除覆盖 UI(金星/职介/等级/星级),
         # 再把多边形外像素设为脸部均值(中性化, 不参与相关度), 最后在 servant_face 模板上滑动匹配
         import cv2
+        bx, by = int(bx), int(by)
         fxs = [p[0] for p in FACE_POLY]; fys = [p[1] for p in FACE_POLY]
         xmin, xmax, ymin, ymax = min(fxs), max(fxs), min(fys), max(fys)
         poly = img[by + ymin:by + ymax + 1, bx + xmin:bx + xmax + 1]
@@ -272,6 +275,7 @@ class SupportAction(CustomAction):
     # ---------- 礼装匹配 ----------
     def _match_ce(self, img, ce_dir, bx, by, ce_name, anchor, ce_sub=""):
         import cv2
+        bx, by = int(bx), int(by)
         if ce_name in EMPTY_CE:
             mfaalog.info("[SupportAction] 礼装为空(跳过匹配)")
             return True
