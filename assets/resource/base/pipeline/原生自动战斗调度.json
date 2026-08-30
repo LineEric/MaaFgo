@@ -171,6 +171,7 @@
         "next": [
             "进本-点击上一次关卡",
             "进本-点击关卡",
+            "进入1",
             "全局空节点"
         ]
     },
@@ -378,6 +379,24 @@
         "next": [
             "[JumpBack]全局-战前吃体力",
             "全局空节点"
+        ]
+    },
+    "进入1": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": "dungeon_enter.png"
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1500,
+        "focus": {
+            "Node.Action.Succeeded": "进入副本完成"
+        },
+        "next": [
+            "进本流程"
         ]
     }
 }
