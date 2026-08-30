@@ -43,7 +43,9 @@ SLOT_ROIS = (
     (1055, 160, 188, 276),
 )
 
-FACE_THRESHOLD = 0.58
+# 真机编队验证的最低有效命中约为 0.649；取 0.62 以降低误匹配，同时保留
+# 资源加载、抗锯齿和不同灵基图带来的合理余量。
+FACE_THRESHOLD = 0.62
 SUPPORT_THRESHOLD = 0.75
 SWAP_DRAG_DURATION = 1200  # ms；长按并拖至目标槽中心
 SWAP_SETTLE_SECONDS = 1.0
@@ -529,7 +531,11 @@ class AutoFormationFromChaldea(CustomAction):
                 return False, latest
             latest = self._detect_slots()
             if latest is not None and self._matches(expected, latest[index]):
-                mfaalog.info(f"[自动编队] 槽位{index + 1}换人复核通过")
+                score = float(latest[index].get("score", 0.0))
+                mfaalog.info(
+                    f"[自动编队] 槽位{index + 1}换人复核通过："
+                    f"{score:.4f}/{FACE_THRESHOLD:.2f}"
+                )
                 return True, latest
             time.sleep(SERVANT_REPLACE_VERIFY_INTERVAL_SECONDS)
         mfaalog.warning(
