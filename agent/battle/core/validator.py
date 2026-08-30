@@ -137,17 +137,13 @@ def validate_main_action(
     if not target_verdict.ok:
         return target_verdict
 
-    seen_servant_skills: set[tuple[int, int]] = set()
     servants = {servant.slot: servant for servant in state.servants}
     for skill in action.servant_skills:
         if not is_slot(skill.servant_slot, 1, 3) or not is_slot(
             skill.skill_index, 1, 3
         ):
             return Verdict(False, "invalid_servant_skill")
-        key = (skill.servant_slot, skill.skill_index)
-        if key in seen_servant_skills:
-            return Verdict(False, "duplicate_servant_skill")
-        seen_servant_skills.add(key)
+        # 不校验同回合重复技能: 减CD策略/部分英灵技能允许同一技能一回合多次释放
         if skill.target_ally is not None and not is_slot(skill.target_ally, 1, 3):
             return Verdict(False, "invalid_skill_target")
 
