@@ -28,7 +28,7 @@
   lizhuang     : resource/{pkg}/image/lizhuang/                    (礼装模板, 待放)
   np_level     : resource/{pkg}/image/np_level/ch|jp/              (宝具模板, 待放)
   servant_list : agent/custom/servant_list.json                    (已有)
-  support_det  : agent/utils/support_det.pt                        (YOLO 模型, 待放)
+  support_det  : agent/utils/support_det.onnx                       (YOLO ONNX 模型)
 """
 
 import json
@@ -54,7 +54,7 @@ import mfaalog
 _AGENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _ROOT_DIR = os.path.dirname(_AGENT_DIR)
 SERVANT_LIST_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "servant_list.json")
-SUPPORT_MODEL_PATH = os.path.join(_AGENT_DIR, "utils", "support_det.pt")
+SUPPORT_MODEL_PATH = os.path.join(_AGENT_DIR, "utils", "support_det.onnx")
 
 # ---------------- YOLO 检测参数 ----------------
 IMGSZ = 640          # support_det 训练尺寸
@@ -189,25 +189,19 @@ class SupportDetector:
     """support_entry YOLO 检测: 返回全屏框 [(x1,y1,x2,y2,conf)] 按 y 排序"""
 
     def __init__(self, model_path):
-        from ultralytics import YOLO
-        self.model = YOLO(model_path)
+        from utils.yolo_onnx import YoloOnnx
+        self.model = YoloOnnx(model_path, imgsz=IMGSZ)
 
     def detect(self, img):
-        r = self.model(img, conf=CONF, imgsz=IMGSZ, verbose=False)[0]
-        boxes = []
-        for b in r.boxes:
-            x1, y1, x2, y2 = map(int, b.xyxy[0].tolist())
-            boxes.append((x1, y1, x2, y2, float(b.conf[0])))
+        boxes = self.model.detect(img, conf=CONF)
         if not boxes:
             # 低置信兜底
-            r = self.model(img, conf=LOW_CONF, imgsz=IMGSZ, verbose=False)[0]
-            boxes = []
-            for b in r.boxes:
-                x1, y1, x2, y2 = map(int, b.xyxy[0].tolist())
-                boxes.append((x1, y1, x2, y2, float(b.conf[0])))
+            boxes = self.model.detect(img, conf=LOW_CONF)
         # 按 y 排序(条目顺序)
         boxes.sort(key=lambda b: (b[1], b[0]))
-        return boxes
+        # 坐标统一取整: YOLO/ONNX 输出的框坐标可能是 float, 直接用于切片会触发
+        # "TypeError: slice indices must be integers"
+        return [(int(x1), int(y1), int(x2), int(y2), c) for (x1, y1, x2, y2, c, _cl) in boxes]
 
 
 # ---------------- 助战 Action ----------------
@@ -256,6 +250,7 @@ class SupportAction(CustomAction):
         # 头像匹配: 裁剪框内头像区域, 用多边形 mask 物理排除覆盖 UI(金星/职介/等级/星级),
         # 再把多边形外像素设为脸部均值(中性化, 不参与相关度), 最后在 servant_face 模板上滑动匹配
         import cv2
+        bx, by = int(bx), int(by)
         fxs = [p[0] for p in FACE_POLY]; fys = [p[1] for p in FACE_POLY]
         xmin, xmax, ymin, ymax = min(fxs), max(fxs), min(fys), max(fys)
         poly = img[by + ymin:by + ymax + 1, bx + xmin:bx + xmax + 1]
@@ -280,6 +275,7 @@ class SupportAction(CustomAction):
     # ---------- 礼装匹配 ----------
     def _match_ce(self, img, ce_dir, bx, by, ce_name, anchor, ce_sub=""):
         import cv2
+        bx, by = int(bx), int(by)
         if ce_name in EMPTY_CE:
             mfaalog.info("[SupportAction] 礼装为空(跳过匹配)")
             return True
