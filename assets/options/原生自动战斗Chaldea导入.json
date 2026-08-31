@@ -3,11 +3,11 @@
         "原生自动战斗Chaldea导入": {
             "type": "input",
             "label": "Chaldea 队伍导入（可选）",
-            "description": "填写 Chaldea 的分享链接、队伍ID或关卡ID，自动下载攻略并执行战斗。留空则使用默认策略。",
+            "description": "填写 Chaldea 的分享链接、队伍ID、关卡ID，或本地队伍文件（config/Battle 下的文件名，如 94149047_77210_太岁星君，或完整路径），自动下载/加载攻略并执行战斗。留空则使用默认策略。",
             "inputs": [
                 {
                     "name": "chaldea_import_source",
-                    "label": "分享链接 / 队伍ID / 关卡ID（留空=默认策略）",
+                    "label": "分享链接 / 队伍ID / 关卡ID / 本地文件名（留空=默认策略）",
                     "default": "",
                     "verify": ".*"
                 }

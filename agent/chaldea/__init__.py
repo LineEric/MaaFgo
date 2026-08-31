@@ -6,6 +6,7 @@ Chaldea 队伍数据转换包
 
 import json
 import os
+import re
 import logging
 from typing import Optional
 
@@ -116,6 +117,38 @@ def _save_cache(name: str, data: dict) -> None:
         logger.warning(f"[Chaldea] 保存缓存失败({name}): {e}")
 
 
+def _load_local_file(source: str) -> Optional[dict]:
+    """尝试把输入当作本地文件路径/文件名加载 BattleShareData。
+
+    支持:
+    - 绝对/相对路径: G:/xxx/team.json / ./team.json
+    - 纯文件名: 自动在 CACHE_DIR (config/Battle) 中查找
+    - .json 后缀可省略
+    返回加载成功的 dict, 不是文件输入返回 None。
+    """
+    s = source.strip()
+    if not s or re.match(r'^https?://', s) or s.isdigit() or s.startswith("G") and len(s) < 100 and not s.lower().endswith(".json"):
+        return None
+
+    candidates = []
+    if os.sep in s or "/" in s or s.lower().endswith(".json") or s.startswith("."):
+        # 显式路径形式
+        candidates.append(s)
+        if not s.lower().endswith(".json"):
+            candidates.append(s + ".json")
+    else:
+        # 纯文件名: 在缓存目录中查找
+        for name in (s, s + ".json"):
+            candidates.append(os.path.join(CACHE_DIR, name))
+
+    for path in candidates:
+        if os.path.isfile(path):
+            data = _load_cache_file(path)
+            if data and isinstance(data.get("team"), dict):
+                return data
+    return None
+
+
 def fetch_share_data(source: str):
     """下载 + 解码 Chaldea BattleShareData（BBC 与 auto-battle 共用入口）。
 
@@ -131,6 +164,15 @@ def fetch_share_data(source: str):
     quest_id, team_id, direct_data = parse_import_source(source)
     mfaalog.info(f"[Chaldea] parse_import_source: quest_id={quest_id} team_id={team_id} direct_data={'有' if direct_data else '无'}")
     share_data = None
+
+    # 优先尝试本地文件输入（路径 / config/Battle 下的文件名）
+    if quest_id is None and team_id is None and direct_data is None:
+        local = _load_local_file(source)
+        if local:
+            mfaalog.info(f"[Chaldea] 输入识别为本地文件, 直接加载")
+            quest_id = (local.get("quest") or {}).get("id", "0")
+            team_id = "local"
+            return local, quest_id, team_id
 
     if direct_data:
         logger.info("[Chaldea] 匹配到长链接数据特征，开启离线解码...")
