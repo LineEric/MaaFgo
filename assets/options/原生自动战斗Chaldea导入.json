@@ -3,13 +3,20 @@
         "原生自动战斗Chaldea导入": {
             "type": "input",
             "label": "Chaldea 队伍导入（可选）",
-            "description": "填写 Chaldea 的分享链接、队伍ID、关卡ID，或本地队伍文件（config/Battle 下的文件名，如 94149047_77210_太岁星君，或完整路径），自动下载/加载攻略并执行战斗。留空则使用默认策略。",
+            "description": "填写 Chaldea 的分享链接、队伍ID、关卡ID，或点击浏览按钮从本地选择队伍 JSON 文件。两者都填时优先使用本地文件。留空则使用默认策略。",
             "inputs": [
                 {
                     "name": "chaldea_import_source",
-                    "label": "分享链接 / 队伍ID / 关卡ID / 本地文件名（留空=默认策略）",
+                    "label": "分享链接 / 队伍ID / 关卡ID（留空=默认策略）",
                     "default": "",
                     "verify": ".*"
+                },
+                {
+                    "name": "chaldea_import_source_file",
+                    "label": "或从本地文件选择（.json）",
+                    "default": "",
+                    "verify": ".*",
+                    "input_type": "file"
                 }
             ],
             "pipeline_override": {
@@ -20,6 +27,7 @@
                             "custom_action": "auto_battle",
                             "custom_action_param": {
                                 "chaldea_import_source": "{chaldea_import_source}",
+                                "chaldea_import_source_file": "{chaldea_import_source_file}",
                                 "max_turns": 20
                             }
                         }
@@ -32,6 +40,7 @@
                             "custom_action": "auto_battle_repeat",
                             "custom_action_param": {
                                 "chaldea_import_source": "{chaldea_import_source}",
+                                "chaldea_import_source_file": "{chaldea_import_source_file}",
                                 "max_turns": 20
                             }
                         }

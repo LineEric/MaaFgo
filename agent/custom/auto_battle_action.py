@@ -68,15 +68,17 @@ def _plan_from_chaldea_share(param: dict) -> BattlePlan | None:
 
     支持两种形态（显式 ``plan`` 优先级更高，由调用方保证已在此前解析）：
     1. ``chaldea_share``：已解码的 BattleShareData dict（离线注入用）。
-    2. ``chaldea_import_source``：链接/ID/压缩串，复用 agent/chaldea 的
-       fetch_share_data 下载 + 解码（team_id/quest_id 走 API，data= 离线）。
+    2. ``chaldea_import_source`` / ``chaldea_import_source_file``：链接/ID/压缩串
+       或本地文件路径（MXU 文件选择器）。本地文件优先，复用 agent/chaldea 的
+       fetch_share_data 下载 + 解码。
     """
     share = param.get("chaldea_share")
     if isinstance(share, dict):
         mfaalog.info(f"[auto_battle] 使用离线注入的 chaldea_share")
         return _build_plan_from_share(share)
 
-    source = param.get("chaldea_import_source")
+    # 本地文件选择器输入优先于手填的链接/ID
+    source = param.get("chaldea_import_source_file") or param.get("chaldea_import_source")
     if isinstance(source, str) and source.strip():
         mfaalog.info(f"[auto_battle] chaldea_import_source 开始下载/解码: {source[:100]}...")
         share_data, quest_id, team_id = fetch_share_data(source.strip())
