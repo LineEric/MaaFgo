@@ -390,7 +390,7 @@
             "type": "TemplateMatch",
             "param": {
                 "template": [
-                    "close_botton.png",
+                    "close_botton.png"
                 ],
                 "threshold": 0.8
             }
