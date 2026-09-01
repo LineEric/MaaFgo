@@ -5,6 +5,18 @@
       "param": {
         "custom_action": "auto_battle"
       }
+    },
+    "on_error": [
+      "原生自动战斗-队伍下载失败-提示"
+    ]
+  },
+  "原生自动战斗-队伍下载失败-提示": {
+    "doc": "auto_battle 动作失败(多为 Chaldea 队伍下载失败), 提示用户并终止整条任务链",
+    "focus": {
+      "Node.Action.Starting": "<span style=\"color: #FF0000;\">Chaldea 队伍下载/解码失败，任务终止！请检查分享链接/ID 或网络后重试</span>"
+    },
+    "action": {
+      "type": "StopTask"
     }
   },
   "原生自动战斗_Chaldea入口": {
@@ -17,7 +29,10 @@
           "max_turns": 20
         }
       }
-    }
+    },
+    "on_error": [
+      "原生自动战斗-队伍下载失败-提示"
+    ]
   },
   "原生自动战斗_多次入口": {
     "action": {

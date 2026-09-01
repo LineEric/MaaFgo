@@ -37,8 +37,13 @@ class AutoBattleAction(CustomAction):
         profile = _parse_strategy_profile(param)
         battle_policy = _parse_battle_policy(param)
         plan = _parse_plan(param)
-        if plan is None:
-            plan = _plan_from_chaldea_share(param)
+        try:
+            if plan is None:
+                plan = _plan_from_chaldea_share(param)
+        except TeamFetchError as e:
+            # 队伍下载失败: 明确失败并提示, 由 pipeline on_error 走终止分支
+            mfaalog.error(f"[auto_battle] {e}")
+            return CustomAction.RunResult(success=False)
         decider = RuleDecider(battle_policy, plan=plan)
 
         # Agent 模式下，每次调用 context.tasker.controller 都会通过反向 IPC
@@ -63,25 +68,35 @@ def _plan_from_chaldea_share(param: dict) -> BattlePlan | None:
 
     支持两种形态（显式 ``plan`` 优先级更高，由调用方保证已在此前解析）：
     1. ``chaldea_share``：已解码的 BattleShareData dict（离线注入用）。
-    2. ``chaldea_import_source``：链接/ID/压缩串，复用 agent/chaldea 的
-       fetch_share_data 下载 + 解码（team_id/quest_id 走 API，data= 离线）。
+    2. ``chaldea_import_source`` / ``chaldea_import_source_file``：链接/ID/压缩串
+       或本地文件路径（MXU 文件选择器）。本地文件优先，复用 agent/chaldea 的
+       fetch_share_data 下载 + 解码。
     """
     share = param.get("chaldea_share")
     if isinstance(share, dict):
         mfaalog.info(f"[auto_battle] 使用离线注入的 chaldea_share")
         return _build_plan_from_share(share)
 
-    source = param.get("chaldea_import_source")
+    # 本地文件选择器输入优先于手填的链接/ID
+    source = param.get("chaldea_import_source_file") or param.get("chaldea_import_source")
     if isinstance(source, str) and source.strip():
         mfaalog.info(f"[auto_battle] chaldea_import_source 开始下载/解码: {source[:100]}...")
         share_data, quest_id, team_id = fetch_share_data(source.strip())
         mfaalog.info(f"[auto_battle] fetch_share_data 结果: ok={share_data is not None} quest_id={quest_id} team_id={team_id}")
         if not share_data:
-            mfaalog.info("[auto_battle] chaldea_import_source 下载/解码失败")
-            return None
+            mfaalog.error(f"[auto_battle] 队伍下载/解码失败, 终止任务: source={source[:100]}")
+            raise TeamFetchError(
+                f"[Chaldea] 队伍接口无匹配数据: team_id={team_id}, "
+                f"请检查链接/ID是否正确, 或稍后重试"
+            )
         return _build_plan_from_share(share_data)
 
     return None
+
+
+class TeamFetchError(RuntimeError):
+    """Chaldea 队伍下载/解码失败, 任务应终止并提示用户。"""
+    pass
 
 
 def _build_plan_from_share(share: dict) -> BattlePlan:
