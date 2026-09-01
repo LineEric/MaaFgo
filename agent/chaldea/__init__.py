@@ -27,35 +27,39 @@ CACHE_DIR = os.path.join("config", "Battle")
 
 
 def _build_cache_name(share_data: dict, quest_id, team_id) -> str:
-    """生成可读的缓存文件名: 关卡ID_队伍ID_从者名们
+    """生成可读的缓存文件名: 从者名首字_队伍ID_关卡ID
 
-    例: 94149047_77210_太岁星君_大总统_阿蒂拉
+    例: 诺奥阿_77210_94149047 (每个从者取名字的第一个字)
     从者名查不到时用 svtId 兜底; 文件名非法字符替换为下划线。
     """
-    names = []
+    chars = []
     for svt in (share_data.get("team") or {}).get("onFieldSvts") or []:
         svt_id = svt.get("svtId")
         if svt_id is None:
             continue
         name = get_servant_name(svt_id)
-        names.append(name)
-    name_part = "_".join(names) if names else "unknown"
+        # 取名字的首字; 从者_4000100 兜底名取数字部分
+        first = name[:1] if name else ""
+        if not first or name.startswith("从者_"):
+            first = str(svt_id)[-3:]
+        chars.append(first)
+    name_part = "".join(chars) if chars else "unknown"
     # Windows 文件名非法字符过滤
     for ch in r'\/:*?"<>|':
         name_part = name_part.replace(ch, "_")
     # 限制总长度, 防止路径过长
-    if len(name_part) > 80:
-        name_part = name_part[:80]
-    return f"{quest_id}_{team_id}_{name_part}"
+    if len(name_part) > 40:
+        name_part = name_part[:40]
+    return f"{name_part}_{team_id}_{quest_id}"
 
 
 def _find_cache_file(quest_id, team_id) -> Optional[str]:
     """在缓存目录中查找已存在的队伍缓存文件, 找不到返回 None
 
     兼容两类命名:
-    - 新可读名: {quest_id}_{team_id}_从者名们.json (按前缀匹配)
+    - 新命名: 从者名首字_队伍ID_关卡ID (按 team_id 通配匹配: ^.+_{team_id}_数字)
     - 旧纯ID名: chaldea_team_{team_id}.json / chaldea_quest_{quest_id}_*.json
-    team_id 已知但 quest_id 未知时, 用正则匹配 任意数字_{team_id}_ 前缀。
+    以及历史命名 94149047_77210_太岁星君... ({quest_id}_{team_id}_ 前缀)。
     """
     try:
         if not os.path.isdir(CACHE_DIR):
@@ -65,11 +69,11 @@ def _find_cache_file(quest_id, team_id) -> Optional[str]:
         if team_id is not None:
             # 旧格式精确名
             patterns.append(("exact", f"chaldea_team_{team_id}"))
-            # 新格式: quest_id 已知用确定前缀, 未知用通配
+            # 历史命名: {quest_id}_{team_id}_xxx
             if quest_id is not None:
                 patterns.append(("prefix", f"{quest_id}_{team_id}_"))
-            else:
-                patterns.append(("regex", rf"^\d+_{team_id}_"))
+            # 新命名: 从者首字_{team_id}_{quest_id}, 从者部分任意
+            patterns.append(("regex", rf"^.+_{team_id}_\d+$"))
         if quest_id is not None:
             patterns.append(("prefix", f"chaldea_quest_{quest_id}"))
         if not patterns:
@@ -113,8 +117,161 @@ def _save_cache(name: str, data: dict) -> None:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         mfaalog.info(f"[Chaldea] 已保存队伍到本地缓存: {path}")
+        # 缓存更新后刷新本地队伍下拉 option, MXU 重启后下拉可选
+        _update_local_team_option()
     except Exception as e:
         logger.warning(f"[Chaldea] 保存缓存失败({name}): {e}")
+
+
+# 本地队伍下拉 option 输出路径（位于安装目录的 options/ 下, 与 assets/options 同构）
+_OPTION_OUTPUT = os.path.join("options", "本地队伍选择.json")
+
+
+def _team_case_override(stem: str) -> dict:
+    """构建"选中某本地队伍"case 的 pipeline_override, 写入缓存文件名。"""
+    return {
+        "原生自动战斗入口": {
+            "action": {
+                "type": "Custom",
+                "param": {
+                    "custom_action": "auto_battle",
+                    "custom_action_param": {
+                        "chaldea_import_source": stem,
+                        "max_turns": 20,
+                    },
+                },
+            }
+        },
+        "原生自动战斗_多次入口": {
+            "action": {
+                "type": "Custom",
+                "param": {
+                    "custom_action": "auto_battle_repeat",
+                    "custom_action_param": {
+                        "chaldea_import_source": stem,
+                        "max_turns": 20,
+                    },
+                },
+            }
+        },
+        "执行自动编队": {
+            "attach": {"chaldea_import_source": stem}
+        },
+    }
+
+
+def _update_local_team_option() -> None:
+    """扫描 config/Battle 缓存, 重新生成"本地队伍选择" select option。
+
+    option 的第一个 case 为"手动输入"(嵌套原导入输入框), 后续 case 为
+    每个缓存队伍。选中本地队伍时通过 pipeline_override 把缓存文件名写入
+    chaldea_import_source, agent 侧按本地文件加载。
+    MXU 在下次启动时读取 options 目录即可在下拉中展示。
+    """
+    try:
+        import glob
+
+        cases = []
+        if os.path.isdir(CACHE_DIR):
+            for path in sorted(glob.glob(os.path.join(CACHE_DIR, "*.json"))):
+                fname = os.path.basename(path)
+                stem = fname[:-5] if fname.endswith(".json") else fname
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    if not isinstance(data.get("team"), dict):
+                        continue
+                    quest_id = (data.get("quest") or {}).get("id", "")
+                except Exception:
+                    continue
+                # case name: 文件名去非法字符
+                case_name = re.sub(r'[\\/:*?"<>| ]', "_", stem)
+                # label: 从者名们 | 关卡ID, 比文件名首字更易读
+                svt_names = [
+                    get_servant_name(s.get("svtId"))
+                    for s in (data.get("team") or {}).get("onFieldSvts") or []
+                    if s.get("svtId") is not None
+                ]
+                name_part = "·".join(svt_names) if svt_names else stem
+                label = f"{name_part} | {quest_id}" if quest_id else name_part
+                cases.append((case_name, label, stem))
+
+        option = {
+            "option": {
+                "本地队伍选择": {
+                    "type": "select",
+                    "label": "Chaldea 队伍选择",
+                    "description": "选择本地缓存的 Chaldea 队伍，或选\"手动输入\"填分享链接/队伍ID/关卡ID/本地文件。下载过队伍后重启界面即可出现在下拉中。",
+                    "default": "manual",
+                    "cases": [
+                        {
+                            "name": "manual",
+                            "label": "✍ 手动输入（链接 / 队伍ID / 关卡ID / 文件）",
+                            "option": ["Chaldea导入手动输入"],
+                        }
+                    ]
+                    + [
+                        {
+                            "name": cn,
+                            "label": lb,
+                            "pipeline_override": _team_case_override(stem),
+                        }
+                        for cn, lb, stem in cases
+                    ],
+                },
+                # 手动输入子 option: 与"本地队伍选择"同文件生成, 保持同步
+                "Chaldea导入手动输入": {
+                    "type": "input",
+                    "label": "手动导入（可选）",
+                    "description": "填写 Chaldea 的分享链接、队伍ID、关卡ID，或点击浏览按钮从本地选择队伍 JSON 文件。留空则使用默认策略。",
+                    "inputs": [
+                        {
+                            "name": "chaldea_import_source",
+                            "label": "分享链接 / 队伍ID / 关卡ID / 本地文件（留空=默认策略）",
+                            "default": "",
+                            "verify": ".*",
+                            "input_type": "file",
+                        }
+                    ],
+                    "pipeline_override": {
+                        "原生自动战斗入口": {
+                            "action": {
+                                "type": "Custom",
+                                "param": {
+                                    "custom_action": "auto_battle",
+                                    "custom_action_param": {
+                                        "chaldea_import_source": "{chaldea_import_source}",
+                                        "max_turns": 20,
+                                    },
+                                },
+                            }
+                        },
+                        "原生自动战斗_多次入口": {
+                            "action": {
+                                "type": "Custom",
+                                "param": {
+                                    "custom_action": "auto_battle_repeat",
+                                    "custom_action_param": {
+                                        "chaldea_import_source": "{chaldea_import_source}",
+                                        "max_turns": 20,
+                                    },
+                                },
+                            }
+                        },
+                        "执行自动编队": {
+                            "attach": {"chaldea_import_source": "{chaldea_import_source}"}
+                        },
+                    },
+                },
+            }
+        }
+
+        os.makedirs(os.path.dirname(_OPTION_OUTPUT) or ".", exist_ok=True)
+        with open(_OPTION_OUTPUT, "w", encoding="utf-8") as f:
+            json.dump(option, f, ensure_ascii=False, indent=4)
+        mfaalog.info(f"[Chaldea] 已生成本地队伍下拉 option: {_OPTION_OUTPUT} ({len(cases)}个队伍)")
+    except Exception as e:
+        logger.warning(f"[Chaldea] 生成本地队伍option失败: {e}")
 
 
 def _load_local_file(source: str) -> Optional[dict]:

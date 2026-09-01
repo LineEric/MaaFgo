@@ -30,13 +30,10 @@ def _ensure_cache_loaded() -> None:
     """
     确保名称缓存已加载，采用两级策略:
 
-    1. 本地 JSON 数据库 (assets/resource/Chaldea/servant_names_CN.json)
-       由 tools/update_chaldea_data.py 生成，完全离线，无需网络。
-       运行一次更新脚本后永久有效。
-
+    1. 本地 JSON 数据库 (agent/utils/Chaldea/servant_names_CN.json
+       及 servant_names_JP.json, 由 tools/update_chaldea_data.py 生成,
+       完全离线。CN 未实装的新从者自动 fallback 到 JP 名称。)
     2. Atlas Academy API (网络备用，30秒超时)
-       在本地数据库不存在或为空时触发。
-
     3. 全部失败 → 使用 fallback 名称 "从者_{svtId}"（BBC 无法识别助战）
     """
     global _cache_loaded, _cache_load_attempted
@@ -47,11 +44,17 @@ def _ensure_cache_loaded() -> None:
     # ---- 第一级: 本地 JSON 数据库 ----
     _chaldea_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir = os.path.join(_chaldea_dir, "..", "utils", "Chaldea")
-    servant_path = os.path.join(data_dir, "servant_names_CN.json")
+    # 依次加载 CN / JP 名称库; JP 用于 CN 未实装的新从者 (不覆盖已有 CN 名)
+    servant_paths = [
+        os.path.join(data_dir, "servant_names_CN.json"),
+        os.path.join(data_dir, "servant_names_JP.json"),
+    ]
     equip_path = os.path.join(data_dir, "equip_names_CN.json")
 
     local_servant_ok = False
-    if os.path.exists(servant_path):
+    for servant_path in servant_paths:
+        if not os.path.exists(servant_path):
+            continue
         try:
             with open(servant_path, "r", encoding="utf-8") as f:
                 raw = json.load(f)
@@ -59,18 +62,16 @@ def _ensure_cache_loaded() -> None:
                 if key.startswith("_"):
                     continue  # 跳过 _readme 等元数据键
                 try:
-                    _servant_name_cache[int(key)] = name
+                    _servant_name_cache.setdefault(int(key), name)
                 except ValueError:
                     pass
-            if _servant_name_cache:
-                logger.info(f"[Chaldea] 从本地数据库加载从者名称: {len(_servant_name_cache)} 条")
-                local_servant_ok = True
-            else:
-                logger.warning("[Chaldea] 本地从者数据库为空，请运行 tools/update_chaldea_data.py")
+            local_servant_ok = True
         except Exception as e:
-            logger.warning(f"[Chaldea] 本地从者数据库加载失败: {e}")
+            logger.warning(f"[Chaldea] 本地从者数据库加载失败({servant_path}): {e}")
+    if _servant_name_cache:
+        logger.info(f"[Chaldea] 从本地数据库加载从者名称: {len(_servant_name_cache)} 条")
     else:
-        logger.warning(f"[Chaldea] 本地从者数据库不存在: {servant_path}，请运行 tools/update_chaldea_data.py")
+        logger.warning("[Chaldea] 本地从者数据库为空，请运行 tools/update_chaldea_data.py")
 
     if os.path.exists(equip_path):
         try:
