@@ -1,0 +1,17 @@
+{
+    "option": {
+        "本地队伍选择": {
+            "type": "select",
+            "label": "本地队伍选择",
+            "description": "从本地缓存的 Chaldea 队伍（config/Battle）中选择。下载过队伍后重启界面即可在此选择；也可在上方导入框直接填文件名或路径。",
+            "default": "none",
+            "cases": [
+                {
+                    "name": "none",
+                    "label": "不使用本地队伍（在导入框填链接/ID/文件）",
+                    "pipeline_override": {}
+                }
+            ]
+        }
+    }
+}
