@@ -40,7 +40,13 @@ class ImportChaldeaTeam(CustomAction):
                 return CustomAction.RunResult(success=False)
             
             attach_data = node_data.get('attach', {})
-            chaldea_import_source = attach_data.get('chaldea_import_source', '')
+            # 单一输入框: 链接/ID/本地文件路径合用 chaldea_import_source,
+            # 兼容旧版分离字段的 chaldea_import_source_file
+            chaldea_import_source = str(
+                attach_data.get('chaldea_import_source')
+                or attach_data.get('chaldea_import_source_file')
+                or ''
+            ).strip()
             
             # 验证必需参数
             if not chaldea_import_source:
