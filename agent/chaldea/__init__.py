@@ -123,10 +123,44 @@ def _save_cache(name: str, data: dict) -> None:
 _OPTION_OUTPUT = os.path.join("options", "本地队伍选择.json")
 
 
+def _team_case_override(stem: str) -> dict:
+    """构建"选中某本地队伍"case 的 pipeline_override, 写入缓存文件名。"""
+    return {
+        "原生自动战斗入口": {
+            "action": {
+                "type": "Custom",
+                "param": {
+                    "custom_action": "auto_battle",
+                    "custom_action_param": {
+                        "chaldea_import_source": stem,
+                        "max_turns": 20,
+                    },
+                },
+            }
+        },
+        "原生自动战斗_多次入口": {
+            "action": {
+                "type": "Custom",
+                "param": {
+                    "custom_action": "auto_battle_repeat",
+                    "custom_action_param": {
+                        "chaldea_import_source": stem,
+                        "max_turns": 20,
+                    },
+                },
+            }
+        },
+        "执行自动编队": {
+            "attach": {"chaldea_import_source": stem}
+        },
+    }
+
+
 def _update_local_team_option() -> None:
     """扫描 config/Battle 缓存, 重新生成"本地队伍选择" select option。
 
-    生成的 option 通过 pipeline_override 把缓存文件名写入
+    option 的第一个 case 为"手动输入"(嵌套原导入输入框), 后续 case 为
+    每个缓存队伍。选中本地队伍时通过 pipeline_override 把缓存文件名写入
     chaldea_import_source, agent 侧按本地文件加载。
     MXU 在下次启动时读取 options 目录即可在下拉中展示。
     """
@@ -155,53 +189,69 @@ def _update_local_team_option() -> None:
             "option": {
                 "本地队伍选择": {
                     "type": "select",
-                    "label": "本地队伍选择",
-                    "description": "从本地缓存的 Chaldea 队伍（config/Battle）中选择。下载过队伍后重启界面即可在此选择；也可在上方导入框直接填文件名或路径。",
-                    "default": "none",
+                    "label": "Chaldea 队伍选择",
+                    "description": "选择本地缓存的 Chaldea 队伍，或选\"手动输入\"填分享链接/队伍ID/关卡ID/本地文件。下载过队伍后重启界面即可出现在下拉中。",
+                    "default": "manual",
                     "cases": [
                         {
-                            "name": "none",
-                            "label": "不使用本地队伍（在导入框填链接/ID/文件）",
-                            "pipeline_override": {},
+                            "name": "manual",
+                            "label": "✍ 手动输入（链接 / 队伍ID / 关卡ID / 文件）",
+                            "option": ["Chaldea导入手动输入"],
                         }
                     ]
                     + [
                         {
                             "name": cn,
                             "label": lb,
-                            "pipeline_override": {
-                                "原生自动战斗入口": {
-                                    "action": {
-                                        "type": "Custom",
-                                        "param": {
-                                            "custom_action": "auto_battle",
-                                            "custom_action_param": {
-                                                "chaldea_import_source": stem,
-                                                "max_turns": 20,
-                                            },
-                                        },
-                                    }
-                                },
-                                "原生自动战斗_多次入口": {
-                                    "action": {
-                                        "type": "Custom",
-                                        "param": {
-                                            "custom_action": "auto_battle_repeat",
-                                            "custom_action_param": {
-                                                "chaldea_import_source": stem,
-                                                "max_turns": 20,
-                                            },
-                                        },
-                                    }
-                                },
-                                "执行自动编队": {
-                                    "attach": {"chaldea_import_source": stem}
-                                },
-                            },
+                            "pipeline_override": _team_case_override(stem),
                         }
                         for cn, lb, stem in cases
                     ],
-                }
+                },
+                # 手动输入子 option: 与"本地队伍选择"同文件生成, 保持同步
+                "Chaldea导入手动输入": {
+                    "type": "input",
+                    "label": "手动导入（可选）",
+                    "description": "填写 Chaldea 的分享链接、队伍ID、关卡ID，或点击浏览按钮从本地选择队伍 JSON 文件。留空则使用默认策略。",
+                    "inputs": [
+                        {
+                            "name": "chaldea_import_source",
+                            "label": "分享链接 / 队伍ID / 关卡ID / 本地文件（留空=默认策略）",
+                            "default": "",
+                            "verify": ".*",
+                            "input_type": "file",
+                        }
+                    ],
+                    "pipeline_override": {
+                        "原生自动战斗入口": {
+                            "action": {
+                                "type": "Custom",
+                                "param": {
+                                    "custom_action": "auto_battle",
+                                    "custom_action_param": {
+                                        "chaldea_import_source": "{chaldea_import_source}",
+                                        "max_turns": 20,
+                                    },
+                                },
+                            }
+                        },
+                        "原生自动战斗_多次入口": {
+                            "action": {
+                                "type": "Custom",
+                                "param": {
+                                    "custom_action": "auto_battle_repeat",
+                                    "custom_action_param": {
+                                        "chaldea_import_source": "{chaldea_import_source}",
+                                        "max_turns": 20,
+                                    },
+                                },
+                            }
+                        },
+                        "执行自动编队": {
+                            "attach": {"chaldea_import_source": "{chaldea_import_source}"}
+                        },
+                    },
+                },
             }
         }
 

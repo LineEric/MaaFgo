@@ -178,8 +178,6 @@
     "options/原生自动战斗次数.json",
     "options/原生自动战斗跳过剧情.json",
     "options/原生自动战斗助战方式.json",
-    "options/原生自动战斗Chaldea导入.json",
-    "options/自动编队Chaldea导入.json",
     "options/本地队伍选择.json"
   ],
   "agent": {
