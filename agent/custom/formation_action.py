@@ -115,10 +115,11 @@ class AutoFormationFromChaldea(CustomAction):
             self.controller = context.tasker.controller
             node = context.get_node_data(argv.node_name) or {}
             attach = node.get("attach") or {}
-            # 本地文件选择器输入优先于手填的链接/ID
+            # 单一输入框: 链接/ID/本地文件路径合用 chaldea_import_source,
+            # 兼容旧版分离字段的 chaldea_import_source_file
             source = str(
-                attach.get("chaldea_import_source_file")
-                or attach.get("chaldea_import_source")
+                attach.get("chaldea_import_source")
+                or attach.get("chaldea_import_source_file")
                 or ""
             ).strip()
             if not source:

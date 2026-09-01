@@ -40,10 +40,11 @@ class ImportChaldeaTeam(CustomAction):
                 return CustomAction.RunResult(success=False)
             
             attach_data = node_data.get('attach', {})
-            # 本地文件选择器输入优先于手填的链接/ID
+            # 单一输入框: 链接/ID/本地文件路径合用 chaldea_import_source,
+            # 兼容旧版分离字段的 chaldea_import_source_file
             chaldea_import_source = str(
-                attach_data.get('chaldea_import_source_file')
-                or attach_data.get('chaldea_import_source')
+                attach_data.get('chaldea_import_source')
+                or attach_data.get('chaldea_import_source_file')
                 or ''
             ).strip()
             
