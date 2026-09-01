@@ -27,35 +27,39 @@ CACHE_DIR = os.path.join("config", "Battle")
 
 
 def _build_cache_name(share_data: dict, quest_id, team_id) -> str:
-    """生成可读的缓存文件名: 关卡ID_队伍ID_从者名们
+    """生成可读的缓存文件名: 从者名首字_队伍ID_关卡ID
 
-    例: 94149047_77210_太岁星君_大总统_阿蒂拉
+    例: 诺奥阿_77210_94149047 (每个从者取名字的第一个字)
     从者名查不到时用 svtId 兜底; 文件名非法字符替换为下划线。
     """
-    names = []
+    chars = []
     for svt in (share_data.get("team") or {}).get("onFieldSvts") or []:
         svt_id = svt.get("svtId")
         if svt_id is None:
             continue
         name = get_servant_name(svt_id)
-        names.append(name)
-    name_part = "_".join(names) if names else "unknown"
+        # 取名字的首字; 从者_4000100 兜底名取数字部分
+        first = name[:1] if name else ""
+        if not first or name.startswith("从者_"):
+            first = str(svt_id)[-3:]
+        chars.append(first)
+    name_part = "".join(chars) if chars else "unknown"
     # Windows 文件名非法字符过滤
     for ch in r'\/:*?"<>|':
         name_part = name_part.replace(ch, "_")
     # 限制总长度, 防止路径过长
-    if len(name_part) > 80:
-        name_part = name_part[:80]
-    return f"{quest_id}_{team_id}_{name_part}"
+    if len(name_part) > 40:
+        name_part = name_part[:40]
+    return f"{name_part}_{team_id}_{quest_id}"
 
 
 def _find_cache_file(quest_id, team_id) -> Optional[str]:
     """在缓存目录中查找已存在的队伍缓存文件, 找不到返回 None
 
     兼容两类命名:
-    - 新可读名: {quest_id}_{team_id}_从者名们.json (按前缀匹配)
+    - 新命名: 从者名首字_队伍ID_关卡ID (按 team_id 通配匹配: ^.+_{team_id}_数字)
     - 旧纯ID名: chaldea_team_{team_id}.json / chaldea_quest_{quest_id}_*.json
-    team_id 已知但 quest_id 未知时, 用正则匹配 任意数字_{team_id}_ 前缀。
+    以及历史命名 94149047_77210_太岁星君... ({quest_id}_{team_id}_ 前缀)。
     """
     try:
         if not os.path.isdir(CACHE_DIR):
@@ -65,11 +69,11 @@ def _find_cache_file(quest_id, team_id) -> Optional[str]:
         if team_id is not None:
             # 旧格式精确名
             patterns.append(("exact", f"chaldea_team_{team_id}"))
-            # 新格式: quest_id 已知用确定前缀, 未知用通配
+            # 历史命名: {quest_id}_{team_id}_xxx
             if quest_id is not None:
                 patterns.append(("prefix", f"{quest_id}_{team_id}_"))
-            else:
-                patterns.append(("regex", rf"^\d+_{team_id}_"))
+            # 新命名: 从者首字_{team_id}_{quest_id}, 从者部分任意
+            patterns.append(("regex", rf"^.+_{team_id}_\d+$"))
         if quest_id is not None:
             patterns.append(("prefix", f"chaldea_quest_{quest_id}"))
         if not patterns:
@@ -182,7 +186,14 @@ def _update_local_team_option() -> None:
                     continue
                 # case name: 文件名去非法字符
                 case_name = re.sub(r'[\\/:*?"<>| ]', "_", stem)
-                label = f"{quest_id} | {stem}" if quest_id else stem
+                # label: 从者名们 | 关卡ID, 比文件名首字更易读
+                svt_names = [
+                    get_servant_name(s.get("svtId"))
+                    for s in (data.get("team") or {}).get("onFieldSvts") or []
+                    if s.get("svtId") is not None
+                ]
+                name_part = "·".join(svt_names) if svt_names else stem
+                label = f"{name_part} | {quest_id}" if quest_id else name_part
                 cases.append((case_name, label, stem))
 
         option = {
