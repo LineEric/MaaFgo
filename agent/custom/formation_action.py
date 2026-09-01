@@ -114,7 +114,13 @@ class AutoFormationFromChaldea(CustomAction):
             self.context = context
             self.controller = context.tasker.controller
             node = context.get_node_data(argv.node_name) or {}
-            source = str((node.get("attach") or {}).get("chaldea_import_source") or "").strip()
+            attach = node.get("attach") or {}
+            # 本地文件选择器输入优先于手填的链接/ID
+            source = str(
+                attach.get("chaldea_import_source_file")
+                or attach.get("chaldea_import_source")
+                or ""
+            ).strip()
             if not source:
                 self._fail("invalid_chaldea_team: 未提供 Chaldea 分享链接/ID")
                 return CustomAction.RunResult(success=False)
