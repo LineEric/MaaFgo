@@ -39,6 +39,7 @@ _PICK_DELAY_S = 0.3
 
 # —— 等待超时（秒）：均为真机验证过的正常时序；异常才用这些上限判定卡死 ——
 _OPEN_CARDS_TIMEOUT_S = 5.0         # 点击攻击后确认进入选卡界面
+_OPEN_CARDS_RETRY = 6               # 攻击点击被覆盖层吞掉时的重试次数
 _SKILL_TARGET_TIMEOUT_S = 5.0       # 技能目标子屏出现
 _SKILL_ANIM_TIMEOUT_S = 15.0        # 施放技能后动画结束回到主界面
 _MASTER_SKILL_RETURN_TIMEOUT_S = 10.0  # 御主技能后回主界面或进换人界面
@@ -151,12 +152,27 @@ class AutoBattleRuntime:
                     return BattleResult.fail("skill_execution_failed", turns)
 
                 mfaalog.info("[AutoBattle] MAIN_BATTLE -> opening command cards (click attack)")
-                self._mark_action("open_command_cards")
-                if not self.executor.open_command_cards():
-                    mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
-                    return BattleResult.fail("open_cards_failed", turns)
-                mfaalog.info("[AutoBattle] command cards clicked, confirming command selection scene...")
-                if not self._wait_until((Scene.COMMAND_SELECTION,), _OPEN_CARDS_TIMEOUT_S):
+                opened = False
+                for attempt in range(1, _OPEN_CARDS_RETRY + 1):
+                    self._mark_action("open_command_cards")
+                    if not self.executor.open_command_cards():
+                        mfaalog.info(f"[AutoBattle] open_command_cards failed. turns={turns}")
+                        return BattleResult.fail("open_cards_failed", turns)
+                    mfaalog.info("[AutoBattle] command cards clicked, confirming command selection scene...")
+                    if self._wait_until((Scene.COMMAND_SELECTION,), _OPEN_CARDS_TIMEOUT_S):
+                        opened = True
+                        break
+                    # 竞态防护：技能覆盖层收尾时主界面模板会弱命中（如 0.82），
+                    # 攻击点击被残留覆盖层吞掉。确认仍在主界面后重试点击。
+                    img = self.controller.post_screencap().wait().get()
+                    scene = perception.detect_scene(self.ctx, img)
+                    mfaalog.info(
+                        f"[AutoBattle] attack click not confirmed "
+                        f"(attempt {attempt}/{_OPEN_CARDS_RETRY}, scene={scene.name}); retrying"
+                    )
+                    if scene is not Scene.MAIN_BATTLE:
+                        break  # 场景已变化（弹窗/目标子屏等），交回主循环处理
+                if not opened:
                     mfaalog.info("[AutoBattle] command selection confirmation failed; stopping safely")
                     return BattleResult.fail("open_cards_confirm_failed", turns)
                 mfaalog.info("[AutoBattle] command cards opened and confirmed")
@@ -471,8 +487,15 @@ class AutoBattleRuntime:
         cast_callable()
         time.sleep(0.2)
         # 子流水线：处理技能点击后可能出现的特殊覆盖层
+        # 注意：选从者1/2/3 均为 DirectHit 节点（必命中），必须显式禁用
+        # 未选中的两个节点，否则 next 列表按序识别永远先命中「选从者1」
         target = target_ally if target_ally is not None else default_target
-        override = {f"{self._SKILL_TARGET_BRANCH}_选从者{target}": {}}
+        override = {
+            f"{self._SKILL_TARGET_BRANCH}_选从者{slot}": (
+                {} if slot == target else {"enabled": False}
+            )
+            for slot in (1, 2, 3)
+        }
         entry = self._run_special_skill_pipeline(override)
         if entry in self._SKILL_SKIP_BRANCHES:
             mfaalog.info(f"[AutoBattle] special dialog '{entry}' handled; skill skipped")
@@ -502,8 +525,11 @@ class AutoBattleRuntime:
         if detail.status.failed:
             mfaalog.info("[AutoBattle] special skill pipeline: no overlay matched")
             return None
-        # entry 为最终命中并执行 action 的节点名
-        return getattr(detail, "entry", None)
+        # detail.entry 恒为入口名（战斗_特殊技能处理），真正命中的分支
+        # 要看最后执行的节点：nodes 非空取末尾节点名，否则回退 entry
+        nodes = getattr(detail, "nodes", None) or []
+        last = nodes[-1] if nodes else None
+        return getattr(last, "name", None) or getattr(detail, "entry", None)
 
     def _drive_settlement(self, turns: int) -> BattleResult:
         """胜利后点击穿过结算多屏（掉落/羁绊/结果）直到回关卡列表/主界面。
