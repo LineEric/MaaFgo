@@ -13,7 +13,7 @@
                             "action": {
                                 "type": "StartApp",
                                 "param": {
-                                    "package": "com.bilibili.fatego"
+                                    "package": "com.bilibili.fatego/.EmptyClass"
                                 }
                             }
                         },
@@ -21,7 +21,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fatego"
+                                    "package": "com.bilibili.fatego/.EmptyClass"
                                 }
                             }
                         },
@@ -29,7 +29,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fatego"
+                                    "package": "com.bilibili.fatego/.EmptyClass"
                                 }
                             }
                         }
