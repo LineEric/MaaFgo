@@ -2,7 +2,7 @@
     "task": [
         {
             "name": "迦勒底之门",
-            "label": "迦勒底之门",
+            "label": "🏛️ 迦勒底之门",
             "description": "选择副本后，可使用 BBC 战斗或原生自动战斗。",
             "entry": "迦勒底之门",
             "controller": [

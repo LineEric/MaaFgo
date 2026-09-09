@@ -2,7 +2,7 @@
     "task": [
         {
             "name": "冠位戴冠战",
-            "label": "冠位戴冠战",
+            "label": "👑 冠位戴冠战",
             "description": "选择职介和难度后，可使用 BBC 战斗或原生自动战斗。",
             "entry": "冠位戴冠战",
             "controller": [

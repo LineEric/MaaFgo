@@ -3,7 +3,7 @@
         {
             "name": "日常战斗",
             "description": "进入日常副本后，可选择 BBC 战斗或原生自动战斗。",
-            "label": "日常战斗",
+            "label": "⚔️ 日常战斗",
             "entry": "日常战斗",
             "option": [
                 "chapter",
