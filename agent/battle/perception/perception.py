@@ -72,12 +72,6 @@ def _reco(context, node: str, img):
     return context.run_recognition(node, img)
 
 
-def reached_post_battle(context, img) -> bool:
-    """结算点击流是否已走完（回到关卡列表/主界面）。依赖 SETTLEMENT_DONE_NODE（待标定）。"""
-    r = _reco(context, config.SETTLEMENT_DONE_NODE, img)
-    return bool(r and r.hit)
-
-
 def detect_scene(context, img) -> Scene:
     """轻量版：只检测场景，不做卡牌/技能/敌人等完整感知。用于轮询等待。"""
     scene, _ = _detect_scene(context, img)
