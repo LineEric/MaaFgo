@@ -32,8 +32,6 @@ _ANIMATION_TIMEOUT_S = 60.0
 _UNKNOWN_TIMEOUT_S = 30.0
 # 每次轮询之间等画面静止的窗口（ms）
 _POLL_FREEZE_MS = 2000
-# 胜利后结算点击流（掉落/羁绊/结果多屏）的最大耗时
-_SETTLEMENT_TIMEOUT_S = 90.0
 # 每次选卡后的固定间隔，等待卡牌选中态渲染
 _PICK_DELAY_S = 0.3
 
@@ -86,11 +84,15 @@ class AutoBattleRuntime:
             mfaalog.info(f"[AutoBattle] Turn {turns+1} | scene={scene.name} | unknown={state.unknown_fields}")
 
             if scene is Scene.VICTORY:
-                mfaalog.info(f"[AutoBattle] Victory! turns={turns} -> driving settlement")
-                return self._drive_settlement(turns)
+                # 战斗已胜。结算多屏（奖励/好友申请/连续出击等）不在 Python 侧处理，
+                # 由 pipeline 的 结束战斗_* 节点家族负责推进（见 原生自动战斗调度.json）。
+                mfaalog.info(f"[AutoBattle] Victory! turns={turns} -> settlement handled by pipeline")
+                return BattleResult.success(turns)
             if scene is Scene.DEFEAT:
-                mfaalog.info(f"[AutoBattle] Defeat. turns={turns}")
-                return BattleResult.fail("defeat", turns)
+                # 战斗失败同样交给 pipeline 的 战斗失败_不回主界面 撤退分支处理，
+                # 避免 custom action 失败导致 auto_battle_repeat 中断整条多场链。
+                mfaalog.info(f"[AutoBattle] Defeat. turns={turns} -> retreat handled by pipeline")
+                return BattleResult(True, "defeat", turns)
             if scene is Scene.DIALOG:
                 mfaalog.info(f"[AutoBattle] Unexpected dialog. turns={turns}")
                 return BattleResult.fail("unexpected_dialog", turns)
@@ -530,26 +532,6 @@ class AutoBattleRuntime:
         nodes = getattr(detail, "nodes", None) or []
         last = nodes[-1] if nodes else None
         return getattr(last, "name", None) or getattr(detail, "entry", None)
-
-    def _drive_settlement(self, turns: int) -> BattleResult:
-        """胜利后点击穿过结算多屏（掉落/羁绊/结果）直到回关卡列表/主界面。
-
-        标定护栏：坐标未标定时（executor.tap_settlement_continue 返回 False），
-        不盲点，直接按现有行为返回胜利（战斗已赢，只是暂不能自动点回主界面）。
-        """
-        mfaalog.info(f"[AutoBattle] _drive_settlement() timeout={_SETTLEMENT_TIMEOUT_S}s")
-        deadline = time.monotonic() + _SETTLEMENT_TIMEOUT_S
-        while time.monotonic() < deadline:
-            img = self.controller.post_screencap().wait().get()
-            if perception.reached_post_battle(self.ctx, img):
-                mfaalog.info("[AutoBattle] settlement done -> back to quest list")
-                return BattleResult.success(turns)
-            if not self.executor.tap_settlement_continue():
-                mfaalog.info("[AutoBattle] settlement not calibrated -> reporting victory without click-through")
-                return BattleResult.success(turns)
-            time.sleep(0.5)
-        mfaalog.info(f"[AutoBattle] settlement did not finish within {_SETTLEMENT_TIMEOUT_S}s")
-        return BattleResult.fail("settlement_timeout", turns)
 
     def _wait_turn_settled(self) -> bool:
         mfaalog.info(f"[AutoBattle] _wait_turn_settled() timeout={_ANIMATION_TIMEOUT_S}s")
