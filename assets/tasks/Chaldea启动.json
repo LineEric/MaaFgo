@@ -3,7 +3,7 @@
         {
             "name": "Chaldea 一键战斗",
             "description": "粘贴 Chaldea 分享链接后直接启动 BBchannel 执行战斗，无需游戏内导航。适合已在关卡界面手动进入的场景。",
-            "label": "Chaldea 一键战斗",
+            "label": "🚀 Chaldea 一键战斗",
             "entry": "bbc战斗",
             "option": [
                 "chaldea_team",
