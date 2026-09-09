@@ -60,6 +60,7 @@ SUPPORT_MODEL_PATH = os.path.join(_AGENT_DIR, "utils", "support_det.onnx")
 IMGSZ = 640          # support_det 训练尺寸
 CONF = 0.5
 LOW_CONF = 0.25
+BASE_W, BASE_H = 1280, 720
 
 # ---------------- 框内锚点(坐标系.txt, YOLO 框左上角=0,0) ----------------
 LEVEL_ROI = (62, 15, 118, 27)      # 英灵等级: x62-180 y15-42 -> (x,y,w,h)
@@ -95,6 +96,15 @@ CLASS_TABS = {
 OCR_EN_DIR = os.path.join(_ROOT_DIR, "resource", "model", "ocr")
 OCR_REC_ONNX = os.path.join(OCR_EN_DIR, "rec.onnx")
 OCR_REC_KEYS = os.path.join(OCR_EN_DIR, "keys.txt")
+
+
+def _image_dir(package, *parts):
+    """Return an image directory from either a packaged or development layout."""
+    relative = os.path.join(package, "image", *parts)
+    packaged = os.path.join(_ROOT_DIR, "resource", relative)
+    if os.path.isdir(packaged):
+        return packaged
+    return os.path.join(_ROOT_DIR, "assets", "resource", relative)
 
 # ---------------- ROI 尺寸 ----------------
 CE_ROI = (160, 50)        # 礼装匹配窗口(w,h): 锚点为中心, 与礼装模板(约153x40)同量级
@@ -212,6 +222,54 @@ class SupportAction(CustomAction):
     _servant_map = None
     _detector = None
     _face_mask = None
+
+    def _init_scale(self, controller):
+        """Read the device resolution and initialize reference-to-device scaling."""
+        self.sx = self.sy = 1.0
+        self._screen_size = (BASE_W, BASE_H)
+        self._shot_base(controller)
+
+    def _shot_base(self, controller):
+        """Return each screenshot in the 1280x720 reference coordinate system.
+
+        Detection, templates, and all entry-relative anchors are calibrated at
+        720p. Controller operations are converted back to the device size by
+        _tap and _swipe.
+        """
+        import cv2
+        img = _norm_img(controller.post_screencap().wait().get())
+        if img is None:
+            return None
+        height, width = img.shape[:2]
+        screen_size = (width, height)
+        if screen_size != self._screen_size:
+            self._screen_size = screen_size
+            self.sx = width / BASE_W
+            self.sy = height / BASE_H
+            mfaalog.info(
+                f"[SupportAction] screen={width}x{height}, "
+                f"scale={self.sx:.3f}x{self.sy:.3f}"
+            )
+        if screen_size == (BASE_W, BASE_H):
+            return img
+        return cv2.resize(img, (BASE_W, BASE_H), interpolation=cv2.INTER_LINEAR)
+
+    def _point_to_screen(self, x, y):
+        """Convert a 1280x720 reference point to a controller point."""
+        width, height = self._screen_size
+        return (
+            min(width - 1, max(0, int(round(x * self.sx)))),
+            min(height - 1, max(0, int(round(y * self.sy)))),
+        )
+
+    def _tap(self, controller, x, y):
+        controller.post_click(*self._point_to_screen(x, y)).wait()
+
+    def _swipe(self, controller, x1, y1, x2, y2, duration):
+        controller.post_swipe(
+            *self._point_to_screen(x1, y1),
+            *self._point_to_screen(x2, y2), duration,
+        ).wait()
 
     @classmethod
     def _get_face_mask(cls):
@@ -571,12 +629,11 @@ class SupportAction(CustomAction):
         return True
 
     # ---------- 刷新后连接中检测 ----------
-    @staticmethod
-    def _is_connecting(controller):
+    def _is_connecting(self, controller):
         """刷新后判断是否仍在连接: (1158,623)-(1259,709) 区域白像素占比 >= 10%(WHITE_RATIO) 表示连接中;
         截图失败视为已连接完成(避免卡死), 交由后续识别流程处理"""
         import cv2
-        img = _norm_img(controller.post_screencap().wait().get())
+        img = self._shot_base(controller)
         if img is None:
             return False
         x0, y0 = CONNECT_ROI[0], CONNECT_ROI[1]
@@ -633,10 +690,10 @@ class SupportAction(CustomAction):
 
             resource_package = str(context.get_node_data("资源包配置")["attach"]["resource_package"])
             pkg = "cn" if resource_package == "cn" else "base"
-            base_dir = os.path.join(_ROOT_DIR, "resource", pkg, "image")
+            base_dir = _image_dir(pkg)
             # 英灵头像/礼装固定放 base, 不用 pkg 区分
-            face_dir = os.path.join(_ROOT_DIR, "resource", "base", "image", "servant_face")
-            ce_dir = os.path.join(_ROOT_DIR, "resource", "base", "image", "lizhuang")
+            face_dir = _image_dir("base", "servant_face")
+            ce_dir = _image_dir("base", "lizhuang")
             np_dir = os.path.join(base_dir, "nplevel")   # 宝具模板按 pkg 动态选择(base/cn)
             skill_dir = os.path.join(base_dir, "skill")   # 视图判断模板(主动/被动), 按 pkg 动态选择
             mfaalog.info(f"[SupportAction] 素材根: {base_dir} 宝具目录: {np_dir}")
@@ -654,6 +711,7 @@ class SupportAction(CustomAction):
             detector = self._get_detector()
 
             controller = context.tasker.controller
+            self._init_scale(controller)
 
             # 执行所有助战选择前, 先点击对应职介的筛选 tab(全屏坐标); 间隔0.5s点击3次
             if class_name:
@@ -662,13 +720,13 @@ class SupportAction(CustomAction):
                 else:
                     tab = CLASS_TABS.get(class_name, CLASS_TABS["OTHER"])
                 for _ in range(3):
-                    controller.post_click(tab[0], tab[1]).wait()
+                    self._tap(controller, tab[0], tab[1])
                     time.sleep(0.5)
                 mfaalog.info(f"[SupportAction] 点击职介筛选: {class_name} @ {tab}")
 
             # 识别一次: 截图->YOLO检测->逐个框判定; 命中点击条目并返回 True(未命中 False)
             def try_match():
-                img = _norm_img(controller.post_screencap().wait().get())
+                img = self._shot_base(controller)
                 if img is None:
                     mfaalog.error("[SupportAction] 截图失败")
                     return False
@@ -695,28 +753,28 @@ class SupportAction(CustomAction):
                     # 主动/宝具/等级 均满足, 剩被动
                     if not passive_need:
                         cx, cy = (bx + bx2) // 2, (by + by2) // 2
-                        controller.post_click(cx, cy).wait()
+                        self._tap(controller, cx, cy)
                         mfaalog.info(f"[SupportAction] 点击条目 ({cx},{cy})")
                         return True
 
                     # 需要被动: 点击1次切到被动视图, 间隔0.5s稳定后再单帧识别
-                    controller.post_click(VIEW_SWITCH_POS[0], VIEW_SWITCH_POS[1]).wait()
+                    self._tap(controller, *VIEW_SWITCH_POS)
                     time.sleep(0.5)
-                    img = _norm_img(controller.post_screencap().wait().get())
+                    img = self._shot_base(controller)
                     if img is None:
                         return False
                     passive_ok = self._match_passive(img, bx, by, passive)
 
                     # 被动识别结束, 无论是否点击条目, 点击2次(846,127)切回主动视图, 每次间隔0.5s
-                    controller.post_click(VIEW_SWITCH_POS[0], VIEW_SWITCH_POS[1]).wait()
+                    self._tap(controller, *VIEW_SWITCH_POS)
                     time.sleep(0.5)
-                    controller.post_click(VIEW_SWITCH_POS[0], VIEW_SWITCH_POS[1]).wait()
+                    self._tap(controller, *VIEW_SWITCH_POS)
                     time.sleep(0.5)
 
                     if not passive_ok:
                         continue
                     cx, cy = (bx + bx2) // 2, (by + by2) // 2
-                    controller.post_click(cx, cy).wait()
+                    self._tap(controller, cx, cy)
                     mfaalog.info(f"[SupportAction] 点击条目 ({cx},{cy})")
                     return True
 
@@ -734,8 +792,7 @@ class SupportAction(CustomAction):
                 if context.tasker.stopping:
                     mfaalog.info("[SupportAction] 检测到任务停止信号, 中断助战查找")
                     return CustomAction.RunResult(success=False)
-                controller.post_swipe(SWIPE_START[0], SWIPE_START[1],
-                                      SWIPE_END[0], SWIPE_END[1], SWIPE_DURATION).wait()
+                self._swipe(controller, *SWIPE_START, *SWIPE_END, SWIPE_DURATION)
                 swipe_count += 1
                 time.sleep(SWIPE_SETTLE)   # 等列表惯性滚动结束, 画面稳定后再识别
                 mfaalog.info(f"[SupportAction] 第 {swipe_count} 次滑动, 重新识别")

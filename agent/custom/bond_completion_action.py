@@ -47,6 +47,7 @@ _PLAYER_SERVANTS_PATH = os.path.join(_PLAYER_INVENTORY_DIR, "player_servants.jso
 _PLAYER_EQUIPS_PATH = os.path.join(_PLAYER_INVENTORY_DIR, "player_equips.json")
 
 COST_ROI = (915, 671, 154, 43)
+SERVANT_BOND_REMAINING_ROI = (1079, 528, 126, 31)
 LIST_ROI = (70, 165, 1160, 445)
 # 真机 1280x720 编队页对 NarrowFigures 的稳定分数为 0.8111/0.8730，次高误匹配
 # 仅 0.3752/0.3491；因此编队卡复核使用 0.78。库存列表与礼装仍坚持 0.90。
@@ -1071,6 +1072,74 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         )
         return match is not None and match[0] >= SERVANT_VERIFY_THRESHOLD
 
+    def _check_new_servant_bond(self, slot, servant):
+        """打开新补从者详情；有数字表示仍可获得羁绊，其他结果表示已满。"""
+        x, y, width, height = self._slot_roi(slot)
+        target = [int(round(x + width / 2)), int(round(y + height / 2)), 1, 1]
+        self.context.override_pipeline({
+            "羁绊补齐-打开从者详情": {
+                "action": {
+                    "type": "LongPress",
+                    "param": {"target": target, "duration": 3000},
+                }
+            }
+        })
+        self._focus_user(f"正在确认从者羁绊：{servant['name']}")
+        opened = self._run_pipeline("羁绊补齐-打开从者详情")
+        detail_opened = not self._in_formation_edit()
+        if not detail_opened:
+            mfaalog.error(
+                f"[羁绊补齐] 从者详情未打开：槽位{slot + 1} "
+                f"{servant['name']}({servant['id']})"
+            )
+            return "failed"
+
+        result = "failed"
+        try:
+            if not opened:
+                mfaalog.error(
+                    f"[羁绊补齐] 从者详情已出现但 Pipeline 返回失败："
+                    f"槽位{slot + 1} {servant['name']}({servant['id']})"
+                )
+                return "failed"
+            image = self._shot()
+            if image is None:
+                mfaalog.error("[羁绊补齐] 从者详情截图不可用")
+                return "failed"
+            roi = self._scale_roi(SERVANT_BOND_REMAINING_ROI)
+            try:
+                detail = self.context.run_recognition_direct("OCR", JOCR(roi=roi), image)
+            except Exception as exc:
+                mfaalog.error(f"[羁绊补齐] 从者羁绊 OCR 调用异常: {exc}")
+                return "failed"
+            texts = []
+            if detail is not None:
+                for item in detail.all_results:
+                    text = str(getattr(item, "text", "") or "").strip()
+                    if text:
+                        texts.append(text)
+            raw = " ".join(texts)
+            if re.search(r"\d", raw):
+                result = "available"
+                mfaalog.info(
+                    f"[羁绊补齐] 从者羁绊未满：槽位{slot + 1} "
+                    f"{servant['name']}({servant['id']})，OCR={raw!r}"
+                )
+            else:
+                result = "full"
+                mfaalog.warning(
+                    f"[羁绊补齐] 从者羁绊已满：槽位{slot + 1} "
+                    f"{servant['name']}({servant['id']})，OCR={raw!r}"
+                )
+        finally:
+            closed = self._run_pipeline("羁绊补齐-关闭从者详情")
+            if not closed or not self._wait_for(self._in_formation_edit, 5.0):
+                mfaalog.error(
+                    f"[羁绊补齐] 关闭从者详情后未返回编队：槽位{slot + 1}"
+                )
+                result = "failed"
+        return result
+
     @staticmethod
     def _slot_roi(slot):
         from formation_action import SLOT_ROIS
@@ -1105,6 +1174,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             if not self._enter_servant_select_new(slot):
                 return None
             chosen = None
+            rejected_full_in_slot = False
             for rarity in self.rarity_order:
                 candidates = self._servant_candidates(rarity)
                 if not candidates:
@@ -1194,6 +1264,30 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                             self._focus_user(f"正在定位本地库从者：{candidate['name']}")
                         select_result = self._select_scanned_servant(candidate, candidates)
                         if select_result == "selected":
+                            if not self._verify_servant_slot(slot, candidate):
+                                return None
+                            bond_state = self._check_new_servant_bond(slot, candidate)
+                            if bond_state == "failed":
+                                return None
+                            if bond_state == "full":
+                                rejected_full_in_slot = True
+                                candidate_id = str(candidate["id"])
+                                self.unavailable_servants.add(candidate_id)
+                                owned_ids.discard(candidate_id)
+                                owned = [
+                                    item for item in owned
+                                    if str(item["id"]) != candidate_id
+                                ]
+                                self._focus_user(
+                                    f"{candidate['name']}羁绊已满，正在查找下一名从者",
+                                    "orange",
+                                )
+                                if not self._enter_servant_select_new(slot):
+                                    return None
+                                if not self._filter_servant_rarity(rarity):
+                                    return None
+                                should_replan = True
+                                break
                             chosen = dict(candidate)
                             break
                         if select_result == "failed":
@@ -1231,6 +1325,12 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                     break
             if chosen is None:
                 if not self._leave_servant_select():
+                    return None
+                if rejected_full_in_slot:
+                    mfaalog.warning(
+                        f"[羁绊补齐] 槽位{slot + 1}候选均不可用；"
+                        "为避免保留满羁绊从者，取消本次羁绊阶段"
+                    )
                     return None
                 mfaalog.warning(f"[羁绊补齐] bond_completion_partial: 槽位{slot + 1}无可用从者")
                 if replacing_existing:

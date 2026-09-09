@@ -17,7 +17,7 @@
         "action": {
             "type": "StartApp",
             "param": {
-                "package": "com.aniplex.fategrandorder"
+                "package": "com.aniplex.fategrandorder/jp.delightworks.Fgo.player.AndroidPlugin"
             }
         },
         "post_delay": 3000,
