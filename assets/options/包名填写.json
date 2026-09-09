@@ -43,7 +43,7 @@
                             "action": {
                                 "type": "StartApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.m4399"
+                                    "package": "com.bilibili.fgo.m4399/com.bilibili.fatego.SplashActivity"
                                 }
                             }
                         },
@@ -51,7 +51,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.m4399"
+                                    "package": "com.bilibili.fgo.m4399/com.bilibili.fatego.SplashActivity"
                                 }
                             }
                         },
@@ -59,7 +59,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.m4399"
+                                    "package": "com.bilibili.fgo.m4399/com.bilibili.fatego.SplashActivity"
                                 }
                             }
                         }
@@ -73,7 +73,7 @@
                             "action": {
                                 "type": "StartApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.vivo"
+                                    "package": "com.bilibili.fgo.vivo/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         },
@@ -81,7 +81,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.vivo"
+                                    "package": "com.bilibili.fgo.vivo/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         },
@@ -89,7 +89,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.vivo"
+                                    "package": "com.bilibili.fgo.vivo/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         }
@@ -103,7 +103,7 @@
                             "action": {
                                 "type": "StartApp",
                                 "param": {
-                                    "package": "com.bilibili.fatego.sharejoy"
+                                    "package": "com.bilibili.fatego.sharejoy/com.bilibili.fatego.UnityPlayerNativeActivity"
                                 }
                             }
                         },
@@ -111,7 +111,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fatego.sharejoy"
+                                    "package": "com.bilibili.fatego.sharejoy/com.bilibili.fatego.UnityPlayerNativeActivity"
                                 }
                             }
                         },
@@ -119,7 +119,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fatego.sharejoy"
+                                    "package": "com.bilibili.fatego.sharejoy/com.bilibili.fatego.UnityPlayerNativeActivity"
                                 }
                             }
                         }
@@ -133,7 +133,7 @@
                             "action": {
                                 "type": "StartApp",
                                 "param": {
-                                    "package": "com.tencent.tmgp.fgo"
+                                    "package": "com.tencent.tmgp.fgo/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         },
@@ -141,7 +141,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.tencent.tmgp.fgo"
+                                    "package": "com.tencent.tmgp.fgo/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         },
@@ -149,7 +149,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.tencent.tmgp.fgo"
+                                    "package": "com.tencent.tmgp.fgo/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         }
@@ -163,7 +163,7 @@
                             "action": {
                                 "type": "StartApp",
                                 "param": {
-                                    "package": "com.aniplex.fategrandorder"
+                                    "package": "com.aniplex.fategrandorder/jp.delightworks.Fgo.player.AndroidPlugin"
                                 }
                             }
                         },
@@ -171,7 +171,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.aniplex.fategrandorder"
+                                    "package": "com.aniplex.fategrandorder/jp.delightworks.Fgo.player.AndroidPlugin"
                                 }
                             }
                         },
@@ -179,7 +179,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.aniplex.fategrandorder"
+                                    "package": "com.aniplex.fategrandorder/jp.delightworks.Fgo.player.AndroidPlugin"
                                 }
                             }
                         }
@@ -193,7 +193,7 @@
                             "action": {
                                 "type": "StartApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.mi"
+                                    "package": "com.bilibili.fgo.mi/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         },
@@ -201,7 +201,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.mi"
+                                    "package": "com.bilibili.fgo.mi/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         },
@@ -209,7 +209,7 @@
                             "action": {
                                 "type": "StopApp",
                                 "param": {
-                                    "package": "com.bilibili.fgo.mi"
+                                    "package": "com.bilibili.fgo.mi/com.bilibili.fatego.PermissionActivity"
                                 }
                             }
                         }
