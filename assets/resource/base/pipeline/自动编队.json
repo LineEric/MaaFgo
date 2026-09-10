@@ -7,7 +7,8 @@
             }
         },
         "attach": {
-            "chaldea_import_source": ""
+            "chaldea_import_source": "",
+            "use_support_substitution": false
         },
         "next": [
             "执行羁绊补齐自动编队"

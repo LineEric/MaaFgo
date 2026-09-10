@@ -141,6 +141,9 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 self.debug_preserve_failure = _truthy(
                     attach.get("debug_preserve_failure", False)
                 )
+                self.use_support_substitution = _truthy(
+                    attach.get("use_support_substitution", False)
+                )
             except (TypeError, ValueError) as exc:
                 return self._result_fail(f"bond_completion_option_invalid: {exc}")
             if self.bond_base <= 0:
@@ -201,9 +204,13 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             detected = self._detect_slots_stable()
             if detected is None:
                 return self._abort_safe("bond_completion_slot_invalid: 无法识别编队槽位")
-            support_slots = [i for i, item in enumerate(detected) if item["kind"] == "SUPPORT"]
-            if len(support_slots) > 1:
-                return self._abort_safe("bond_completion_slot_invalid: 识别到多个助战槽")
+            expected_support_count = sum(
+                item["kind"] == "SUPPORT" for item in self.expected
+            )
+            if not self._configure_support_target(detected, expected_support_count):
+                return self._abort_safe(
+                    "bond_completion_slot_invalid: 助战身份或替代目标不匹配"
+                )
             self.equip_probe_slots = [
                 i for i, item in enumerate(detected)
                 if item["kind"] not in {"EMPTY", "SUPPORT"}

@@ -13,6 +13,7 @@
       "modify_unspecified_servants": true,
       "modify_unspecified_equips": true,
       "debug_preserve_failure": false,
+      "use_support_substitution": false,
       "chaldea_import_source": ""
     },
     "next": ["自动编队完成"]

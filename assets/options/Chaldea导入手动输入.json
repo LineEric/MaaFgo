@@ -50,6 +50,30 @@
                 }
             }
         },
+        "自动编队助战替代": {
+            "type": "select",
+            "label": "是否用助战代替编队数据",
+            "description": "仅在 Chaldea 编队数据未标记助战时生效。选是后，当前助战必须与数据中的一个本地从者为同一从者，并代替该从者所在槽位；身份无法识别或不匹配时停止任务。数据已包含助战时始终按数据校验助战身份和位置。",
+            "default": "否",
+            "cases": [
+                {
+                    "name": "否",
+                    "label": "否",
+                    "pipeline_override": {
+                        "执行自动编队": {"attach": {"use_support_substitution": false}},
+                        "执行羁绊补齐自动编队": {"attach": {"use_support_substitution": false}}
+                    }
+                },
+                {
+                    "name": "是",
+                    "label": "是",
+                    "pipeline_override": {
+                        "执行自动编队": {"attach": {"use_support_substitution": true}},
+                        "执行羁绊补齐自动编队": {"attach": {"use_support_substitution": true}}
+                    }
+                }
+            ]
+        },
         "自动编队礼装开关": {
             "type": "select",
             "label": "自动编成礼装",

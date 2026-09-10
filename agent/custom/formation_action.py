@@ -163,6 +163,13 @@ class AutoFormationFromChaldea(CustomAction):
             self.auto_equip = str(auto_equip_value).strip().lower() not in {
                 "0", "false", "no", "off", "否",
             }
+            support_substitution_value = attach.get(
+                "use_support_substitution", False
+            )
+            self.use_support_substitution = (
+                str(support_substitution_value).strip().lower()
+                not in {"0", "false", "no", "off", "否", ""}
+            )
             self.equip_missing_policy = str(
                 attach.get("equip_missing_policy") or "skip"
             ).strip()
@@ -198,12 +205,12 @@ class AutoFormationFromChaldea(CustomAction):
             current = self._detect_slots()
             if current is None:
                 return CustomAction.RunResult(success=False)
-            # Chaldea 未指定助战时，允许把当前已选助战替换为目标本地从者；
-            # 只有 Chaldea 明确要求助战时，才必须保证当前存在且仅存在一位助战。
-            if expected_support_count and sum(item["kind"] == "SUPPORT" for item in current) != expected_support_count:
-                self._fail("support_count_invalid: 当前助战数量与 Chaldea 目标不一致")
-                return CustomAction.RunResult(success=False)
             self._log_layout("初始", current)
+            if not self._configure_support_target(current, expected_support_count):
+                return CustomAction.RunResult(success=False)
+            expected_support_count = sum(
+                item["kind"] == "SUPPORT" for item in self.expected
+            )
 
             # 在点击“配置变更”前判断当前队伍的复用价值。助战不参与统计；当至少
             # 一半的目标本地从者不匹配时，整队清空比逐个拖动、替换更直接。清空
@@ -304,6 +311,11 @@ class AutoFormationFromChaldea(CustomAction):
             svt_id = item.get("svtId")
             equip_id, equip_limit_break = self._extract_equip(item)
             if support_type in SUPPORT_TYPES:
+                if not isinstance(svt_id, int) or svt_id <= 0:
+                    self._fail(
+                        f"invalid_chaldea_team: 助战槽位{index + 1}没有有效 svtId"
+                    )
+                    return None
                 expected.append({
                     "kind": "SUPPORT", "svt_id": svt_id, "equip_id": equip_id,
                     "equip_limit_break": equip_limit_break, "slot": index,
@@ -472,10 +484,12 @@ class AutoFormationFromChaldea(CustomAction):
                     raise RuntimeError(f"resource_missing: svtId={svt_id}")
                 self.local_templates[svt_id] = templates
             if item["kind"] == "SUPPORT" and isinstance(svt_id, int):
-                # 助战身份只用于最终日志，缺资源不影响助战位置校验。
                 templates = self._load_servant_templates(svt_id, self.narrow_dirs)
-                if templates:
-                    self.support_templates[svt_id] = templates
+                if not templates:
+                    templates = self._load_servant_templates(svt_id, self.face_dirs)
+                if not templates:
+                    raise RuntimeError(f"resource_missing: 助战 svtId={svt_id}")
+                self.support_templates[svt_id] = templates
             if not self.auto_equip:
                 continue
             equip_id = item.get("equip_id")
@@ -500,6 +514,9 @@ class AutoFormationFromChaldea(CustomAction):
             item["equip_status"] = "ready"
             self.equip_team_templates[equip_id] = team_template
             self.equip_list_templates[equip_id] = list_template
+        self.identity_templates = dict(self.local_templates)
+        for svt_id, templates in self.support_templates.items():
+            self.identity_templates.setdefault(svt_id, templates)
         self.support_marker = self._load_named_template("battle/助战标记.png")
         if self.support_marker is None:
             raise RuntimeError("resource_missing: battle/助战标记.png")
@@ -590,19 +607,37 @@ class AutoFormationFromChaldea(CustomAction):
                 continue
             support = self._match_template(image, self.support_marker, roi)
             if support is not None and support[0] >= SUPPORT_THRESHOLD:
-                detected.append({"kind": "SUPPORT", "svt_id": None, "score": support[0]})
+                identity = self._match_template_groups(
+                    image, self.identity_templates, roi
+                )
+                detected.append({
+                    "kind": "SUPPORT",
+                    "svt_id": (
+                        identity[1]
+                        if identity is not None and identity[0] >= FACE_THRESHOLD
+                        else None
+                    ),
+                    "score": support[0],
+                    "identity_score": identity[0] if identity is not None else 0.0,
+                    "template": identity[2] if identity is not None else None,
+                })
                 continue
-            best = None
-            for svt_id, templates in self.local_templates.items():
-                match = self._match_servant(image, templates, roi)
-                if match is not None and (best is None or match[0] > best[0]):
-                    best = (match[0], svt_id, match[2])
+            best = self._match_template_groups(image, self.local_templates, roi)
             if best is not None and best[0] >= FACE_THRESHOLD:
                 detected.append({"kind": "LOCAL", "svt_id": best[1], "score": best[0], "template": best[2]})
             else:
                 # 不在 Chaldea 目标集合内的本地从者只需标为 OTHER，后续替换即可。
                 detected.append({"kind": "OTHER", "svt_id": None, "score": best[0] if best else 0.0})
         return detected
+
+    def _match_template_groups(self, image, groups, roi):
+        """在多个从者 ID 的模板组中返回最高分 ``(score, id, template)``。"""
+        best = None
+        for svt_id, templates in groups.items():
+            match = self._match_servant(image, templates, roi)
+            if match is not None and (best is None or match[0] > best[0]):
+                best = (match[0], svt_id, match[2])
+        return best
 
     def _is_empty_slot(self, image, roi):
         """识别编队中灰色的 SELECT 空槽；不依赖文字 OCR。"""
@@ -622,7 +657,13 @@ class AutoFormationFromChaldea(CustomAction):
         if expected["kind"] == "LOCAL":
             return current["kind"] == "LOCAL" and current["svt_id"] == expected["svt_id"]
         if expected["kind"] == "SUPPORT":
-            return current["kind"] == "SUPPORT"
+            return (
+                current["kind"] == "SUPPORT"
+                and (
+                    expected.get("svt_id") is None
+                    or current.get("svt_id") == expected["svt_id"]
+                )
+            )
         # Chaldea 未提供从者的槽位不参与最终匹配：用户的已有编队可以保留
         # 这些位置的从者。但它们仍可能是后续重排的可移动来源，见
         # _can_move_from。
@@ -666,6 +707,78 @@ class AutoFormationFromChaldea(CustomAction):
 
     def _same_item(self, actual, expected):
         return self._matches(expected, actual)
+
+    def _configure_support_target(self, current, expected_support_count):
+        """校验助战身份，并在开启替代时生成最终 SUPPORT 目标。"""
+        support_indices = [
+            index for index, item in enumerate(current) if item["kind"] == "SUPPORT"
+        ]
+        if len(support_indices) > 1:
+            return self._fail("support_count_invalid: 当前识别到多个助战槽")
+
+        if expected_support_count or self.use_support_substitution:
+            if not support_indices:
+                reason = (
+                    "Chaldea 要求助战"
+                    if expected_support_count
+                    else "已开启助战替代"
+                )
+                return self._fail(f"support_missing: {reason}，但当前编队没有助战")
+            support_index = support_indices[0]
+            actual = current[support_index]
+            actual_id = actual.get("svt_id")
+            if actual_id is None:
+                return self._fail(
+                    "support_identity_unknown: 无法识别"
+                    f"槽位{support_index + 1}助战人物，"
+                    f"最高分={actual.get('identity_score', 0.0):.3f}/"
+                    f"{FACE_THRESHOLD:.2f}，template={actual.get('template') or '-'}"
+                )
+
+        if expected_support_count:
+            target_index = next(
+                index for index, item in enumerate(self.expected)
+                if item["kind"] == "SUPPORT"
+            )
+            expected_id = self.expected[target_index]["svt_id"]
+            if actual_id != expected_id:
+                return self._fail(
+                    "support_identity_mismatch: "
+                    f"当前助战槽位{support_index + 1}为 svtId={actual_id}，"
+                    f"Chaldea 槽位{target_index + 1}要求 svtId={expected_id}"
+                )
+            mfaalog.info(
+                f"[自动编队] 助战身份校验通过：svtId={actual_id}，"
+                f"目标槽位{target_index + 1}"
+            )
+            return True
+
+        if not self.use_support_substitution:
+            mfaalog.info("[自动编队] 未开启助战替代；沿用空位安置规则")
+            return True
+
+        candidate_indices = [
+            index for index, item in enumerate(self.expected)
+            if item["kind"] == "LOCAL" and item["svt_id"] == actual_id
+        ]
+        if not candidate_indices:
+            expected_ids = sorted({
+                item["svt_id"] for item in self.expected if item["kind"] == "LOCAL"
+            })
+            return self._fail(
+                "support_identity_mismatch: "
+                f"当前助战槽位{support_index + 1}为 svtId={actual_id}，"
+                f"Chaldea 本地从者中没有同 ID 目标；候选={expected_ids}"
+            )
+        target_index = (
+            support_index if support_index in candidate_indices else candidate_indices[0]
+        )
+        self.expected[target_index]["kind"] = "SUPPORT"
+        mfaalog.info(
+            f"[自动编队] 助战替代生效：svtId={actual_id}，"
+            f"代替 Chaldea 槽位{target_index + 1}的同名本地从者"
+        )
+        return True
 
     def _relocate_unexpected_support(self, current, expected_support_count):
         """当 Chaldea 没有助战但游戏已选助战时，将其移至未指定槽位。"""
@@ -1243,24 +1356,15 @@ class AutoFormationFromChaldea(CustomAction):
     # ---------- 结束校验、日志 ----------
 
     def _log_support_identity_if_possible(self, current):
-        image = self._shot()
         for index, expected in enumerate(self.expected):
             if expected["kind"] != "SUPPORT" or current[index]["kind"] != "SUPPORT":
                 continue
-            templates = self.support_templates.get(expected["svt_id"], [])
-            if not templates:
-                mfaalog.info(
-                    f"[自动编队] 助战槽位{index + 1}位置正确；无目标头像资源，未校验助战人物"
-                )
-                continue
-            match = self._match_servant(image, templates, SLOT_ROIS[index])
-            if match is None or match[0] < FACE_THRESHOLD:
-                mfaalog.warning(
-                    f"[自动编队] 助战槽位{index + 1}位置正确，但人物可能与 Chaldea "
-                    f"svtId={expected['svt_id']} 不一致（不阻断编队）"
-                )
-            else:
-                mfaalog.info(f"[自动编队] 助战槽位{index + 1}人物与 Chaldea 一致")
+            actual = current[index]
+            mfaalog.info(
+                f"[自动编队] 助战最终复核通过：槽位{index + 1} "
+                f"svtId={actual.get('svt_id')}，"
+                f"identity_score={actual.get('identity_score', 0.0):.3f}"
+            )
 
     def _confirm_formation_change_if_present(self):
         """点击“编队决定”后，按需确认游戏的二次确认弹窗。"""
@@ -1278,15 +1382,15 @@ class AutoFormationFromChaldea(CustomAction):
 
     def _log_layout(self, title, current):
         def describe(item):
-            if item["kind"] == "LOCAL":
-                return f"LOCAL({item['svt_id']})"
+            if item["kind"] in {"LOCAL", "SUPPORT"}:
+                return f"{item['kind']}({item.get('svt_id')})"
             return item["kind"]
-        mfaalog.info(f"[自动编队] {title}：" + ", ".join(describe(item) for item in current))
         mfaalog.info(
-            "[自动编队] 目标：" + ", ".join(
-                f"LOCAL({item['svt_id']})" if item["kind"] == "LOCAL" else item["kind"]
-                for item in self.expected
-            )
+            f"[自动编队] {title}："
+            + ", ".join(describe(item) for item in current)
+        )
+        mfaalog.info(
+            "[自动编队] 目标：" + ", ".join(describe(item) for item in self.expected)
         )
 
     def _run_pipeline(self, name):
