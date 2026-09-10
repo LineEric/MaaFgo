@@ -35,8 +35,7 @@
       "name": "享游服",
       "path": [
         "resource/base",
-        "resource/cn",
-        "resource/channel/xiangyou"
+        "resource/cn"
       ],
       "option": [
         "资源包类型-cn"
