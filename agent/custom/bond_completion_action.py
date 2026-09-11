@@ -52,6 +52,7 @@ LIST_ROI = (70, 165, 1160, 445)
 # 真机 1280x720 编队页对 NarrowFigures 的稳定分数为 0.8111/0.8730，次高误匹配
 # 仅 0.3752/0.3491；因此编队卡复核使用 0.78。库存列表与礼装仍坚持 0.90。
 SERVANT_VERIFY_THRESHOLD = 0.78
+SERVANT_VERIFY_CROP_BOTTOM = 80
 OTHER_SERVANT_VERIFY_MARGIN = 0.10
 # 真机装入“秘密任务”后的 team 模板稳定命中为 0.8970；列表命中仍为
 # 0.9623。另一次真机回填复核为 0.8365；编队礼装复核据此使用 0.82，
@@ -90,6 +91,7 @@ SERVANT_BOND_OCR_TIMEOUT_SECONDS = 5.0
 STATE_VERIFY_TIMEOUT_SECONDS = 6.0
 EQUIP_SLOT_VERIFY_TIMEOUT_SECONDS = 6.0
 COST_VERIFY_TIMEOUT_SECONDS = 5.0
+UNSPECIFIED_SERVANT_STABILITY_MAX_CHECKS = 3
 
 
 def _truthy(value) -> bool:
@@ -691,30 +693,30 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         if not slots:
             return {}
         previous = None
-        stable = None
-
-        def identified_twice():
-            nonlocal previous, stable
+        for attempt in range(UNSPECIFIED_SERVANT_STABILITY_MAX_CHECKS):
             current = self._identify_unspecified_servants(
                 self._shot(), slots, report_errors=False
             )
             if current is None:
                 previous = None
-                return False
-            signature = tuple(
-                (slot, str(current[slot].get("id"))) for slot in sorted(current)
-            )
-            if signature == previous:
-                stable = current
-                return True
-            previous = signature
-            return False
-
-        if self._wait_for(identified_twice, STATE_VERIFY_TIMEOUT_SECONDS):
-            return stable
+            else:
+                signature = tuple(
+                    (slot, str(current[slot].get("id")))
+                    for slot in sorted(current)
+                )
+                if signature == previous:
+                    if attempt > 1:
+                        mfaalog.info(
+                            f"[羁绊补齐] 其他位置从者经{attempt + 1}轮识别后稳定"
+                        )
+                    return current
+                previous = signature
+            if attempt + 1 < UNSPECIFIED_SERVANT_STABILITY_MAX_CHECKS:
+                time.sleep(0.4)
         mfaalog.error(
-            f"[羁绊补齐] 其他位置从者在{STATE_VERIFY_TIMEOUT_SECONDS:.0f}秒内"
-            "未取得连续一致的唯一识别结果"
+            f"[羁绊补齐] 其他位置从者经过"
+            f"{UNSPECIFIED_SERVANT_STABILITY_MAX_CHECKS}轮识别后"
+            "仍未取得连续一致的唯一结果"
         )
         return None
 
@@ -1196,13 +1198,83 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         verified = self._wait_for(
             matched, SERVANT_SLOT_VERIFY_TIMEOUT_SECONDS
         )
+        cropped_attempted = False
+        cropped_attempts = 0
+        cropped_best_score = 0.0
+        if not verified:
+            cropped_templates = [
+                (name, template[:-SERVANT_VERIFY_CROP_BOTTOM])
+                for name, template in templates
+                if template is not None
+                and template.ndim >= 2
+                and template.shape[0] > SERVANT_VERIFY_CROP_BOTTOM
+            ]
+            if cropped_templates:
+                cropped_attempted = True
+                mfaalog.info(
+                    f"[羁绊补齐] 槽位{slot + 1}常规模板连续匹配不足，"
+                    f"改用底部裁剪{SERVANT_VERIFY_CROP_BOTTOM}px模板重试"
+                )
+
+                def cropped_matched():
+                    nonlocal cropped_attempts, cropped_best_score
+                    cropped_attempts += 1
+                    match = self._match_servant(
+                        self._shot(), cropped_templates, self._slot_roi(slot)
+                    )
+                    score = match[0] if match else 0.0
+                    cropped_best_score = max(cropped_best_score, score)
+                    return score >= SERVANT_VERIFY_THRESHOLD
+
+                verified = self._wait_for(
+                    cropped_matched, SERVANT_SLOT_VERIFY_TIMEOUT_SECONDS
+                )
+        crop_result = (
+            f"，裁剪底部{SERVANT_VERIFY_CROP_BOTTOM}px后"
+            f"best={cropped_best_score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f}，"
+            f"尝试={cropped_attempts}"
+            if cropped_attempted else ""
+        )
         mfaalog.info(
             f"[羁绊补齐] 新从者复核{'通过' if verified else '失败'}："
             f"槽位{slot + 1} {servant['name']}({servant['id']}) "
             f"best={best_score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f}，"
-            f"尝试={attempts}"
+            f"尝试={attempts}{crop_result}"
         )
         return verified
+
+    def _match_final_servant_slot(self, image, templates, slot):
+        """最终整队复核单个从者；完整模板不足时改用底部裁剪80px模板。"""
+        match = self._match_servant(image, templates, self._slot_roi(slot))
+        score = match[0] if match else 0.0
+        if score >= SERVANT_VERIFY_THRESHOLD:
+            return True
+        cropped_templates = [
+            (name, template[:-SERVANT_VERIFY_CROP_BOTTOM])
+            for name, template in templates
+            if template is not None
+            and template.ndim >= 2
+            and template.shape[0] > SERVANT_VERIFY_CROP_BOTTOM
+        ]
+        if not cropped_templates:
+            return False
+        cropped_match = self._match_servant(
+            image, cropped_templates, self._slot_roi(slot)
+        )
+        cropped_score = cropped_match[0] if cropped_match else 0.0
+        if cropped_score < SERVANT_VERIFY_THRESHOLD:
+            return False
+        logged_slots = getattr(self, "_final_crop_logged_slots", set())
+        if slot not in logged_slots:
+            mfaalog.info(
+                f"[羁绊补齐] 最终编队槽位{slot + 1}完整模板匹配不足 "
+                f"({score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f})，"
+                f"裁剪底部{SERVANT_VERIFY_CROP_BOTTOM}px后通过 "
+                f"({cropped_score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f})"
+            )
+            logged_slots.add(slot)
+            self._final_crop_logged_slots = logged_slots
+        return True
 
     def _check_new_servant_bond(self, slot, servant):
         """打开新补从者详情；有数字表示仍可获得羁绊，其他结果表示已满。"""
@@ -1903,6 +1975,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
     def _verify_final_state(self):
         """持续复核最终编队，避免任一旧缓存帧触发整阶段回滚。"""
         attempts = 0
+        self._final_crop_logged_slots = set()
 
         def verified():
             nonlocal attempts
@@ -1924,8 +1997,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             slot = item["slot"]
             if item["kind"] == "LOCAL":
                 templates = self.local_templates.get(item["svt_id"], [])
-                match = self._match_servant(image, templates, self._slot_roi(slot))
-                if match is None or match[0] < SERVANT_VERIFY_THRESHOLD:
+                if not self._match_final_servant_slot(image, templates, slot):
                     return False
             elif item["kind"] == "SUPPORT":
                 match = self._match_template(image, self.support_marker, self._slot_roi(slot))
@@ -1933,15 +2005,13 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                     return False
         for slot, servant in self.added_servants.items():
             templates = self._servant_templates(servant["id"], for_list=False)
-            match = self._match_servant(image, templates, self._slot_roi(slot))
-            if match is None or match[0] < SERVANT_VERIFY_THRESHOLD:
+            if not self._match_final_servant_slot(image, templates, slot):
                 return False
         for slot, servant in self.unspecified_servants_by_slot.items():
             if slot in self.added_servants:
                 continue
             templates = self._servant_templates(servant["id"], for_list=False)
-            match = self._match_servant(image, templates, self._slot_roi(slot))
-            if match is None or match[0] < SERVANT_VERIFY_THRESHOLD:
+            if not self._match_final_servant_slot(image, templates, slot):
                 return False
         for slot, locked in self.locked_unspecified_equips.items():
             before = locked["snapshot"]
