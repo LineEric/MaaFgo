@@ -1,13 +1,48 @@
 {
     "option": {
+        "原生自动战斗使用Chaldea队伍": {
+            "type": "select",
+            "label": "是否使用 Chaldea 队伍",
+            "description": "选择助战后自动应用导入队伍，再进入战斗。无法按等级或技能区分同名从者，请将不用的个体放入保管室。",
+            "default": "否",
+            "cases": [
+                {
+                    "name": "否",
+                    "label": "否"
+                },
+                {
+                    "name": "是",
+                    "label": "是",
+                    "option": [
+                        "Chaldea导入手动输入",
+                        "自动编队助战替代",
+                        "自动编队礼装开关",
+                        "自动编队礼装缺失处理",
+                        "自动补齐从者和羁绊礼装"
+                    ],
+                    "pipeline_override": {
+                        "进本-编队处理": {
+                            "next": [
+                                "执行自动编队"
+                            ]
+                        },
+                        "自动编队完成": {
+                            "next": [
+                                "进本-点击队伍确认"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
         "Chaldea导入手动输入": {
             "type": "input",
-            "label": "Chaldea 队伍导入（可选）",
-            "description": "填写 Chaldea 的分享链接、队伍ID、关卡ID，或点击浏览按钮从本地选择队伍 JSON 文件。下载过的队伍缓存文件名（config/Battle 下，如\"诺100奥_77210_94149047\"）也可以直接填。留空则使用默认策略。",
+            "label": "Chaldea 队伍导入",
+            "description": "必填。支持分享链接、队伍ID、关卡ID、本地 JSON，或 config/Battle 下的缓存文件名。",
             "inputs": [
                 {
                     "name": "chaldea_import_source",
-                    "label": "分享链接 / 队伍ID / 关卡ID / 本地文件（留空=默认策略）",
+                    "label": "分享链接 / 队伍ID / 关卡ID / 本地文件",
                     "default": "",
                     "verify": ".*",
                     "input_type": "file"
@@ -50,10 +85,34 @@
                 }
             }
         },
+        "自动编队助战替代": {
+            "type": "select",
+            "label": "是否用助战代替编队数据",
+            "description": "队伍未标记助战时，可用当前同名助战替代对应从者；无法识别或不匹配会停止任务。已标记助战时按数据校验。",
+            "default": "否",
+            "cases": [
+                {
+                    "name": "否",
+                    "label": "否",
+                    "pipeline_override": {
+                        "执行自动编队": {"attach": {"use_support_substitution": false}},
+                        "执行羁绊补齐自动编队": {"attach": {"use_support_substitution": false}}
+                    }
+                },
+                {
+                    "name": "是",
+                    "label": "是",
+                    "pipeline_override": {
+                        "执行自动编队": {"attach": {"use_support_substitution": true}},
+                        "执行羁绊补齐自动编队": {"attach": {"use_support_substitution": true}}
+                    }
+                }
+            ]
+        },
         "自动编队礼装开关": {
             "type": "select",
             "label": "自动编成礼装",
-            "description": "关闭后仅调整从者和助战位置，完成从者复核后直接确认编队。",
+            "description": "关闭后只编排从者和助战，不更换礼装。",
             "default": "是",
             "cases": [
                 {
@@ -75,7 +134,7 @@
         "自动编队礼装缺失处理": {
             "type": "select",
             "label": "满破礼装缺失时",
-            "description": "仅当 Chaldea 要求满破、数据库和图片资源均存在但仓库未找到时生效。",
+            "description": "仅在指定的满破礼装未找到时生效。",
             "default": "跳过礼装",
             "cases": [
                 {

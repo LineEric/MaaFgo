@@ -52,6 +52,7 @@ LIST_ROI = (70, 165, 1160, 445)
 # 真机 1280x720 编队页对 NarrowFigures 的稳定分数为 0.8111/0.8730，次高误匹配
 # 仅 0.3752/0.3491；因此编队卡复核使用 0.78。库存列表与礼装仍坚持 0.90。
 SERVANT_VERIFY_THRESHOLD = 0.78
+SERVANT_VERIFY_CROP_BOTTOM = 80
 OTHER_SERVANT_VERIFY_MARGIN = 0.10
 # 真机装入“秘密任务”后的 team 模板稳定命中为 0.8970；列表命中仍为
 # 0.9623。另一次真机回填复核为 0.8365；编队礼装复核据此使用 0.82，
@@ -84,6 +85,13 @@ EMPTY_EQUIP_SATURATED_RATIO_MAX = 0.30
 SUPPORT_TYPES = {"friend", "fixed", "npc"}
 SHORT_PARTY_CONFIRM_ROI = (650, 540, 350, 120)
 SHORT_PARTY_POLL_SECONDS = 5.0
+SERVANT_SLOT_VERIFY_TIMEOUT_SECONDS = 6.0
+SERVANT_DETAIL_OPEN_TIMEOUT_SECONDS = 6.0
+SERVANT_BOND_OCR_TIMEOUT_SECONDS = 5.0
+STATE_VERIFY_TIMEOUT_SECONDS = 6.0
+EQUIP_SLOT_VERIFY_TIMEOUT_SECONDS = 6.0
+COST_VERIFY_TIMEOUT_SECONDS = 5.0
+UNSPECIFIED_SERVANT_STABILITY_MAX_CHECKS = 3
 
 
 def _truthy(value) -> bool:
@@ -108,6 +116,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         self.local_equip_ids = set()
         self.local_servant_inventory_active = False
         self.local_equip_inventory_active = False
+        self.servant_detail_open = False
         try:
             node = context.get_node_data(argv.node_name) or {}
             attach = node.get("attach") or {}
@@ -140,6 +149,9 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 )
                 self.debug_preserve_failure = _truthy(
                     attach.get("debug_preserve_failure", False)
+                )
+                self.use_support_substitution = _truthy(
+                    attach.get("use_support_substitution", False)
                 )
             except (TypeError, ValueError) as exc:
                 return self._result_fail(f"bond_completion_option_invalid: {exc}")
@@ -181,14 +193,14 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 return self._result_fail("bond_completion_slot_invalid: 人数不足弹窗确认后未回到编队页")
             # 编队确认页的蓝色“开始任务”按钮与“编队决定”外观接近，单独用
             # edit_marker 可能误判。先用确认页专有的“配置变更”按钮定界。
-            if self._on_confirm_page():
+            if self._confirmed_now(self._on_confirm_page):
                 mfaalog.info("[羁绊补齐] 位于编队确认页，进入配置变更")
                 if not self._run_pipeline("羁绊补齐-打开配置"):
                     return self._result_fail("bond_completion_slot_invalid: 未找到配置变更按钮")
                 if not self._wait_for(self._in_formation_edit, 5.0):
                     return self._result_fail("bond_completion_slot_invalid: 未进入配置变更页")
                 self.opened_edit = True
-            elif self._in_formation_edit():
+            elif self._confirmed_now(self._in_formation_edit):
                 mfaalog.info("[羁绊补齐] 已位于编队编辑页")
                 self.opened_edit = True
             else:
@@ -201,9 +213,13 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             detected = self._detect_slots_stable()
             if detected is None:
                 return self._abort_safe("bond_completion_slot_invalid: 无法识别编队槽位")
-            support_slots = [i for i, item in enumerate(detected) if item["kind"] == "SUPPORT"]
-            if len(support_slots) > 1:
-                return self._abort_safe("bond_completion_slot_invalid: 识别到多个助战槽")
+            expected_support_count = sum(
+                item["kind"] == "SUPPORT" for item in self.expected
+            )
+            if not self._configure_support_target(detected, expected_support_count):
+                return self._abort_safe(
+                    "bond_completion_slot_invalid: 助战身份或替代目标不匹配"
+                )
             self.equip_probe_slots = [
                 i for i, item in enumerate(detected)
                 if item["kind"] not in {"EMPTY", "SUPPORT"}
@@ -211,13 +227,12 @@ class CompleteBondFormation(AutoFormationFromChaldea):
 
             # Chaldea 未指定位置上的残留从者不能简单丢出评分模型。先识别其身份：
             # 允许修改时把对应槽位列为替换候选；禁止修改时把它锁定为固定成员。
-            image = self._shot()
             other_slots = [
                 i for i, item in enumerate(detected)
                 if self.expected[i]["kind"] == "EMPTY" and item["kind"] == "OTHER"
             ]
-            self.unspecified_servants_by_slot = self._identify_unspecified_servants(
-                image, other_slots
+            self.unspecified_servants_by_slot = self._identify_unspecified_servants_stable(
+                other_slots
             )
             if self.unspecified_servants_by_slot is None:
                 return self._abort_safe(
@@ -247,9 +262,14 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             self.initial_used_cost = self.used_cost
 
             current_servants = self._current_known_servants()
-            image = self._shot()
-            initial_fixed_equips, empty_equip_slots, occupied_unknown, equip_by_slot = self._classify_current_equips(
-                image, detected
+            (
+                initial_fixed_equips,
+                empty_equip_slots,
+                occupied_unknown,
+                equip_by_slot,
+                image,
+            ) = self._classify_current_equips_stable(
+                detected
             )
             if initial_fixed_equips is None:
                 return self._abort_safe("bond_completion_final_mismatch: Chaldea 保护礼装不匹配")
@@ -294,9 +314,11 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 return self._abort_safe("bond_completion_select_verify_failed: 补从者状态不可确认")
 
             # 新从者的礼装位在选人后为空；加入前再次用编队截图验证。
-            image = self._shot()
             for slot in self.added_servants:
-                if slot not in self.empty_equip_slots and self._is_empty_equip_slot(image, slot):
+                if (
+                    slot not in self.empty_equip_slots
+                    and self._wait_for_empty_equip_slot(slot)
+                ):
                     self.empty_equip_slots.append(slot)
             self.empty_equip_slots = sorted(set(self.empty_equip_slots))
 
@@ -627,13 +649,26 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         return used, maximum
 
     def _read_cost_consistent(self):
-        first = self._ocr_cost_once()
-        time.sleep(0.35)
-        second = self._ocr_cost_once()
-        if first is None or second is None or first != second:
-            mfaalog.warning(f"[羁绊补齐] COST 连续结果不一致: {first} / {second}")
-            return None
-        return first
+        deadline = time.monotonic() + COST_VERIFY_TIMEOUT_SECONDS
+        previous = None
+        attempts = 0
+        while time.monotonic() < deadline:
+            current = self._ocr_cost_once()
+            attempts += 1
+            if current is not None and current == previous:
+                if attempts > 2:
+                    mfaalog.info(
+                        f"[羁绊补齐] COST 经{attempts}次读取后稳定："
+                        f"{current[0]}/{current[1]}"
+                    )
+                return current
+            previous = current if current is not None else None
+            time.sleep(0.35)
+        mfaalog.warning(
+            f"[羁绊补齐] COST 在{COST_VERIFY_TIMEOUT_SECONDS:.0f}秒内"
+            f"未取得连续一致结果，最后={previous}，尝试={attempts}"
+        )
+        return None
 
     def _current_known_servants(self):
         result = []
@@ -653,7 +688,39 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         result.extend(dict(item) for item in self.added_servants.values())
         return result
 
-    def _identify_unspecified_servants(self, image, slots):
+    def _identify_unspecified_servants_stable(self, slots):
+        """持续识别其他位置从者，要求连续两次身份结果一致。"""
+        if not slots:
+            return {}
+        previous = None
+        for attempt in range(UNSPECIFIED_SERVANT_STABILITY_MAX_CHECKS):
+            current = self._identify_unspecified_servants(
+                self._shot(), slots, report_errors=False
+            )
+            if current is None:
+                previous = None
+            else:
+                signature = tuple(
+                    (slot, str(current[slot].get("id")))
+                    for slot in sorted(current)
+                )
+                if signature == previous:
+                    if attempt > 1:
+                        mfaalog.info(
+                            f"[羁绊补齐] 其他位置从者经{attempt + 1}轮识别后稳定"
+                        )
+                    return current
+                previous = signature
+            if attempt + 1 < UNSPECIFIED_SERVANT_STABILITY_MAX_CHECKS:
+                time.sleep(0.4)
+        mfaalog.error(
+            f"[羁绊补齐] 其他位置从者经过"
+            f"{UNSPECIFIED_SERVANT_STABILITY_MAX_CHECKS}轮识别后"
+            "仍未取得连续一致的唯一结果"
+        )
+        return None
+
+    def _identify_unspecified_servants(self, image, slots, report_errors=True):
         """识别 Chaldea 未指定、但当前队伍仍占用的本地从者槽。"""
         if not slots:
             return {}
@@ -679,7 +746,8 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                     ranked.append((float(match[0]), servant_id, match[2], servant))
             ranked.sort(key=lambda item: (-item[0], item[1]))
             if not ranked:
-                mfaalog.error(f"[羁绊补齐] 槽位{slot + 1}没有可用的从者模板候选")
+                if report_errors:
+                    mfaalog.error(f"[羁绊补齐] 槽位{slot + 1}没有可用的从者模板候选")
                 return None
             best = ranked[0]
             second_score = ranked[1][0] if len(ranked) > 1 else -1.0
@@ -692,12 +760,13 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 best[0] < SERVANT_VERIFY_THRESHOLD
                 or best[0] - second_score < OTHER_SERVANT_VERIFY_MARGIN
             ):
-                mfaalog.error(
-                    f"[羁绊补齐] 槽位{slot + 1}其他位置从者识别不唯一："
-                    f"{best[0]:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f}，"
-                    f"margin={best[0] - second_score:.4f}/"
-                    f"{OTHER_SERVANT_VERIFY_MARGIN:.2f}"
-                )
+                if report_errors:
+                    mfaalog.error(
+                        f"[羁绊补齐] 槽位{slot + 1}其他位置从者识别不唯一："
+                        f"{best[0]:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f}，"
+                        f"margin={best[0] - second_score:.4f}/"
+                        f"{OTHER_SERVANT_VERIFY_MARGIN:.2f}"
+                    )
                 return None
             servant = dict(best[3])
             if not (servant.get("bond") or {}).get("tags"):
@@ -730,6 +799,13 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             f"sat_ratio={saturated_ratio:.3f}，empty={empty}"
         )
         return empty
+
+    def _wait_for_empty_equip_slot(self, slot):
+        """持续等待指定礼装位呈现为空，容忍返回动画与旧缓存帧。"""
+        return self._wait_for(
+            lambda: self._is_empty_equip_slot(self._shot(), slot),
+            EQUIP_SLOT_VERIFY_TIMEOUT_SECONDS,
+        )
 
     def _equip_slot_snapshot(self, image, slot):
         if image is None:
@@ -767,7 +843,47 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         _name, template = data
         return self._match_template(image, template, EQUIP_TEAM_ROIS[slot])
 
-    def _classify_current_equips(self, image, detected):
+    def _classify_current_equips_stable(self, detected):
+        """要求连续两帧得到相同礼装分类，再用于规划或保护校验。"""
+        previous = None
+        stable = None
+        stable_image = None
+
+        def classified_twice():
+            nonlocal previous, stable, stable_image
+            image = self._shot()
+            current = self._classify_current_equips(
+                image, detected, report_errors=False
+            )
+            fixed, empty, unknown, by_slot = current
+            if fixed is None:
+                previous = None
+                return False
+            signature = (
+                tuple(sorted(str(item.get("id")) for item in fixed)),
+                tuple(empty),
+                tuple(unknown),
+                tuple(sorted(
+                    (slot, str(item.get("id")))
+                    for slot, item in by_slot.items()
+                )),
+            )
+            if signature == previous:
+                stable = current
+                stable_image = image
+                return True
+            previous = signature
+            return False
+
+        if self._wait_for(classified_twice, STATE_VERIFY_TIMEOUT_SECONDS):
+            return (*stable, stable_image)
+        mfaalog.error(
+            f"[羁绊补齐] 当前礼装状态在{STATE_VERIFY_TIMEOUT_SECONDS:.0f}秒内"
+            "未取得连续一致的识别结果"
+        )
+        return None, [], [], {}, None
+
+    def _classify_current_equips(self, image, detected, report_errors=True):
         fixed, empty, unknown, equip_by_slot = [], [], [], {}
         for slot, state in enumerate(detected):
             if state["kind"] in {"EMPTY", "SUPPORT"}:
@@ -777,10 +893,12 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 match = self._match_equip_id(image, protected_id, slot)
                 if match is None or match[0] < EQUIP_VERIFY_THRESHOLD:
                     score = match[0] if match else 0.0
-                    mfaalog.error(
-                        f"[羁绊补齐] 保护礼装复核失败：槽位{slot + 1} ceId={protected_id} "
-                        f"score={score:.4f}/{EQUIP_VERIFY_THRESHOLD:.2f}"
-                    )
+                    if report_errors:
+                        mfaalog.error(
+                            f"[羁绊补齐] 保护礼装复核失败：槽位{slot + 1} "
+                            f"ceId={protected_id} "
+                            f"score={score:.4f}/{EQUIP_VERIFY_THRESHOLD:.2f}"
+                        )
                     return None, [], [], {}
                 equip = self.equip_database.get(str(protected_id))
                 if equip is not None:
@@ -936,7 +1054,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         return hits
 
     def _enter_servant_select_new(self, slot):
-        if self._in_servant_select():
+        if self._confirmed_now(self._in_servant_select):
             return True
         self.controller.post_click(*self._slot_center(slot)).wait()
         if not self._wait_for(self._in_servant_select, 8.0):
@@ -944,7 +1062,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         return self._run_pipeline("羁绊补齐-确认从者选择界面")
 
     def _leave_servant_select(self):
-        if self._in_formation_edit():
+        if self._confirmed_now(self._in_formation_edit):
             return True
         if not self._run_pipeline("羁绊补齐-从者选择返回"):
             return False
@@ -1064,13 +1182,99 @@ class CompleteBondFormation(AutoFormationFromChaldea):
 
     def _verify_servant_slot(self, slot, servant):
         templates = self._servant_templates(servant["id"], for_list=False)
-        match = self._match_servant(self._shot(), templates, self._slot_roi(slot))
-        score = match[0] if match else 0.0
-        mfaalog.info(
-            f"[羁绊补齐] 新从者复核：槽位{slot + 1} {servant['name']}({servant['id']}) "
-            f"score={score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f}"
+        attempts = 0
+        best_score = 0.0
+
+        def matched():
+            nonlocal attempts, best_score
+            attempts += 1
+            match = self._match_servant(
+                self._shot(), templates, self._slot_roi(slot)
+            )
+            score = match[0] if match else 0.0
+            best_score = max(best_score, score)
+            return score >= SERVANT_VERIFY_THRESHOLD
+
+        verified = self._wait_for(
+            matched, SERVANT_SLOT_VERIFY_TIMEOUT_SECONDS
         )
-        return match is not None and match[0] >= SERVANT_VERIFY_THRESHOLD
+        cropped_attempted = False
+        cropped_attempts = 0
+        cropped_best_score = 0.0
+        if not verified:
+            cropped_templates = [
+                (name, template[:-SERVANT_VERIFY_CROP_BOTTOM])
+                for name, template in templates
+                if template is not None
+                and template.ndim >= 2
+                and template.shape[0] > SERVANT_VERIFY_CROP_BOTTOM
+            ]
+            if cropped_templates:
+                cropped_attempted = True
+                mfaalog.info(
+                    f"[羁绊补齐] 槽位{slot + 1}常规模板连续匹配不足，"
+                    f"改用底部裁剪{SERVANT_VERIFY_CROP_BOTTOM}px模板重试"
+                )
+
+                def cropped_matched():
+                    nonlocal cropped_attempts, cropped_best_score
+                    cropped_attempts += 1
+                    match = self._match_servant(
+                        self._shot(), cropped_templates, self._slot_roi(slot)
+                    )
+                    score = match[0] if match else 0.0
+                    cropped_best_score = max(cropped_best_score, score)
+                    return score >= SERVANT_VERIFY_THRESHOLD
+
+                verified = self._wait_for(
+                    cropped_matched, SERVANT_SLOT_VERIFY_TIMEOUT_SECONDS
+                )
+        crop_result = (
+            f"，裁剪底部{SERVANT_VERIFY_CROP_BOTTOM}px后"
+            f"best={cropped_best_score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f}，"
+            f"尝试={cropped_attempts}"
+            if cropped_attempted else ""
+        )
+        mfaalog.info(
+            f"[羁绊补齐] 新从者复核{'通过' if verified else '失败'}："
+            f"槽位{slot + 1} {servant['name']}({servant['id']}) "
+            f"best={best_score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f}，"
+            f"尝试={attempts}{crop_result}"
+        )
+        return verified
+
+    def _match_final_servant_slot(self, image, templates, slot):
+        """最终整队复核单个从者；完整模板不足时改用底部裁剪80px模板。"""
+        match = self._match_servant(image, templates, self._slot_roi(slot))
+        score = match[0] if match else 0.0
+        if score >= SERVANT_VERIFY_THRESHOLD:
+            return True
+        cropped_templates = [
+            (name, template[:-SERVANT_VERIFY_CROP_BOTTOM])
+            for name, template in templates
+            if template is not None
+            and template.ndim >= 2
+            and template.shape[0] > SERVANT_VERIFY_CROP_BOTTOM
+        ]
+        if not cropped_templates:
+            return False
+        cropped_match = self._match_servant(
+            image, cropped_templates, self._slot_roi(slot)
+        )
+        cropped_score = cropped_match[0] if cropped_match else 0.0
+        if cropped_score < SERVANT_VERIFY_THRESHOLD:
+            return False
+        logged_slots = getattr(self, "_final_crop_logged_slots", set())
+        if slot not in logged_slots:
+            mfaalog.info(
+                f"[羁绊补齐] 最终编队槽位{slot + 1}完整模板匹配不足 "
+                f"({score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f})，"
+                f"裁剪底部{SERVANT_VERIFY_CROP_BOTTOM}px后通过 "
+                f"({cropped_score:.4f}/{SERVANT_VERIFY_THRESHOLD:.2f})"
+            )
+            logged_slots.add(slot)
+            self._final_crop_logged_slots = logged_slots
+        return True
 
     def _check_new_servant_bond(self, slot, servant):
         """打开新补从者详情；有数字表示仍可获得羁绊，其他结果表示已满。"""
@@ -1086,41 +1290,34 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         })
         self._focus_user(f"正在确认从者羁绊：{servant['name']}")
         opened = self._run_pipeline("羁绊补齐-打开从者详情")
-        detail_opened = not self._in_formation_edit()
+        # 截图接口可能在本次截图完成前返回上一帧缓存。持续等待“已经离开
+        # 编队编辑页”，避免一次旧帧就把实际已打开的详情页判成失败。
+        detail_opened = self._wait_for(
+            lambda: not self._in_formation_edit(),
+            SERVANT_DETAIL_OPEN_TIMEOUT_SECONDS,
+        )
         if not detail_opened:
             mfaalog.error(
                 f"[羁绊补齐] 从者详情未打开：槽位{slot + 1} "
                 f"{servant['name']}({servant['id']})"
             )
             return "failed"
+        self.servant_detail_open = True
 
         result = "failed"
         try:
             if not opened:
-                mfaalog.error(
-                    f"[羁绊补齐] 从者详情已出现但 Pipeline 返回失败："
+                # Pipeline 的节点结果也可能受切页首帧影响；既然已经通过持续
+                # 画面检测确认详情页打开，就以实际 UI 状态为准继续检查。
+                mfaalog.warning(
+                    f"[羁绊补齐] 打开从者详情 Pipeline 返回失败，但已确认详情页出现："
                     f"槽位{slot + 1} {servant['name']}({servant['id']})"
                 )
+            bond_state = self._read_servant_bond_state()
+            if bond_state is None:
                 return "failed"
-            image = self._shot()
-            if image is None:
-                mfaalog.error("[羁绊补齐] 从者详情截图不可用")
-                return "failed"
-            roi = self._scale_roi(SERVANT_BOND_REMAINING_ROI)
-            try:
-                detail = self.context.run_recognition_direct("OCR", JOCR(roi=roi), image)
-            except Exception as exc:
-                mfaalog.error(f"[羁绊补齐] 从者羁绊 OCR 调用异常: {exc}")
-                return "failed"
-            texts = []
-            if detail is not None:
-                for item in detail.all_results:
-                    text = str(getattr(item, "text", "") or "").strip()
-                    if text:
-                        texts.append(text)
-            raw = " ".join(texts)
-            if re.search(r"\d", raw):
-                result = "available"
+            result, raw = bond_state
+            if result == "available":
                 mfaalog.info(
                     f"[羁绊补齐] 从者羁绊未满：槽位{slot + 1} "
                     f"{servant['name']}({servant['id']})，OCR={raw!r}"
@@ -1132,13 +1329,70 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                     f"{servant['name']}({servant['id']})，OCR={raw!r}"
                 )
         finally:
-            closed = self._run_pipeline("羁绊补齐-关闭从者详情")
-            if not closed or not self._wait_for(self._in_formation_edit, 5.0):
-                mfaalog.error(
-                    f"[羁绊补齐] 关闭从者详情后未返回编队：槽位{slot + 1}"
-                )
+            if not self._close_servant_detail(slot):
                 result = "failed"
         return result
+
+    def _read_servant_bond_state(self):
+        """连续两帧得到相同结论后，才确认新从者的羁绊状态。"""
+        previous_state = None
+        stable_result = None
+
+        def recognized_twice():
+            nonlocal previous_state, stable_result
+            current = self._read_servant_bond_state_once()
+            if current is None:
+                previous_state = None
+                return False
+            state, raw = current
+            if state == previous_state:
+                stable_result = (state, raw)
+                return True
+            previous_state = state
+            return False
+
+        if self._wait_for(recognized_twice, SERVANT_BOND_OCR_TIMEOUT_SECONDS):
+            return stable_result
+        mfaalog.error(
+            f"[羁绊补齐] 从者羁绊状态在{SERVANT_BOND_OCR_TIMEOUT_SECONDS:.0f}秒内"
+            "未得到连续一致的识别结果"
+        )
+        return None
+
+    def _read_servant_bond_state_once(self):
+        image = self._shot()
+        if image is None:
+            return None
+        roi = self._scale_roi(SERVANT_BOND_REMAINING_ROI)
+        try:
+            detail = self.context.run_recognition_direct("OCR", JOCR(roi=roi), image)
+        except Exception as exc:
+            mfaalog.warning(f"[羁绊补齐] 从者羁绊 OCR 单次调用异常: {exc}")
+            return None
+        texts = []
+        if detail is not None:
+            for item in detail.all_results:
+                text = str(getattr(item, "text", "") or "").strip()
+                if text:
+                    texts.append(text)
+        raw = " ".join(texts)
+        state = "available" if re.search(r"\d", raw) else "full"
+        return state, raw
+
+    def _close_servant_detail(self, slot=None):
+        """关闭已确认打开的详情页，并持续等待返回编队编辑页。"""
+        closed = self._run_pipeline("羁绊补齐-关闭从者详情")
+        returned = self._wait_for(self._in_formation_edit, 5.0)
+        if returned:
+            self.servant_detail_open = False
+            if not closed:
+                mfaalog.warning(
+                    "[羁绊补齐] 关闭从者详情 Pipeline 返回失败，但已确认回到编队"
+                )
+            return True
+        suffix = f"：槽位{slot + 1}" if slot is not None else ""
+        mfaalog.error(f"[羁绊补齐] 关闭从者详情后未返回编队{suffix}")
+        return False
 
     @staticmethod
     def _slot_roi(slot):
@@ -1375,7 +1629,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
     # ---------- 礼装规划与选择 ----------
 
     def _enter_equip_select_new(self, slot):
-        if self._in_equip_select():
+        if self._confirmed_now(self._in_equip_select):
             return True
         x, _y, width, _height = self._slot_roi(slot)
         point = (int(round((x + width / 2) * self.sx)), int(round(EQUIP_SLOT_CLICK_Y * self.sy)))
@@ -1385,7 +1639,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         return self._run_pipeline("羁绊补齐-确认礼装选择界面")
 
     def _leave_equip_select_new(self):
-        if self._in_formation_edit():
+        if self._confirmed_now(self._in_formation_edit):
             return True
         if not self._run_pipeline("羁绊补齐-礼装选择返回"):
             return False
@@ -1560,7 +1814,11 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 )
                 self.controller.post_click(*match[1]).wait()
                 time.sleep(0.3)
-                confirm = self._match_template(self._shot(), self.equip_confirm_marker)
+                confirm = self._wait_for_template_match(
+                    self.equip_confirm_marker,
+                    0.80,
+                    STATE_VERIFY_TIMEOUT_SECONDS,
+                )
                 if confirm is not None and confirm[0] >= 0.80:
                     self.controller.post_click(*confirm[1]).wait()
                     if self._wait_for(self._in_formation_edit, 6.0):
@@ -1587,7 +1845,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             return False
         if not self._wait_for(self._in_formation_edit, 6.0):
             return False
-        if not self._is_empty_equip_slot(self._shot(), slot):
+        if not self._wait_for_empty_equip_slot(slot):
             return False
         cost = self._read_cost_consistent()
         if cost is None:
@@ -1662,9 +1920,8 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 return False
             if result != "selected":
                 return False
-            match = self._match_equip_id(self._shot(), equip["id"], slot)
-            if match is None or match[0] < EQUIP_VERIFY_THRESHOLD:
-                score = match[0] if match else 0.0
+            verified, score = self._wait_for_equip_slot_match(slot, equip["id"])
+            if not verified:
                 mfaalog.error(
                     f"[羁绊补齐] 礼装复核失败：槽位{slot + 1} {equip['name']}({equip['id']}) "
                     f"score={score:.4f}/{EQUIP_VERIFY_THRESHOLD:.2f}"
@@ -1702,14 +1959,45 @@ class CompleteBondFormation(AutoFormationFromChaldea):
 
     # ---------- 最终复核与安全退出 ----------
 
+    def _wait_for_equip_slot_match(self, slot, equip_id):
+        best_score = 0.0
+
+        def matched():
+            nonlocal best_score
+            match = self._match_equip_id(self._shot(), equip_id, slot)
+            score = match[0] if match else 0.0
+            best_score = max(best_score, score)
+            return score >= EQUIP_VERIFY_THRESHOLD
+
+        verified = self._wait_for(matched, EQUIP_SLOT_VERIFY_TIMEOUT_SECONDS)
+        return verified, best_score
+
     def _verify_final_state(self):
-        image = self._shot()
+        """持续复核最终编队，避免任一旧缓存帧触发整阶段回滚。"""
+        attempts = 0
+        self._final_crop_logged_slots = set()
+
+        def verified():
+            nonlocal attempts
+            attempts += 1
+            return self._verify_final_state_once(self._shot())
+
+        result = self._wait_for(verified, STATE_VERIFY_TIMEOUT_SECONDS)
+        if not result:
+            mfaalog.error(
+                f"[羁绊补齐] 最终编队在{STATE_VERIFY_TIMEOUT_SECONDS:.0f}秒内"
+                f"未通过完整复核，尝试={attempts}"
+            )
+        return result
+
+    def _verify_final_state_once(self, image):
+        if image is None:
+            return False
         for item in self.expected:
             slot = item["slot"]
             if item["kind"] == "LOCAL":
                 templates = self.local_templates.get(item["svt_id"], [])
-                match = self._match_servant(image, templates, self._slot_roi(slot))
-                if match is None or match[0] < SERVANT_VERIFY_THRESHOLD:
+                if not self._match_final_servant_slot(image, templates, slot):
                     return False
             elif item["kind"] == "SUPPORT":
                 match = self._match_template(image, self.support_marker, self._slot_roi(slot))
@@ -1717,15 +2005,13 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                     return False
         for slot, servant in self.added_servants.items():
             templates = self._servant_templates(servant["id"], for_list=False)
-            match = self._match_servant(image, templates, self._slot_roi(slot))
-            if match is None or match[0] < SERVANT_VERIFY_THRESHOLD:
+            if not self._match_final_servant_slot(image, templates, slot):
                 return False
         for slot, servant in self.unspecified_servants_by_slot.items():
             if slot in self.added_servants:
                 continue
             templates = self._servant_templates(servant["id"], for_list=False)
-            match = self._match_servant(image, templates, self._slot_roi(slot))
-            if match is None or match[0] < SERVANT_VERIFY_THRESHOLD:
+            if not self._match_final_servant_slot(image, templates, slot):
                 return False
         for slot, locked in self.locked_unspecified_equips.items():
             before = locked["snapshot"]
@@ -1786,11 +2072,15 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             return CustomAction.RunResult(success=False)
         self._focus_user("羁绊优化未完成，正在恢复原编队", "orange")
         mfaalog.warning(f"[羁绊补齐] {reason}；尝试取消本阶段并保留第一阶段编队")
-        if self._in_equip_select():
+        # 详情页中的返回/取消控件与编队页不同。若详情检查或关闭阶段出错，
+        # 先确保回到编队编辑页，再继续原有的取消变更流程。
+        if getattr(self, "servant_detail_open", False):
+            self._close_servant_detail()
+        if self._confirmed_now(self._in_equip_select):
             self._leave_equip_select_new()
-        elif self._in_servant_select():
+        elif self._confirmed_now(self._in_servant_select):
             self._leave_servant_select()
-        if self._in_formation_edit() and self._run_pipeline("羁绊补齐-取消配置"):
+        if self._confirmed_now(self._in_formation_edit) and self._run_pipeline("羁绊补齐-取消配置"):
             # 队伍发生过变化时，游戏会询问是否放弃当前改动。右侧“决定”才会
             # 恢复进入本 Action 前的第一阶段队伍；左侧“取消”会留在编辑页。
             self._run_pipeline("羁绊补齐-取消变更确认")
