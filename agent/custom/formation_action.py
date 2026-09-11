@@ -69,11 +69,15 @@ SWAP_VERIFY_TIMEOUT_SECONDS = 6.0
 SWAP_VERIFY_INTERVAL_SECONDS = 0.5
 SERVANT_REPLACE_VERIFY_TIMEOUT_SECONDS = 10.0
 SERVANT_REPLACE_VERIFY_INTERVAL_SECONDS = 0.5
+SERVANT_LIST_STABILITY_MAX_CHECKS = 3
+SERVANT_LIST_STABILITY_INTERVAL_SECONDS = 0.4
+SERVANT_LIST_STABILITY_CENTER_DELTA_PX = 6
 SELECT_PAGE_ENTER_TIMEOUT_SECONDS = 8.0
 EMPTY_SLOT_STD_THRESHOLD = 25.0
 EMPTY_SLOT_CHANNEL_DELTA_THRESHOLD = 6.0
 FORMATION_CONFIRM_ROI = (724, 583, 232, 101)
 FORMATION_CONFIRM_DELAY_SECONDS = 1.0
+FORMATION_CONFIRM_APPEAR_TIMEOUT_SECONDS = 3.0
 SELECT_PAGE_SCALE_ROI = (2, 598, 110, 122)
 SELECT_PAGE_SCALE_THRESHOLD = 0.85
 EQUIP_FILTER_TAG_THRESHOLD = 0.92
@@ -85,6 +89,9 @@ EQUIP_MATCH_STABILITY_INTERVAL_SECONDS = 0.5
 EQUIP_MATCH_STABILITY_MAX_CHECKS = 3
 EQUIP_MATCH_CENTER_DELTA_PX = 6
 SCREENSHOT_SETTLE_SECONDS = 0.2
+SLOT_LAYOUT_VERIFY_TIMEOUT_SECONDS = 5.0
+SLOT_LAYOUT_VERIFY_INTERVAL_SECONDS = 0.4
+TEMPLATE_APPEAR_TIMEOUT_SECONDS = 3.0
 MAX_REORDER_OPS = 12
 MAX_FIND_SERVANT_ROUNDS = 80
 MAX_SERVANT_SELECT_ATTEMPTS = 3
@@ -202,7 +209,7 @@ class AutoFormationFromChaldea(CustomAction):
             self._prepare_target_templates()
             self.list_view_prepared = False
             self.equip_list_view_prepared = False
-            current = self._detect_slots()
+            current = self._detect_slots_stable()
             if current is None:
                 return CustomAction.RunResult(success=False)
             self._log_layout("初始", current)
@@ -216,7 +223,7 @@ class AutoFormationFromChaldea(CustomAction):
             # 一半的目标本地从者不匹配时，整队清空比逐个拖动、替换更直接。清空
             # 流程结束后游戏已处于编辑状态，不应再次点击“配置变更”。
             should_clear = self._should_clear_formation(current)
-            already_editing = self._in_formation_edit()
+            already_editing = self._confirmed_now(self._in_formation_edit)
             if should_clear:
                 if already_editing:
                     # “编队编辑”入口只存在于编队确认页。该分支仅用于测试中断或
@@ -232,7 +239,7 @@ class AutoFormationFromChaldea(CustomAction):
                     if not self._wait_for(self._in_formation_edit, 5.0):
                         self._fail("formation_clear_failed: 清空编队后未进入编辑状态")
                         return CustomAction.RunResult(success=False)
-                    current = self._detect_slots()
+                    current = self._detect_slots_stable()
                     if current is None:
                         return CustomAction.RunResult(success=False)
                     self._log_layout("清空后", current)
@@ -253,7 +260,7 @@ class AutoFormationFromChaldea(CustomAction):
             if not self._replace_local_servants():
                 return CustomAction.RunResult(success=False)
 
-            current = self._detect_slots()
+            current = self._detect_slots_stable()
             if current is None:
                 return CustomAction.RunResult(success=False)
             self._log_layout("最终复核", current)
@@ -268,7 +275,7 @@ class AutoFormationFromChaldea(CustomAction):
                     return CustomAction.RunResult(success=False)
                 # 礼装选择不应改变从者布局；决定前再做一次从者/助战复核，防止界面
                 # 加载或误触导致带着错误队伍提交。
-                current = self._detect_slots()
+                current = self._detect_slots_stable()
                 if current is None:
                     return CustomAction.RunResult(success=False)
                 mismatch = self._first_mismatch(current)
@@ -630,6 +637,37 @@ class AutoFormationFromChaldea(CustomAction):
                 detected.append({"kind": "OTHER", "svt_id": None, "score": best[0] if best else 0.0})
         return detected
 
+    def _detect_slots_stable(self):
+        """持续读取布局，要求连续两帧的槽位类型和身份一致。"""
+        deadline = time.monotonic() + SLOT_LAYOUT_VERIFY_TIMEOUT_SECONDS
+        previous = None
+        latest = None
+        attempts = 0
+        while time.monotonic() < deadline:
+            if self.context.tasker.stopping:
+                return None
+            latest = self._detect_slots()
+            attempts += 1
+            if latest is not None:
+                signature = tuple(
+                    (item.get("kind"), item.get("svt_id")) for item in latest
+                )
+                if signature == previous:
+                    if attempts > 2:
+                        mfaalog.info(
+                            f"[自动编队] 编队槽位布局经{attempts}次复核后稳定"
+                        )
+                    return latest
+                previous = signature
+            else:
+                previous = None
+            time.sleep(SLOT_LAYOUT_VERIFY_INTERVAL_SECONDS)
+        mfaalog.warning(
+            f"[自动编队] 编队槽位布局在"
+            f"{SLOT_LAYOUT_VERIFY_TIMEOUT_SECONDS:.0f}秒内未稳定"
+        )
+        return None
+
     def _match_template_groups(self, image, groups, roi):
         """在多个从者 ID 的模板组中返回最高分 ``(score, id, template)``。"""
         best = None
@@ -821,7 +859,7 @@ class AutoFormationFromChaldea(CustomAction):
 
     def _reorder_existing(self):
         for _ in range(MAX_REORDER_OPS):
-            current = self._detect_slots()
+            current = self._detect_slots_stable()
             if current is None:
                 return False
             target_index = next(
@@ -861,12 +899,17 @@ class AutoFormationFromChaldea(CustomAction):
         """轮询等待拖动动画和卡片资源刷新完成，再复核目标槽位。"""
         deadline = time.monotonic() + SWAP_VERIFY_TIMEOUT_SECONDS
         latest = None
+        consecutive = 0
         while time.monotonic() < deadline:
             if self.context.tasker.stopping:
                 return False, latest
             latest = self._detect_slots()
             if latest is not None and self._matches(expected, latest[target_index]):
-                return True, latest
+                consecutive += 1
+                if consecutive >= 2:
+                    return True, latest
+            else:
+                consecutive = 0
             time.sleep(SWAP_VERIFY_INTERVAL_SECONDS)
         return False, latest
 
@@ -881,7 +924,7 @@ class AutoFormationFromChaldea(CustomAction):
         for index, expected in enumerate(self.expected):
             if expected["kind"] != "LOCAL":
                 continue
-            current = self._detect_slots()
+            current = self._detect_slots_stable()
             if current is None:
                 return False
             if self._matches(expected, current[index]):
@@ -920,17 +963,22 @@ class AutoFormationFromChaldea(CustomAction):
         """等待从者卡资源加载完成，再判断本次换人是否生效。"""
         deadline = time.monotonic() + SERVANT_REPLACE_VERIFY_TIMEOUT_SECONDS
         latest = None
+        consecutive = 0
         while time.monotonic() < deadline:
             if self.context.tasker.stopping:
                 return False, latest
             latest = self._detect_slots()
             if latest is not None and self._matches(expected, latest[index]):
-                score = float(latest[index].get("score", 0.0))
-                mfaalog.info(
-                    f"[自动编队] 槽位{index + 1}换人复核通过："
-                    f"{score:.4f}/{FACE_THRESHOLD:.2f}"
-                )
-                return True, latest
+                consecutive += 1
+                if consecutive >= 2:
+                    score = float(latest[index].get("score", 0.0))
+                    mfaalog.info(
+                        f"[自动编队] 槽位{index + 1}换人连续复核通过："
+                        f"{score:.4f}/{FACE_THRESHOLD:.2f}"
+                    )
+                    return True, latest
+            else:
+                consecutive = 0
             time.sleep(SERVANT_REPLACE_VERIFY_INTERVAL_SECONDS)
         mfaalog.warning(
             f"[自动编队] 槽位{index + 1}换人复核等待"
@@ -939,7 +987,7 @@ class AutoFormationFromChaldea(CustomAction):
         return False, latest
 
     def _enter_servant_select(self, slot_index):
-        if self._in_servant_select():
+        if self._confirmed_now(self._in_servant_select):
             return self._run_pipeline("自动编队-确认从者选择界面")
         # 槽位坐标只允许点击一次：游戏切页尚未完成时再次点击同一坐标，会在
         # 从者列表中命中第一张卡片，等同于误选第一个从者。
@@ -1008,8 +1056,9 @@ class AutoFormationFromChaldea(CustomAction):
         for round_index in range(MAX_FIND_SERVANT_ROUNDS):
             if self.context.tasker.stopping:
                 return False
-            image = self._shot()
-            match = self._match_servant(image, templates, None)
+            match = self._find_servant_in_still_list(
+                templates, servant["name"], round_index
+            )
             if match is not None:
                 mfaalog.info(
                     f"[自动编队] 查找 {servant['name']} 第{round_index + 1}轮，"
@@ -1023,6 +1072,33 @@ class AutoFormationFromChaldea(CustomAction):
             if not self._run_pipeline("自动编队-从者列表下滑查找"):
                 return self._fail("servant_list_swipe_failed: 从者列表下滑失败")
         return False
+
+    def _find_servant_in_still_list(self, templates, servant_name, round_index):
+        """只返回连续两帧中位置稳定的从者列表匹配，避免滚动残影误点。"""
+        latest = None
+        for check_index in range(SERVANT_LIST_STABILITY_MAX_CHECKS):
+            first = self._match_servant(self._shot(), templates, None)
+            time.sleep(SERVANT_LIST_STABILITY_INTERVAL_SECONDS)
+            second = self._match_servant(self._shot(), templates, None)
+            latest = second or first
+            first_hit = first is not None and first[0] >= FACE_THRESHOLD
+            second_hit = second is not None and second[0] >= FACE_THRESHOLD
+            if not first_hit and not second_hit:
+                return latest
+            if first_hit and second_hit:
+                dx = abs(first[1][0] - second[1][0])
+                dy = abs(first[1][1] - second[1][1])
+                if (
+                    first[2] == second[2]
+                    and dx <= SERVANT_LIST_STABILITY_CENTER_DELTA_PX
+                    and dy <= SERVANT_LIST_STABILITY_CENTER_DELTA_PX
+                ):
+                    return second
+            mfaalog.info(
+                f"[自动编队] 从者 {servant_name} 第{round_index + 1}轮画面未稳定，"
+                f"第{check_index + 1}/{SERVANT_LIST_STABILITY_MAX_CHECKS}次等待"
+            )
+        return None
 
     def _get_servant_info(self, svt_id):
         path = os.path.join(_CUSTOM_DIR, "servant_list.json")
@@ -1053,6 +1129,18 @@ class AutoFormationFromChaldea(CustomAction):
         match = self._match_equip(image, equip_id, EQUIP_TEAM_ROIS[slot_index])
         return match is not None and match[0] >= EQUIP_TEAM_THRESHOLD, match
 
+    def _equip_matches_slot_stable(self, slot_index, equip_id):
+        """连续两次得到相同结论后，才决定礼装是否已经位于目标槽。"""
+        previous = None
+        latest_match = None
+        for _ in range(EQUIP_MATCH_STABILITY_MAX_CHECKS):
+            matched, latest_match = self._equip_matches_slot(slot_index, equip_id)
+            if matched == previous:
+                return matched, latest_match
+            previous = matched
+            time.sleep(EQUIP_MATCH_STABILITY_INTERVAL_SECONDS)
+        return False, latest_match
+
     def _replace_equips(self):
         """在从者全部完成后逐槽补齐概念礼装。
 
@@ -1060,10 +1148,9 @@ class AutoFormationFromChaldea(CustomAction):
         礼装的本地从者也没有任何操作目标。数据库或图片资源不覆盖的礼装按用户
         要求只输出日志并继续执行。
         """
-        # 先在编队页对所有可匹配的礼装做同一帧校验。若全部已正确，绝不能为了
-        # "确认"而进入任一礼装选择页：后者会重置筛选状态，也增加误选风险。
-        image = self._shot()
-        if image is None:
+        # 先在编队页对所有可匹配的礼装做连续帧校验。若全部已正确，绝不能为了
+        # “确认”而进入任一礼装选择页：后者会重置筛选状态，也增加误选风险。
+        if self._shot() is None:
             return self._fail("equip_initial_verify_failed: 无法获取编队截图")
         pending = []
         for index, expected in enumerate(self.expected):
@@ -1079,8 +1166,7 @@ class AutoFormationFromChaldea(CustomAction):
             if expected.get("equip_status") != "ready":
                 continue
             equip = self._get_equip_info(equip_id)
-            match = self._match_equip(image, equip_id, EQUIP_TEAM_ROIS[index])
-            matched = match is not None and match[0] >= EQUIP_TEAM_THRESHOLD
+            matched, match = self._equip_matches_slot_stable(index, equip_id)
             if matched:
                 mfaalog.info(
                     f"[自动编队] 礼装起始校验：槽位{index + 1}已匹配 "
@@ -1107,7 +1193,7 @@ class AutoFormationFromChaldea(CustomAction):
         for index, expected, equip_id, equip in pending:
             # 前一槽的返回动画或网络刷新可能影响后续槽位；在实际编辑前再次确认，
             # 防止已经正确的礼装被重复编辑。
-            matched, match = self._equip_matches_slot(index, equip_id)
+            matched, match = self._equip_matches_slot_stable(index, equip_id)
             if matched:
                 mfaalog.info(
                     f"[自动编队] 槽位{index + 1}礼装复查已匹配："
@@ -1175,7 +1261,7 @@ class AutoFormationFromChaldea(CustomAction):
         return "not_found"
 
     def _enter_equip_select(self, slot_index):
-        if self._in_equip_select():
+        if self._confirmed_now(self._in_equip_select):
             return self._run_pipeline("自动编队-确认礼装选择界面")
         # 同从者选择页：礼装列表加载期间不能对同一屏幕坐标重复点击，否则会
         # 直接选中列表中的首个礼装。
@@ -1189,7 +1275,7 @@ class AutoFormationFromChaldea(CustomAction):
         return self._in_selection_page()
 
     def _leave_equip_select(self):
-        if self._in_formation_edit():
+        if self._confirmed_now(self._in_formation_edit):
             return True
         if not self._run_pipeline("自动编队-礼装选择返回"):
             return False
@@ -1267,7 +1353,11 @@ class AutoFormationFromChaldea(CustomAction):
                 )
                 self.controller.post_click(*result[1]).wait()
                 time.sleep(EQUIP_CARD_SELECT_SETTLE_SECONDS)
-                confirm = self._match_template(self._shot(), self.equip_confirm_marker)
+                confirm = self._wait_for_template_match(
+                    self.equip_confirm_marker,
+                    0.80,
+                    TEMPLATE_APPEAR_TIMEOUT_SECONDS,
+                )
                 if confirm is None or confirm[0] < 0.80:
                     mfaalog.warning(
                         f"[自动编队] 礼装 {equip['name']} 命中后未找到礼装决定；"
@@ -1287,7 +1377,7 @@ class AutoFormationFromChaldea(CustomAction):
                         EQUIP_SELECT_RETURN_TIMEOUT_SECONDS,
                     ):
                         return "selected"
-                    if not self._in_equip_select():
+                    if not self._wait_for(self._in_equip_select, 1.5):
                         return "failed"
                     mfaalog.warning(
                         f"[自动编队] 礼装 {equip['name']} 点击决定后未匹配，"
@@ -1337,6 +1427,7 @@ class AutoFormationFromChaldea(CustomAction):
     def _wait_for_equip_replace_verify(self, slot_index, equip_id):
         deadline = time.monotonic() + SERVANT_REPLACE_VERIFY_TIMEOUT_SECONDS
         latest_score = 0.0
+        consecutive = 0
         while time.monotonic() < deadline:
             if self.context.tasker.stopping:
                 return False, latest_score
@@ -1344,7 +1435,11 @@ class AutoFormationFromChaldea(CustomAction):
             if match is not None:
                 latest_score = float(match[0])
             if matched:
-                return True, latest_score
+                consecutive += 1
+                if consecutive >= 2:
+                    return True, latest_score
+            else:
+                consecutive = 0
             time.sleep(SERVANT_REPLACE_VERIFY_INTERVAL_SECONDS)
         mfaalog.warning(
             f"[自动编队] 槽位{slot_index + 1}礼装复核等待"
@@ -1371,9 +1466,13 @@ class AutoFormationFromChaldea(CustomAction):
         # 明确等待弹窗动画完成；不要依赖 pipeline 的 post_delay，以免该节点被
         # 后续配置调整后导致确认截图过早。
         time.sleep(FORMATION_CONFIRM_DELAY_SECONDS)
-        image = self._shot()
-        result = self._match_template(image, self.formation_confirm_marker, FORMATION_CONFIRM_ROI)
-        if result is None or result[0] < 0.80:
+        result = self._wait_for_template_match(
+            self.formation_confirm_marker,
+            0.80,
+            FORMATION_CONFIRM_APPEAR_TIMEOUT_SECONDS,
+            FORMATION_CONFIRM_ROI,
+        )
+        if result is None:
             mfaalog.info("[自动编队] 编队决定后未出现二次确认弹窗")
             return
         mfaalog.info(f"[自动编队] 命中编队二次确认决定，分数={result[0]:.3f}")
@@ -1407,14 +1506,41 @@ class AutoFormationFromChaldea(CustomAction):
         return True
 
     def _wait_for(self, predicate, timeout_seconds):
+        """等待条件连续两次成立，过滤截图缓存和切页过程中的偶发单帧。"""
         end = time.monotonic() + timeout_seconds
+        consecutive = 0
         while time.monotonic() < end:
             if self.context.tasker.stopping:
                 return False
             if predicate():
-                return True
+                consecutive += 1
+                if consecutive >= 2:
+                    return True
+            else:
+                consecutive = 0
             time.sleep(0.4)
         return False
+
+    def _confirmed_now(self, predicate):
+        """仅当首帧命中时补拍一帧确认；首帧未命中则立即返回。"""
+        if not predicate():
+            return False
+        time.sleep(0.25)
+        return bool(predicate())
+
+    def _wait_for_template_match(self, template, threshold, timeout_seconds, roi=None):
+        """持续等待模板出现，避免截图缓存或切页动画造成单帧漏判。"""
+        matched = None
+
+        def predicate():
+            nonlocal matched
+            result = self._match_template(self._shot(), template, roi)
+            if result is not None and result[0] >= threshold:
+                matched = result
+                return True
+            return False
+
+        return matched if self._wait_for(predicate, timeout_seconds) else None
 
     def _fail(self, message):
         mfaalog.error(f"[自动编队] {message}")
