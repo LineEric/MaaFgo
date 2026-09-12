@@ -3,7 +3,7 @@
         "原生自动战斗使用Chaldea队伍": {
             "type": "select",
             "label": "是否使用 Chaldea 队伍",
-            "description": "选择助战后按编队方式检查或还原导入队伍，再进入战斗。无法按等级或技能区分同名从者，请将不用的个体放入保管室。\n\n<img src=\"resource/base/image/errorcode/指南3-自动编队.png\" width=\"614\" height=\"345\" alt=\"Chaldea 编队指南\" />",
+            "description": "选择助战后按编队方式检查或还原导入队伍，再进入战斗。无法按等级或技能区分同名从者，请将不用的个体放入保管室。\n >",
             "default": "否",
             "cases": [
                 {
