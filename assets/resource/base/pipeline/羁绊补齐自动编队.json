@@ -268,6 +268,16 @@
         },
         "post_delay": 1000
     },
+    "羁绊补齐-关闭冠位礼装弹窗": {
+        "doc": "读取冠位礼装后只发送一次 ESC/Android Back 关闭弹窗。",
+        "action": {
+            "type": "ClickKey",
+            "param": {
+                "key": [111]
+            }
+        },
+        "post_delay": 500
+    },
     "羁绊补齐-准备从者列表": {
         "next": [
             "羁绊补齐-从者图标大小检测",
@@ -320,7 +330,8 @@
         "action": {
             "type": "Click"
         },
-        "post_delay": 1000
+        "post_delay": 1000,
+        "on_error": []
     },
     "羁绊补齐-取消配置": {
         "action": {

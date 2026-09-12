@@ -34,6 +34,7 @@ from bond_matcher import (
 from formation_action import (
     EQUIP_SLOT_CLICK_Y,
     EQUIP_TEAM_ROIS,
+    GRAND_EQUIP_POPUP_CONTENT_ROI,
     AutoFormationFromChaldea,
 )
 from chaldea import fetch_share_data
@@ -117,6 +118,10 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         self.local_servant_inventory_active = False
         self.local_equip_inventory_active = False
         self.servant_detail_open = False
+        self.grand_equip_slots = set()
+        self.grand_equips_by_slot = {}
+        self._grand_equip_probe_complete = set()
+        self._grand_fixed_applied_slots = set()
         try:
             node = context.get_node_data(argv.node_name) or {}
             attach = node.get("attach") or {}
@@ -162,6 +167,10 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             self.expected = self._build_expected(share_data)
             if self.expected is None:
                 return CustomAction.RunResult(success=False)
+            self.grand_equip_slots.update(
+                item["slot"] for item in self.expected
+                if item["kind"] == "LOCAL" and item.get("grand_svt")
+            )
             self._init_paths()
             self._init_scale()
             self.auto_equip = True
@@ -262,6 +271,18 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             self.initial_used_cost = self.used_cost
 
             current_servants = self._current_known_servants()
+            own_equip_slots = [
+                slot for slot, state in enumerate(detected)
+                if state["kind"] not in {"EMPTY", "SUPPORT"}
+            ]
+            if not self._probe_grand_equip_slots(own_equip_slots):
+                return self._abort_safe(
+                    "bond_completion_select_verify_failed: 冠位礼装入口识别失败"
+                )
+            self.equip_probe_slots = [
+                slot for slot in self.equip_probe_slots
+                if slot not in self.grand_equip_slots
+            ]
             (
                 initial_fixed_equips,
                 empty_equip_slots,
@@ -293,7 +314,8 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             self.fixed_equips = [
                 equip for equip in equip_by_slot.values()
                 if equip_is_permanent_bond(equip or {})
-            ]
+            ] + self._grand_fixed_equips()
+            self._grand_fixed_applied_slots = set(self.grand_equips_by_slot)
             self.empty_equip_slots = empty_equip_slots
             self._focus_user(
                 f"队伍分析完成：COST {self.used_cost}/{self.max_cost}，"
@@ -314,9 +336,19 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 return self._abort_safe("bond_completion_select_verify_failed: 补从者状态不可确认")
 
             # 新从者的礼装位在选人后为空；加入前再次用编队截图验证。
+            if not self._probe_grand_equip_slots(self.added_servants):
+                return self._abort_safe(
+                    "bond_completion_select_verify_failed: 新增从者冠位礼装入口识别失败"
+                )
+            self._apply_new_grand_fixed_equips()
+            self.empty_equip_slots = [
+                slot for slot in self.empty_equip_slots
+                if slot not in self.grand_equip_slots
+            ]
             for slot in self.added_servants:
                 if (
-                    slot not in self.empty_equip_slots
+                    slot not in self.grand_equip_slots
+                    and slot not in self.empty_equip_slots
                     and self._wait_for_empty_equip_slot(slot)
                 ):
                     self.empty_equip_slots.append(slot)
@@ -525,6 +557,105 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         self._face_paths = []
         for directory in [*self.face_dirs, *self.narrow_dirs]:
             self._face_paths.extend(glob.glob(os.path.join(directory, "f_*.png")))
+
+    def _recognize_grand_popup_equips(self, image):
+        """在冠位弹窗内识别最多三张常驻羁绊礼装。"""
+        candidates = []
+        for equip in self.bond_equips:
+            data = self.equip_team_templates.get(int(equip["id"]))
+            if data is None:
+                continue
+            _name, template = data
+            match = self._match_template(
+                image, template, GRAND_EQUIP_POPUP_CONTENT_ROI
+            )
+            if match is not None and match[0] >= EQUIP_VERIFY_THRESHOLD:
+                candidates.append((float(match[0]), match[1], equip, template.shape[1]))
+
+        # 相近模板可能同时命中同一张卡面；按分数优先并以横向位置去重。
+        selected = []
+        ranked = sorted(candidates, reverse=True, key=lambda row: row[0])
+        for score, center, equip, width in ranked:
+            min_distance = max(40, int(round(width * self.sx * 0.55)))
+            if any(
+                abs(center[0] - old_center[0]) < min_distance
+                for _score, old_center, _equip in selected
+            ):
+                continue
+            selected.append((score, center, equip))
+            if len(selected) >= 3:
+                break
+        selected.sort(key=lambda row: row[1][0])
+        return [dict(row[2]) for row in selected]
+
+    def _record_grand_popup_equips(self, slot):
+        image = self._shot()
+        equips = self._recognize_grand_popup_equips(image) if image is not None else []
+        self.grand_equip_slots.add(slot)
+        self.grand_equips_by_slot[slot] = equips
+        description = "、".join(
+            f"{equip['name']}({equip['id']})" for equip in equips
+        ) or "未识别到羁绊礼装"
+        mfaalog.info(
+            f"[羁绊补齐] 槽位{slot + 1}为冠位从者，弹窗识别{len(equips)}张："
+            f"{description}"
+        )
+
+    def _open_bond_equip_destination(self, slot):
+        """点击礼装位并返回 ``select``、``grand`` 或 ``None``。"""
+        state = self._equip_entry_state()
+        if state is None:
+            x, _y, width, _height = self._slot_roi(slot)
+            point = (
+                int(round((x + width / 2) * self.sx)),
+                int(round(EQUIP_SLOT_CLICK_Y * self.sy)),
+            )
+            self.controller.post_click(*point).wait()
+            state = self._wait_for_equip_entry_state(8.0)
+        self._last_equip_entry_state = state
+        if state == "select":
+            if self._run_pipeline("羁绊补齐-确认礼装选择界面"):
+                return "select"
+            return None
+        if state == "grand":
+            self._record_grand_popup_equips(slot)
+            if self._close_grand_equip_popup("羁绊补齐-关闭冠位礼装弹窗"):
+                return "grand"
+            return None
+        return None
+
+    def _probe_grand_equip_slots(self, slots):
+        """逐槽触发礼装入口，记录实际冠位槽并恢复编队编辑页。"""
+        for slot in sorted(set(slots)):
+            if slot in self._grand_equip_probe_complete:
+                continue
+            state = self._open_bond_equip_destination(slot)
+            if state is None:
+                return False
+            if state == "select" and not self._leave_equip_select_new():
+                return False
+            self._grand_equip_probe_complete.add(slot)
+        return True
+
+    def _grand_fixed_equips(self):
+        return [
+            equip
+            for slot in sorted(getattr(self, "grand_equips_by_slot", {}))
+            for equip in self.grand_equips_by_slot[slot]
+            if equip_is_permanent_bond(equip)
+        ]
+
+    def _apply_new_grand_fixed_equips(self):
+        if not hasattr(self, "_grand_fixed_applied_slots"):
+            self._grand_fixed_applied_slots = set()
+        for slot in sorted(getattr(self, "grand_equips_by_slot", {})):
+            if slot in self._grand_fixed_applied_slots:
+                continue
+            self.fixed_equips.extend(
+                equip for equip in self.grand_equips_by_slot[slot]
+                if equip_is_permanent_bond(equip)
+            )
+            self._grand_fixed_applied_slots.add(slot)
 
     def _servant_templates(self, servant_id, for_list=True):
         key = (str(servant_id), bool(for_list))
@@ -822,6 +953,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         for slot, state in enumerate(detected):
             if (
                 state["kind"] in {"EMPTY", "SUPPORT"}
+                or slot in getattr(self, "grand_equip_slots", set())
                 or self.expected[slot].get("equip_id")
                 or slot in empty
             ):
@@ -884,9 +1016,12 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         return None, [], [], {}, None
 
     def _classify_current_equips(self, image, detected, report_errors=True):
-        fixed, empty, unknown, equip_by_slot = [], [], [], {}
+        fixed = self._grand_fixed_equips()
+        empty, unknown, equip_by_slot = [], [], {}
         for slot, state in enumerate(detected):
             if state["kind"] in {"EMPTY", "SUPPORT"}:
+                continue
+            if slot in getattr(self, "grand_equip_slots", set()):
                 continue
             protected_id = self.expected[slot].get("equip_id")
             if protected_id:
@@ -934,6 +1069,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         modifiable = [
             slot for slot, state in enumerate(detected)
             if state["kind"] not in {"EMPTY", "SUPPORT"}
+            and slot not in getattr(self, "grand_equip_slots", set())
             and not self.expected[slot].get("equip_id")
             and slot not in empty
         ]
@@ -1629,14 +1765,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
     # ---------- 礼装规划与选择 ----------
 
     def _enter_equip_select_new(self, slot):
-        if self._confirmed_now(self._in_equip_select):
-            return True
-        x, _y, width, _height = self._slot_roi(slot)
-        point = (int(round((x + width / 2) * self.sx)), int(round(EQUIP_SLOT_CLICK_Y * self.sy)))
-        self.controller.post_click(*point).wait()
-        if not self._wait_for(self._in_equip_select, 8.0):
-            return False
-        return self._run_pipeline("羁绊补齐-确认礼装选择界面")
+        return self._open_bond_equip_destination(slot) == "select"
 
     def _leave_equip_select_new(self):
         if self._confirmed_now(self._in_formation_edit):
@@ -1755,8 +1884,19 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 f"无本地从者礼装位可预检 {equip['name']}({equip_id})"
             )
             return "failed"
-        probe_slot = self.equip_probe_slots[0]
-        if not self._enter_equip_select_new(probe_slot):
+        probe_slot = None
+        for candidate_slot in list(self.equip_probe_slots):
+            if self._enter_equip_select_new(candidate_slot):
+                probe_slot = candidate_slot
+                break
+            if getattr(self, "_last_equip_entry_state", None) == "grand":
+                self.equip_probe_slots = [
+                    slot for slot in self.equip_probe_slots if slot != candidate_slot
+                ]
+                self._apply_new_grand_fixed_equips()
+                continue
+            break
+        if probe_slot is None:
             mfaalog.error(
                 f"[羁绊补齐] bond_completion_equip_preflight_failed: "
                 f"未进入礼装列表 {equip['name']}({equip_id})"
@@ -1829,6 +1969,9 @@ class CompleteBondFormation(AutoFormationFromChaldea):
 
     def _select_equip(self, slot, equip):
         if not self._enter_equip_select_new(slot):
+            if getattr(self, "_last_equip_entry_state", None) == "grand":
+                self._apply_new_grand_fixed_equips()
+                return "grand"
             return "failed"
         if not self._filter_equip(equip):
             return "failed"
@@ -1899,6 +2042,17 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             if self.local_equip_inventory_active:
                 self._focus_user(f"正在定位本地库礼装：{equip['name']}")
             result = self._select_equip(slot, equip)
+            if result == "grand":
+                self.empty_equip_slots = [
+                    candidate for candidate in self.empty_equip_slots
+                    if candidate != slot
+                ]
+                slots.pop(0)
+                mfaalog.info(
+                    f"[羁绊补齐] 槽位{slot + 1}为冠位从者，"
+                    "已锁定预设礼装并从可编成槽位移除"
+                )
+                continue
             if result == "not_found":
                 if self.local_equip_inventory_active:
                     equip_id = str(equip["id"])
@@ -2030,7 +2184,12 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             if not np.isfinite(score) or score < LOCKED_EQUIP_VERIFY_THRESHOLD:
                 return False
         for item in self.expected:
-            if item["kind"] == "LOCAL" and item.get("equip_id"):
+            if (
+                item["kind"] == "LOCAL"
+                and item["slot"] not in getattr(self, "grand_equip_slots", set())
+                and not item.get("grand_svt")
+                and item.get("equip_id")
+            ):
                 match = self._match_equip_id(image, item["equip_id"], item["slot"])
                 if match is None or match[0] < EQUIP_VERIFY_THRESHOLD:
                     return False

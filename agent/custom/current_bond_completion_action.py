@@ -210,6 +210,7 @@ class CompleteCurrentBondFormation(CompleteBondFormation):
                 "svt_id": None,
                 "equip_id": None,
                 "equip_limit_break": False,
+                "grand_svt": False,
                 "slot": slot,
             }
             for slot in range(6)
@@ -247,6 +248,10 @@ class CompleteCurrentBondFormation(CompleteBondFormation):
         self.local_equip_ids = set()
         self.local_servant_inventory_active = False
         self.local_equip_inventory_active = False
+        self.grand_equip_slots = set()
+        self.grand_equips_by_slot = {}
+        self._grand_equip_probe_complete = set()
+        self._grand_fixed_applied_slots = set()
         try:
             node = context.get_node_data(argv.node_name) or {}
             attach = node.get("attach") or {}
@@ -360,6 +365,14 @@ class CompleteCurrentBondFormation(CompleteBondFormation):
             self.initial_used_cost = self.used_cost
 
             current_servants = self._current_known_servants()
+            if not self._probe_grand_equip_slots(occupied_slots):
+                return self._abort_safe(
+                    "current_bond_select_verify_failed: 冠位礼装入口识别失败"
+                )
+            self.equip_probe_slots = [
+                slot for slot in self.equip_probe_slots
+                if slot not in self.grand_equip_slots
+            ]
             image = self._shot()
             initial_fixed_equips, empty_equip_slots, occupied_unknown, equip_by_slot = (
                 self._classify_current_equips(image, detected)
@@ -395,7 +408,8 @@ class CompleteCurrentBondFormation(CompleteBondFormation):
             self.fixed_equips = [
                 equip for equip in equip_by_slot.values()
                 if equip_is_permanent_bond(equip or {})
-            ]
+            ] + self._grand_fixed_equips()
+            self._grand_fixed_applied_slots = set(self.grand_equips_by_slot)
             self.empty_equip_slots = sorted(set(empty_equip_slots))
             self._focus_user(
                 f"当前编队识别完成：自有从者{own_count}名、空从者位"
@@ -421,11 +435,22 @@ class CompleteCurrentBondFormation(CompleteBondFormation):
                 )
 
             image = self._shot()
+            if not self._probe_grand_equip_slots(self.added_servants):
+                return self._abort_safe(
+                    "current_bond_select_verify_failed: 新增从者冠位礼装入口识别失败"
+                )
+            self._apply_new_grand_fixed_equips()
+            self.empty_equip_slots = [
+                slot for slot in self.empty_equip_slots
+                if slot not in self.grand_equip_slots
+            ]
             for slot in self.added_servants:
                 if slot not in self.equip_probe_slots:
-                    self.equip_probe_slots.append(slot)
+                    if slot not in self.grand_equip_slots:
+                        self.equip_probe_slots.append(slot)
                 if (
-                    slot not in self.empty_equip_slots
+                    slot not in self.grand_equip_slots
+                    and slot not in self.empty_equip_slots
                     and self._is_empty_equip_slot(image, slot)
                 ):
                     self.empty_equip_slots.append(slot)

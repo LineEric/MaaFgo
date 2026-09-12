@@ -104,6 +104,8 @@ SWIPE_LIST_END = (600, 200)
 # 概念礼装显示在编队卡片下部。该纵坐标由 1280 x 720 编队截图标定，横向
 # 则始终取对应从者槽中心，避免点到从者头像而进入错误的选择页。
 EQUIP_SLOT_CLICK_Y = 477
+GRAND_EQUIP_POPUP_CONTENT_ROI = (267, 218, 776, 171)
+GRAND_EQUIP_POPUP_THRESHOLD = 0.80
 
 SUPPORT_TYPES = {"friend", "fixed", "npc"}
 CLASS_TEMPLATE = {
@@ -157,6 +159,7 @@ class AutoFormationFromChaldea(CustomAction):
         try:
             self.context = context
             self.controller = context.tasker.controller
+            self.direct_formation_mode = False
             node = context.get_node_data(argv.node_name) or {}
             attach = node.get("attach") or {}
             # 单一输入框: 链接/ID/本地文件路径合用 chaldea_import_source,
@@ -234,16 +237,29 @@ class AutoFormationFromChaldea(CustomAction):
                         "跳过清空和配置变更，继续增量编队"
                     )
                 else:
-                    if not self._run_pipeline("自动编队-执行清空编队"):
+                    clear_result = self._try_clear_formation()
+                    if clear_result == "failed":
                         self._fail("formation_clear_failed: 未能清空当前编队")
                         return CustomAction.RunResult(success=False)
-                    if not self._wait_for(self._in_formation_edit, 5.0):
+                    if clear_result == "cleared" and not self._wait_for(
+                        self._in_formation_edit, 5.0
+                    ):
                         self._fail("formation_clear_failed: 清空编队后未进入编辑状态")
                         return CustomAction.RunResult(success=False)
                     current = self._detect_slots_stable()
                     if current is None:
                         return CustomAction.RunResult(success=False)
-                    self._log_layout("清空后", current)
+                    title = "清空后" if clear_result == "cleared" else "跳过清空后"
+                    self._log_layout(title, current)
+                    if clear_result == "skipped" and not self._confirmed_now(
+                        self._in_formation_edit
+                    ):
+                        if not self._run_pipeline("自动编队-打开配置"):
+                            self._fail("not_on_formation_page: 跳过解散后未找到配置变更按钮")
+                            return CustomAction.RunResult(success=False)
+                        if not self._wait_for(self._in_formation_edit, 5.0):
+                            self._fail("not_on_formation_page: 跳过解散后未进入配置变更页")
+                            return CustomAction.RunResult(success=False)
             elif not already_editing:
                 if not self._run_pipeline("自动编队-打开配置"):
                     self._fail("not_on_formation_page: 未找到配置变更按钮")
@@ -309,7 +325,7 @@ class AutoFormationFromChaldea(CustomAction):
             if item is None:
                 expected.append({
                     "kind": "EMPTY", "svt_id": None, "equip_id": None,
-                    "equip_limit_break": False, "slot": index,
+                    "equip_limit_break": False, "grand_svt": False, "slot": index,
                 })
                 continue
             if not isinstance(item, dict):
@@ -318,6 +334,7 @@ class AutoFormationFromChaldea(CustomAction):
             support_type = str(item.get("supportType") or "").lower()
             svt_id = item.get("svtId")
             equip_id, equip_limit_break = self._extract_equip(item)
+            grand_svt = item.get("grandSvt") is True
             if support_type in SUPPORT_TYPES:
                 if not isinstance(svt_id, int) or svt_id <= 0:
                     self._fail(
@@ -326,7 +343,8 @@ class AutoFormationFromChaldea(CustomAction):
                     return None
                 expected.append({
                     "kind": "SUPPORT", "svt_id": svt_id, "equip_id": equip_id,
-                    "equip_limit_break": equip_limit_break, "slot": index,
+                    "equip_limit_break": equip_limit_break, "grand_svt": grand_svt,
+                    "slot": index,
                 })
                 continue
             if not isinstance(svt_id, int) or svt_id <= 0:
@@ -334,7 +352,8 @@ class AutoFormationFromChaldea(CustomAction):
                 return None
             expected.append({
                 "kind": "LOCAL", "svt_id": svt_id, "equip_id": equip_id,
-                "equip_limit_break": equip_limit_break, "slot": index,
+                "equip_limit_break": equip_limit_break, "grand_svt": grand_svt,
+                "slot": index,
             })
         return expected
 
@@ -501,7 +520,7 @@ class AutoFormationFromChaldea(CustomAction):
             if not self.auto_equip:
                 continue
             equip_id = item.get("equip_id")
-            if item["kind"] != "LOCAL" or not equip_id:
+            if item["kind"] != "LOCAL" or item.get("grand_svt") or not equip_id:
                 continue
             equip = self._get_equip_info(equip_id)
             if equip is None:
@@ -549,8 +568,13 @@ class AutoFormationFromChaldea(CustomAction):
             self.select_page_markers.append(marker)
         self.formation_confirm_marker = self._load_named_template("决定.png")
         self.equip_confirm_marker = self._load_named_template("EquipFaces/礼装决定.png")
+        self.grand_equip_popup_marker = self._load_named_template(
+            "battle/冠位助战礼装编辑弹窗.png"
+        )
         if self.equip_confirm_marker is None:
             raise RuntimeError("resource_missing: EquipFaces/礼装决定.png")
+        if self.grand_equip_popup_marker is None:
+            raise RuntimeError("resource_missing: battle/冠位助战礼装编辑弹窗.png")
         if self.formation_confirm_marker is None:
             raise RuntimeError("resource_missing: 决定.png")
 
@@ -602,6 +626,20 @@ class AutoFormationFromChaldea(CustomAction):
             return False
         result = self._match_template(image, self.edit_marker)
         return result is not None and result[0] >= 0.75
+
+    def _on_formation_confirm_page(self):
+        image = self._shot()
+        result = self._match_template(image, self.config_marker)
+        return result is not None and result[0] >= 0.80
+
+    def _in_formation_work_area(self):
+        """普通编辑页，或冠位限制下可直接逐槽编辑的确认页。"""
+        if self._in_formation_edit():
+            return True
+        return bool(
+            getattr(self, "direct_formation_mode", False)
+            and self._on_formation_confirm_page()
+        )
 
     def _detect_slots(self):
         image = self._shot()
@@ -735,6 +773,51 @@ class AutoFormationFromChaldea(CustomAction):
             f"处理方式={'清空编队' if should_clear else '配置变更'}"
         )
         return should_clear
+
+    def _try_clear_formation(self):
+        """尝试解散队伍；冠位限制导致按钮无响应时降级为增量编队。"""
+        try:
+            detail = self.context.run_task("自动编队-执行清空编队")
+        except Exception as exc:
+            mfaalog.warning(f"[自动编队] 清空编队流程异常，检查是否受冠位限制：{exc}")
+            detail = None
+
+        if self.context.tasker.stopping:
+            return "failed"
+        detail_succeeded = (
+            detail is not None
+            and detail.status.succeeded
+            and not detail.status.failed
+        )
+
+        # 不仅检查 TaskDetail，还要确认画面仍在编队编辑页。否则全局恢复链可能
+        # 把失败子流程包装成 succeeded，并已经把游戏带离编队页。
+        if detail_succeeded and self._wait_for(self._in_formation_edit, 5.0):
+            return "cleared"
+
+        # 冠位从者编队中，“编队解散”按钮可见但点击后不会弹出二次确认。
+        # 此时子流程会超时失败，不过画面已经稳定停留在编辑页，可以安全地
+        # 沿用现有队伍并切换到逐槽重排/替换。
+        if not detail_succeeded and self._wait_for(self._in_formation_edit, 5.0):
+            mfaalog.warning(
+                "[自动编队] 编队解散点击后未出现确认，可能存在冠位从者；"
+                "跳过解散并改用增量编队"
+            )
+            return "skipped"
+
+        # Grand Duel 的 LIMITED 编队甚至可能不响应“编队编辑”入口。只要仍在
+        # 编队确认页，就先跳过清空；调用方随后通过“配置变更”进入逐槽编辑。
+        if not detail_succeeded and self._wait_for(
+            self._on_formation_confirm_page, 5.0
+        ):
+            mfaalog.warning(
+                "[自动编队] 编队编辑/解散点击后未进入清空流程，可能为冠位限定编队；"
+                "跳过解散并改走配置变更"
+            )
+            return "skipped"
+
+        mfaalog.error("[自动编队] 清空子流程失败，且无法确认仍在编队编辑页")
+        return "failed"
 
     def _can_move_from(self, index, current):
         """判断当前位置的从者能否被移去满足其他目标位置。"""
@@ -1162,6 +1245,13 @@ class AutoFormationFromChaldea(CustomAction):
                         f"[自动编队] 槽位{index + 1}为助战，跳过助战礼装 ceId={equip_id}"
                     )
                 continue
+            if expected.get("grand_svt"):
+                if equip_id:
+                    mfaalog.info(
+                        f"[自动编队] 槽位{index + 1}为 Chaldea 冠位从者，"
+                        f"跳过全部冠位礼装配置（equip1={equip_id}）"
+                    )
+                continue
             if expected["kind"] != "LOCAL" or not equip_id:
                 continue
             if expected.get("equip_status") != "ready":
@@ -1207,6 +1297,13 @@ class AutoFormationFromChaldea(CustomAction):
                 f"[自动编队] 替换槽位{index + 1}礼装为 {equip['name']}({equip_id})，筛选={state}"
             )
             result = self._select_equip_for_slot(index, equip, bool(expected.get("equip_limit_break")))
+            if result == "grand":
+                expected["grand_svt"] = True
+                mfaalog.info(
+                    f"[自动编队] 槽位{index + 1}出现冠位礼装弹窗，"
+                    "已关闭弹窗并将礼装视为满足"
+                )
+                continue
             if result == "selected":
                 verified, score = self._wait_for_equip_replace_verify(index, equip_id)
                 if verified:
@@ -1227,6 +1324,13 @@ class AutoFormationFromChaldea(CustomAction):
                     "按选项改为查找非满破版本"
                 )
                 result = self._select_equip_for_slot(index, equip, False)
+                if result == "grand":
+                    expected["grand_svt"] = True
+                    mfaalog.info(
+                        f"[自动编队] 槽位{index + 1}出现冠位礼装弹窗，"
+                        "已关闭弹窗并将礼装视为满足"
+                    )
+                    continue
                 if result == "selected":
                     verified, score = self._wait_for_equip_replace_verify(index, equip_id)
                     if verified:
@@ -1245,6 +1349,8 @@ class AutoFormationFromChaldea(CustomAction):
 
     def _select_equip_for_slot(self, slot_index, equip, require_limit_break):
         if not self._enter_equip_select(slot_index):
+            if getattr(self, "_last_equip_entry_state", None) == "grand":
+                return "grand"
             self._fail(f"equip_select_failed: 槽位{slot_index + 1}未进入礼装选择界面")
             return "failed"
         if not self._filter_equip_list(equip, require_limit_break):
@@ -1262,14 +1368,72 @@ class AutoFormationFromChaldea(CustomAction):
         return "not_found"
 
     def _enter_equip_select(self, slot_index):
-        if self._confirmed_now(self._in_equip_select):
+        self._last_equip_entry_state = None
+        initial = self._equip_entry_state()
+        if initial == "select":
+            self._last_equip_entry_state = "select"
             return self._run_pipeline("自动编队-确认礼装选择界面")
+        if initial == "grand":
+            self._last_equip_entry_state = "grand"
+            if not self._close_grand_equip_popup("自动编队-关闭冠位礼装弹窗"):
+                self._last_equip_entry_state = "failed"
+            return False
         # 同从者选择页：礼装列表加载期间不能对同一屏幕坐标重复点击，否则会
         # 直接选中列表中的首个礼装。
         self.controller.post_click(*self._equip_slot_center(slot_index)).wait()
-        if not self._wait_for(self._in_equip_select, SELECT_PAGE_ENTER_TIMEOUT_SECONDS):
+        state = self._wait_for_equip_entry_state(SELECT_PAGE_ENTER_TIMEOUT_SECONDS)
+        self._last_equip_entry_state = state
+        if state == "grand":
+            if not self._close_grand_equip_popup("自动编队-关闭冠位礼装弹窗"):
+                self._last_equip_entry_state = "failed"
+            return False
+        if state != "select":
             return False
         return self._run_pipeline("自动编队-确认礼装选择界面")
+
+    def _equip_entry_state(self, image=None):
+        """区分普通礼装仓库与冠位礼装编辑弹窗。"""
+        image = self._shot() if image is None else image
+        if image is None:
+            return None
+        popup_marker = getattr(self, "grand_equip_popup_marker", None)
+        if popup_marker is not None:
+            match = self._match_template(image, popup_marker)
+            if match is not None and match[0] >= GRAND_EQUIP_POPUP_THRESHOLD:
+                return "grand"
+        edit = self._match_template(image, self.edit_marker)
+        if edit is not None and edit[0] >= 0.75:
+            return None
+        for marker in self.select_page_markers:
+            result = self._match_template(image, marker, SELECT_PAGE_SCALE_ROI)
+            if result is not None and result[0] >= SELECT_PAGE_SCALE_THRESHOLD:
+                return "select"
+        return None
+
+    def _wait_for_equip_entry_state(self, timeout_seconds):
+        """轮询两个目标，要求同一结果连续出现两帧后返回。"""
+        deadline = time.monotonic() + timeout_seconds
+        previous = None
+        consecutive = 0
+        while time.monotonic() < deadline:
+            if self.context.tasker.stopping:
+                return None
+            state = self._equip_entry_state()
+            if state is not None and state == previous:
+                consecutive += 1
+                if consecutive >= 2:
+                    return state
+            else:
+                previous = state
+                consecutive = 1 if state is not None else 0
+            time.sleep(0.4)
+        return None
+
+    def _close_grand_equip_popup(self, pipeline_name):
+        """通过单次 ESC/Android Back 关闭冠位礼装弹窗。"""
+        if not self._run_pipeline(pipeline_name):
+            return False
+        return self._wait_for(self._in_formation_edit, 5.0)
 
     def _in_equip_select(self):
         """通过列表页左下角的图标缩放按钮判断已进入礼装选择页。"""

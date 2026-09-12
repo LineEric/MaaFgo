@@ -33,6 +33,7 @@
         "on_error": []
     },
     "清空二次确认": {
+        "timeout": 5000,
         "recognition": {
             "type": "TemplateMatch",
             "param": {
@@ -58,7 +59,8 @@
                 ]
             }
         },
-        "post_delay": 1000
+        "post_delay": 1000,
+        "on_error": []
     },
     "自动编队": {
         "next": [
@@ -236,7 +238,8 @@
         },
         "next": [
             "自动编队-点击清空"
-        ]
+        ],
+        "on_error": []
     },
     "自动编队-点击清空": {
         "recognition": {
@@ -256,7 +259,8 @@
         "post_delay": 500,
         "next": [
             "清空二次确认"
-        ]
+        ],
+        "on_error": []
     },
     "自动编队-点击缩放按钮": {
         "action": {
@@ -274,6 +278,16 @@
     },
     "自动编队-确认从者选择界面": {},
     "自动编队-确认礼装选择界面": {},
+    "自动编队-关闭冠位礼装弹窗": {
+        "doc": "冠位礼装弹窗只发送一次 ESC/Android Back，不进入普通礼装仓库。",
+        "action": {
+            "type": "ClickKey",
+            "param": {
+                "key": [111]
+            }
+        },
+        "post_delay": 500
+    },
     "自动编队-礼装列表下滑查找": {
         "action": {
             "type": "Swipe",
