@@ -1,387 +1,366 @@
 {
-  "战斗_特殊技能处理": {
-    "recognition": "DirectHit",
-    "action": {
-      "type": "DoNothing"
+    "战斗_仇凛2技能_色卡选择": {
+        "doc": "已标定：识别文案（变更为何种类型）+ ROI [366,151,563,94]；Q(327,402) A(650,399) B(943,393)；默认选 A（蓝卡主流），顺序即优先级",
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    366,
+                    151,
+                    563,
+                    94
+                ],
+                "expected": [
+                    "变更为何种类型",
+                    "どのタイプに変更するか選択してください",
+                    "変更する"
+                ]
+            }
+        },
+        "timeout": 5000,
+        "next": [
+            "战斗_仇凛2技能_选A",
+            "战斗_仇凛2技能_选B",
+            "战斗_仇凛2技能_选Q"
+        ]
     },
-    "post_delay": 1000,
-    "next": [
-      "战斗_技能使用弹窗",
-      "战斗_技能无法使用弹窗",
-      "战斗_技能目标子屏",
-      "战斗_仇凛2技能_色卡选择",
-      "战斗_库库尔坎_暴击星消耗",
-      "战斗_玉兔2技能_宝具类型选择",
-      "战斗_岸波白野3技能_天之力选择",
-      "战斗_静希草十郎3技能_红卡选择",
-      "战斗_巴格斯特3技能_全体宝具选择",
-      "战斗_特殊技能_无覆盖层"
-    ],
-    "timeout": 3000
-  },
-  "战斗_特殊技能_无覆盖层": {
-    "doc": "兜底：技能直接释放（无任何特殊覆盖层）。next 按序识别，前面分支全不命中时本 DirectHit 节点立即命中并结束，避免空等 timeout；命中即表示技能已直接生效，Python 侧据此继续等回主界面",
-    "recognition": "DirectHit",
-    "action": {
-      "type": "DoNothing"
+    "战斗_仇凛2技能_选A": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    650,
+                    399
+                ]
+            }
+        }
+    },
+    "战斗_仇凛2技能_选B": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    943,
+                    393
+                ]
+            }
+        }
+    },
+    "战斗_仇凛2技能_选Q": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    327,
+                    402
+                ]
+            }
+        }
+    },
+    "战斗_岸波白野3技能_天之力选择": {
+        "doc": "岸波白野3技能「天之力」选项：模板识别（ROI [428,386,221,77]，点识别位置）。命中即选天之力并关闭子屏；后续如需其他力选项（地之力等），新增对应模板节点挂入入口 next，顺序即优先级",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    428,
+                    386,
+                    221,
+                    77
+                ],
+                "template": "battle/skill/岸波白野技能_3技能_天之力.png",
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "post_delay": 500,
+        "next": [
+            "战斗_技能目标子屏",
+            "战斗_特殊技能_已回主界面"
+        ]
+    },
+    "战斗_巴格斯特3技能_全体宝具选择": {
+        "doc": "巴格斯特3技能「全体宝具」选项：模板识别（ROI [487,375,311,93]，点识别位置）。模板在 cn/image（国服特有资源，与库库尔坎旧例同层）；后续如需其他宝具类型（单体等），新增对应模板节点挂入入口 next，顺序即优先级",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    487,
+                    375,
+                    311,
+                    93
+                ],
+                "template": "battle/skill/巴格斯特技能_3技能_全体宝具.png",
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "post_delay": 500,
+        "next": [
+            "战斗_技能目标子屏",
+            "战斗_特殊技能_已回主界面"
+        ]
+    },
+    "战斗_库库尔坎_不消耗": {
+        "doc": "模板匹配不消耗按钮并点击识别位置（位置随消耗数文案宽度变化，点模板位置更稳）。next 兼容两种后续：2 技能弹目标子屏（串接选择），1/3 技能直接回主界面（DirectHit 终点结束）",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    491,
+                    369,
+                    302,
+                    96
+                ],
+                "template": "battle/skill/库库尔坎技能_通用_不消耗.png",
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "next": [
+            "战斗_技能目标子屏",
+            "战斗_特殊技能_已回主界面"
+        ]
+    },
+    "战斗_库库尔坎_暴击星消耗": {
+        "doc": "已标定：识别 OCR（消耗暴击星, [562,159,160,42]）。next 顺序即优先级：先探测消耗项可点击，灰显/不满足时落到不消耗（陷阱：不可用项点了界面无法关闭）",
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    562,
+                    159,
+                    160,
+                    42
+                ],
+                "expected": [
+                    "消耗暴击星"
+                ]
+            }
+        },
+        "timeout": 5000,
+        "next": [
+            "战斗_库库尔坎_消耗10_可点击",
+            "战斗_库库尔坎_不消耗"
+        ]
+    },
+    "战斗_库库尔坎_消耗10_可点击": {
+        "doc": "模板匹配消耗按钮高亮态；method 必须用 10001（SQDIFF_NORMED 反转版，对亮度敏感）：默认 method=5 (CCOEFF_NORMED) 对线性亮度变化免疫，灰显按钮对亮色模板也能拿 0.9998 导致误命中（2026-09-10 实测复现）。10001 下灰显仅约 0.51、高亮约 1.0，阈值 0.8 干净切割。命中即代表暴击星足够，点识别位置。next 兼容两种后续：2 技能弹目标子屏（串接选择），1/3 技能直接回主界面（DirectHit 终点结束）",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    811,
+                    369,
+                    302,
+                    96
+                ],
+                "template": "battle/skill/库库尔坎技能_通用_消耗10_可点击.png",
+                "method": 10001,
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "next": [
+            "战斗_技能目标子屏",
+            "战斗_特殊技能_已回主界面"
+        ]
+    },
+    "战斗_技能使用弹窗": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    536,
+                    154,
+                    206,
+                    50
+                ],
+                "expected": [
+                    "技能使用",
+                    "スキル使用"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    1108,
+                    177
+                ]
+            }
+        },
+        "post_delay": 500
+    },
+    "战斗_技能无法使用弹窗": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": "close_botton.png",
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "post_delay": 500
+    },
+    "战斗_技能目标子屏": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    461,
+                    158,
+                    369,
+                    68
+                ],
+                "expected": [
+                    "请选择对象",
+                    "対象を選択してください",
+                    "対象",
+                    "選択"
+                ]
+            }
+        },
+        "timeout": 5000,
+        "next": [
+            "战斗_技能目标子屏_选从者1",
+            "战斗_技能目标子屏_选从者2",
+            "战斗_技能目标子屏_选从者3"
+        ]
+    },
+    "战斗_技能目标子屏_选从者1": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    335,
+                    397
+                ]
+            }
+        }
+    },
+    "战斗_技能目标子屏_选从者2": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    633,
+                    386
+                ]
+            }
+        }
+    },
+    "战斗_技能目标子屏_选从者3": {
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": [
+                    951,
+                    388
+                ]
+            }
+        }
+    },
+    "战斗_特殊技能_已回主界面": {
+        "doc": "多步链终点：覆盖层处理完直接回了主界面（如库库尔坎 1/3 技能选完暴击星后无后续子屏）。DirectHit 立即命中结束，避免空等目标子屏的 timeout；与「无覆盖层」的区别是本节点处于链中（前面已处理过覆盖层）"
+    },
+    "战斗_特殊技能_无覆盖层": {
+        "doc": "兜底：技能直接释放（无任何特殊覆盖层）。next 按序识别，前面分支全不命中时本 DirectHit 节点立即命中并结束，避免空等 timeout；命中即表示技能已直接生效，Python 侧据此继续等回主界面"
+    },
+    "战斗_特殊技能处理": {
+        "post_delay": 1000,
+        "timeout": 3000,
+        "next": [
+            "战斗_技能使用弹窗",
+            "战斗_技能无法使用弹窗",
+            "战斗_技能目标子屏",
+            "战斗_仇凛2技能_色卡选择",
+            "战斗_库库尔坎_暴击星消耗",
+            "战斗_玉兔2技能_宝具类型选择",
+            "战斗_岸波白野3技能_天之力选择",
+            "战斗_静希草十郎3技能_红卡选择",
+            "战斗_巴格斯特3技能_全体宝具选择",
+            "战斗_特殊技能_无覆盖层"
+        ]
+    },
+    "战斗_玉兔2技能_宝具类型选择": {
+        "doc": "玉圖2技能宝具类型子屏：模板识别「全体宝具」选项（ROI [489,381,302,83]，点识别位置）。命中即选中全体宝具并关闭子屏；后续如需其他宝具类型选项（单体等），新增对应模板节点挂入入口 next，顺序即优先级",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    489,
+                    381,
+                    302,
+                    83
+                ],
+                "template": "battle/skill/玉兔技能_2技能_全体宝具.png",
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "post_delay": 500,
+        "next": [
+            "战斗_技能目标子屏",
+            "战斗_特殊技能_已回主界面"
+        ]
+    },
+    "战斗_静希草十郎3技能_红卡选择": {
+        "doc": "静希草十郎3技能「红卡」选项：模板识别（ROI [886,377,224,86]，点识别位置）。命中即选红卡并关闭子屏；后续如需其他卡色选项（蓝卡/绿卡等），新增对应模板节点挂入入口 next，顺序即优先级",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    886,
+                    377,
+                    224,
+                    86
+                ],
+                "template": "battle/skill/静希草十郎技能_3技能_红卡.png",
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "post_delay": 500,
+        "next": [
+            "战斗_技能目标子屏",
+            "战斗_特殊技能_已回主界面"
+        ]
     }
-  },
-  "战斗_技能使用弹窗": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [
-          556,
-          156,
-          146,
-          42
-        ],
-        "expected": [
-          "技能使用"
-        ]
-      }
-    },
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": [
-          1108,
-          177
-        ]
-      }
-    },
-    "post_delay": 500
-  },
-  "战斗_技能无法使用弹窗": {
-    "recognition": {
-      "type": "TemplateMatch",
-      "param": {
-        "template": "close_botton.png",
-        "threshold": 0.8
-      }
-    },
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": true
-      }
-    },
-    "post_delay": 500
-  },
-  "战斗_技能目标子屏": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [
-          564,
-          170,
-          161,
-          48
-        ],
-        "expected": [
-          "请选择对象"
-        ]
-      }
-    },
-    "action": {
-      "type": "DoNothing"
-    },
-    "next": [
-      "战斗_技能目标子屏_选从者1",
-      "战斗_技能目标子屏_选从者2",
-      "战斗_技能目标子屏_选从者3"
-    ],
-    "timeout": 5000
-  },
-  "战斗_技能目标子屏_选从者1": {
-    "recognition": "DirectHit",
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": [
-          335,
-          397
-        ]
-      }
-    }
-  },
-  "战斗_技能目标子屏_选从者2": {
-    "recognition": "DirectHit",
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": [
-          633,
-          386
-        ]
-      }
-    }
-  },
-  "战斗_技能目标子屏_选从者3": {
-    "recognition": "DirectHit",
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": [
-          951,
-          388
-        ]
-      }
-    }
-  },
-  "战斗_仇凛2技能_色卡选择": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [
-          366,
-          151,
-          563,
-          94
-        ],
-        "expected": [
-          "变更为何种类型"
-        ]
-      }
-    },
-    "action": {
-      "type": "DoNothing"
-    },
-    "next": [
-      "战斗_仇凛2技能_选A",
-      "战斗_仇凛2技能_选B",
-      "战斗_仇凛2技能_选Q"
-    ],
-    "timeout": 5000,
-    "doc": "已标定：识别文案（变更为何种类型）+ ROI [366,151,563,94]；Q(327,402) A(650,399) B(943,393)；默认选 A（蓝卡主流），顺序即优先级"
-  },
-  "战斗_仇凛2技能_选A": {
-    "recognition": "DirectHit",
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": [
-          650,
-          399
-        ]
-      }
-    }
-  },
-  "战斗_仇凛2技能_选B": {
-    "recognition": "DirectHit",
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": [
-          943,
-          393
-        ]
-      }
-    }
-  },
-  "战斗_仇凛2技能_选Q": {
-    "recognition": "DirectHit",
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": [
-          327,
-          402
-        ]
-      }
-    }
-  },
-  "战斗_库库尔坎_暴击星消耗": {
-    "recognition": {
-      "type": "OCR",
-      "param": {
-        "roi": [
-          562,
-          159,
-          160,
-          42
-        ],
-        "expected": [
-          "消耗暴击星"
-        ]
-      }
-    },
-    "action": {
-      "type": "DoNothing"
-    },
-    "next": [
-      "战斗_库库尔坎_消耗10_可点击",
-      "战斗_库库尔坎_不消耗"
-    ],
-    "timeout": 5000,
-    "doc": "已标定：识别 OCR（消耗暴击星, [562,159,160,42]）。next 顺序即优先级：先探测消耗项可点击，灰显/不满足时落到不消耗（陷阱：不可用项点了界面无法关闭）"
-  },
-  "战斗_库库尔坎_消耗10_可点击": {
-    "recognition": {
-      "type": "TemplateMatch",
-      "param": {
-        "template": "battle/skill/库库尔坎技能_通用_消耗10_可点击.png",
-        "threshold": 0.8,
-        "method": 10001,
-        "roi": [
-          811,
-          369,
-          302,
-          96
-        ]
-      }
-    },
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": true
-      }
-    },
-    "next": [
-      "战斗_技能目标子屏",
-      "战斗_特殊技能_已回主界面"
-    ],
-    "doc": "模板匹配消耗按钮高亮态；method 必须用 10001（SQDIFF_NORMED 反转版，对亮度敏感）：默认 method=5 (CCOEFF_NORMED) 对线性亮度变化免疫，灰显按钮对亮色模板也能拿 0.9998 导致误命中（2026-09-10 实测复现）。10001 下灰显仅约 0.51、高亮约 1.0，阈值 0.8 干净切割。命中即代表暴击星足够，点识别位置。next 兼容两种后续：2 技能弹目标子屏（串接选择），1/3 技能直接回主界面（DirectHit 终点结束）"
-  },
-  "战斗_库库尔坎_不消耗": {
-    "recognition": {
-      "type": "TemplateMatch",
-      "param": {
-        "template": "battle/skill/库库尔坎技能_通用_不消耗.png",
-        "threshold": 0.8,
-        "roi": [
-          491,
-          369,
-          302,
-          96
-        ]
-      }
-    },
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": true
-      }
-    },
-    "next": [
-      "战斗_技能目标子屏",
-      "战斗_特殊技能_已回主界面"
-    ],
-    "doc": "模板匹配不消耗按钮并点击识别位置（位置随消耗数文案宽度变化，点模板位置更稳）。next 兼容两种后续：2 技能弹目标子屏（串接选择），1/3 技能直接回主界面（DirectHit 终点结束）"
-  },
-  "战斗_玉兔2技能_宝具类型选择": {
-    "recognition": {
-      "type": "TemplateMatch",
-      "param": {
-        "roi": [
-          489,
-          381,
-          302,
-          83
-        ],
-        "template": "battle/skill/玉兔技能_2技能_全体宝具.png",
-        "threshold": 0.8
-      }
-    },
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": true
-      }
-    },
-    "post_delay": 500,
-    "doc": "玉圖2技能宝具类型子屏：模板识别「全体宝具」选项（ROI [489,381,302,83]，点识别位置）。命中即选中全体宝具并关闭子屏；后续如需其他宝具类型选项（单体等），新增对应模板节点挂入入口 next，顺序即优先级",
-    "next": [
-      "战斗_技能目标子屏",
-      "战斗_特殊技能_已回主界面"
-    ]
-  },
-  "战斗_岸波白野3技能_天之力选择": {
-    "recognition": {
-      "type": "TemplateMatch",
-      "param": {
-        "roi": [
-          428,
-          386,
-          221,
-          77
-        ],
-        "template": "battle/skill/岸波白野技能_3技能_天之力.png",
-        "threshold": 0.8
-      }
-    },
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": true
-      }
-    },
-    "post_delay": 500,
-    "doc": "岸波白野3技能「天之力」选项：模板识别（ROI [428,386,221,77]，点识别位置）。命中即选天之力并关闭子屏；后续如需其他力选项（地之力等），新增对应模板节点挂入入口 next，顺序即优先级",
-    "next": [
-      "战斗_技能目标子屏",
-      "战斗_特殊技能_已回主界面"
-    ]
-  },
-  "战斗_静希草十郎3技能_红卡选择": {
-    "recognition": {
-      "type": "TemplateMatch",
-      "param": {
-        "roi": [
-          886,
-          377,
-          224,
-          86
-        ],
-        "template": "battle/skill/静希草十郎技能_3技能_红卡.png",
-        "threshold": 0.8
-      }
-    },
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": true
-      }
-    },
-    "post_delay": 500,
-    "doc": "静希草十郎3技能「红卡」选项：模板识别（ROI [886,377,224,86]，点识别位置）。命中即选红卡并关闭子屏；后续如需其他卡色选项（蓝卡/绿卡等），新增对应模板节点挂入入口 next，顺序即优先级",
-    "next": [
-      "战斗_技能目标子屏",
-      "战斗_特殊技能_已回主界面"
-    ]
-  },
-  "战斗_巴格斯特3技能_全体宝具选择": {
-    "recognition": {
-      "type": "TemplateMatch",
-      "param": {
-        "roi": [
-          487,
-          375,
-          311,
-          93
-        ],
-        "template": "battle/skill/巴格斯特技能_3技能_全体宝具.png",
-        "threshold": 0.8
-      }
-    },
-    "action": {
-      "type": "Click",
-      "param": {
-        "target": true
-      }
-    },
-    "post_delay": 500,
-    "doc": "巴格斯特3技能「全体宝具」选项：模板识别（ROI [487,375,311,93]，点识别位置）。模板在 cn/image（国服特有资源，与库库尔坎旧例同层）；后续如需其他宝具类型（单体等），新增对应模板节点挂入入口 next，顺序即优先级",
-    "next": [
-      "战斗_技能目标子屏",
-      "战斗_特殊技能_已回主界面"
-    ]
-  },
-  "战斗_特殊技能_已回主界面": {
-    "doc": "多步链终点：覆盖层处理完直接回了主界面（如库库尔坎 1/3 技能选完暴击星后无后续子屏）。DirectHit 立即命中结束，避免空等目标子屏的 timeout；与「无覆盖层」的区别是本节点处于链中（前面已处理过覆盖层）",
-    "recognition": "DirectHit",
-    "action": {
-      "type": "DoNothing"
-    }
-  }
 }
