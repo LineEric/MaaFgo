@@ -15,23 +15,8 @@
                     "label": "是",
                     "option": [
                         "Chaldea导入手动输入",
-                        "自动编队助战替代",
-                        "自动编队礼装开关",
-                        "自动编队礼装缺失处理",
-                        "自动补齐从者和羁绊礼装"
-                    ],
-                    "pipeline_override": {
-                        "进本-编队处理": {
-                            "next": [
-                                "执行自动编队"
-                            ]
-                        },
-                        "自动编队完成": {
-                            "next": [
-                                "进本-点击队伍确认"
-                            ]
-                        }
-                    }
+                        "Chaldea编队方式"
+                    ]
                 }
             ]
         },
@@ -78,12 +63,63 @@
                         "chaldea_import_source": "{chaldea_import_source}"
                     }
                 },
+                "执行手动编队检查": {
+                    "attach": {
+                        "chaldea_import_source": "{chaldea_import_source}"
+                    }
+                },
                 "执行羁绊补齐自动编队": {
                     "attach": {
                         "chaldea_import_source": "{chaldea_import_source}"
                     }
                 }
             }
+        },
+        "Chaldea编队方式": {
+            "type": "select",
+            "label": "编队方式",
+            "description": "手动仅核对从者；身份一致但位置不同会自动换位保存。自动会按导入数据完整编队。",
+            "default": "手动",
+            "cases": [
+                {
+                    "name": "手动",
+                    "label": "手动",
+                    "pipeline_override": {
+                        "进本-编队处理": {
+                            "next": [
+                                "执行手动编队检查"
+                            ]
+                        },
+                        "手动编队检查完成": {
+                            "next": [
+                                "进本-点击队伍确认"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "自动",
+                    "label": "自动",
+                    "option": [
+                        "自动编队助战替代",
+                        "自动编队礼装开关",
+                        "自动编队礼装缺失处理",
+                        "自动补齐从者和羁绊礼装"
+                    ],
+                    "pipeline_override": {
+                        "进本-编队处理": {
+                            "next": [
+                                "执行自动编队"
+                            ]
+                        },
+                        "自动编队完成": {
+                            "next": [
+                                "进本-点击队伍确认"
+                            ]
+                        }
+                    }
+                }
+            ]
         },
         "自动编队助战替代": {
             "type": "select",
@@ -95,16 +131,32 @@
                     "name": "否",
                     "label": "否",
                     "pipeline_override": {
-                        "执行自动编队": {"attach": {"use_support_substitution": false}},
-                        "执行羁绊补齐自动编队": {"attach": {"use_support_substitution": false}}
+                        "执行自动编队": {
+                            "attach": {
+                                "use_support_substitution": false
+                            }
+                        },
+                        "执行羁绊补齐自动编队": {
+                            "attach": {
+                                "use_support_substitution": false
+                            }
+                        }
                     }
                 },
                 {
                     "name": "是",
                     "label": "是",
                     "pipeline_override": {
-                        "执行自动编队": {"attach": {"use_support_substitution": true}},
-                        "执行羁绊补齐自动编队": {"attach": {"use_support_substitution": true}}
+                        "执行自动编队": {
+                            "attach": {
+                                "use_support_substitution": true
+                            }
+                        },
+                        "执行羁绊补齐自动编队": {
+                            "attach": {
+                                "use_support_substitution": true
+                            }
+                        }
                     }
                 }
             ]
@@ -119,14 +171,22 @@
                     "name": "是",
                     "label": "是",
                     "pipeline_override": {
-                        "执行自动编队": {"attach": {"auto_equip": true}}
+                        "执行自动编队": {
+                            "attach": {
+                                "auto_equip": true
+                            }
+                        }
                     }
                 },
                 {
                     "name": "否",
                     "label": "否",
                     "pipeline_override": {
-                        "执行自动编队": {"attach": {"auto_equip": false}}
+                        "执行自动编队": {
+                            "attach": {
+                                "auto_equip": false
+                            }
+                        }
                     }
                 }
             ]
@@ -141,14 +201,22 @@
                     "name": "跳过礼装",
                     "label": "跳过该礼装",
                     "pipeline_override": {
-                        "执行自动编队": {"attach": {"equip_missing_policy": "skip"}}
+                        "执行自动编队": {
+                            "attach": {
+                                "equip_missing_policy": "skip"
+                            }
+                        }
                     }
                 },
                 {
                     "name": "查找非满破礼装",
                     "label": "改查非满破版本",
                     "pipeline_override": {
-                        "执行自动编队": {"attach": {"equip_missing_policy": "allow_non_limit_break"}}
+                        "执行自动编队": {
+                            "attach": {
+                                "equip_missing_policy": "allow_non_limit_break"
+                            }
+                        }
                     }
                 }
             ]
