@@ -14,6 +14,22 @@
             "执行羁绊补齐自动编队"
         ]
     },
+    "执行手动编队检查": {
+        "doc": "战斗流程的手动编队核对入口。显式使用空 on_error，确保身份不匹配时任务保持失败并停止，不被全局 Global_Null 恢复链改写为成功。",
+        "action": {
+            "type": "Custom",
+            "param": {
+                "custom_action": "validate_formation_from_chaldea"
+            }
+        },
+        "attach": {
+            "chaldea_import_source": ""
+        },
+        "next": [
+            "手动编队检查完成"
+        ],
+        "on_error": []
+    },
     "清空二次确认": {
         "recognition": {
             "type": "TemplateMatch",
@@ -697,5 +713,6 @@
         },
         "post_delay": 1000
     },
-    "自动编队完成": {}
+    "自动编队完成": {},
+    "手动编队检查完成": {}
 }

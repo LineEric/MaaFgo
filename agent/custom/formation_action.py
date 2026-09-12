@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Chaldea 自动编队。
+"""Chaldea 自动编队与手动编队核对。
 
 该 Action 仅从编队界面开始工作：读取 Chaldea BattleShareData 后，先拖拽调整
 已有本地从者与助战的位置，再打开从者选择页替换不匹配的本地从者。原生自动
-战斗相关 Action 不依赖、也不修改本模块。
+战斗相关 Action 不依赖、也不修改本模块。手动核对 Action 仅在从者身份相同的
+情况下复用拖拽换位，不进入从者或礼装仓库。
 """
 
 import glob
@@ -1544,4 +1545,176 @@ class AutoFormationFromChaldea(CustomAction):
 
     def _fail(self, message):
         mfaalog.error(f"[自动编队] {message}")
+        return False
+
+
+@AgentServer.custom_action("validate_formation_from_chaldea")
+class ValidateFormationFromChaldea(AutoFormationFromChaldea):
+    """核对当前编队；仅在从者相同而位置不同时执行换位。"""
+
+    def run(self, context: Context, argv: CustomAction.RunArg) -> CustomAction.RunResult:
+        try:
+            self.context = context
+            self.controller = context.tasker.controller
+            node = context.get_node_data(argv.node_name) or {}
+            attach = node.get("attach") or {}
+            source = str(
+                attach.get("chaldea_import_source")
+                or attach.get("chaldea_import_source_file")
+                or ""
+            ).strip()
+            if not source:
+                self._fail("invalid_chaldea_team: 未提供 Chaldea 分享链接/ID/本地文件")
+                return CustomAction.RunResult(success=False)
+
+            # 手动方式不读取或执行任何自动编队附加选项。
+            self.auto_equip = False
+            self.use_support_substitution = False
+            self.equip_missing_policy = "skip"
+            self.equip_database = {}
+            self._init_paths()
+            self._init_scale()
+            share_data, _quest_id, _team_id = fetch_share_data(source)
+            expected = self._build_expected(share_data)
+            if expected is None:
+                return CustomAction.RunResult(success=False)
+            self.expected = expected
+
+            expected_support_count = sum(
+                item["kind"] == "SUPPORT" for item in self.expected
+            )
+            if expected_support_count > 1:
+                self._fail("invalid_chaldea_team: 当前编队仅支持一个助战槽")
+                return CustomAction.RunResult(success=False)
+
+            self._prepare_target_templates()
+            page_state = self._wait_for_formation_page()
+            if page_state is None:
+                self._fail("not_on_formation_page: 未稳定识别到编队确认页或编辑页")
+                return CustomAction.RunResult(success=False)
+
+            current = self._detect_slots_stable()
+            if current is None:
+                return CustomAction.RunResult(success=False)
+            self._log_layout("手动检查初始", current)
+            if not self._configure_support_target(current, expected_support_count):
+                return CustomAction.RunResult(success=False)
+            if not self._manual_identities_match(current):
+                return CustomAction.RunResult(success=False)
+
+            mismatch = self._first_mismatch(current)
+            if mismatch is None:
+                if page_state == "edit":
+                    if not self._save_manual_formation():
+                        return CustomAction.RunResult(success=False)
+                    mfaalog.info("[手动编队] 从者身份与位置均匹配，已保存当前编队")
+                else:
+                    mfaalog.info("[手动编队] 从者身份与位置均匹配，直接进入战斗")
+                return CustomAction.RunResult(success=True)
+
+            mfaalog.info(
+                f"[手动编队] 从者身份一致，仅位置不匹配（首个为槽位{mismatch + 1}），"
+                "开始换位"
+            )
+            if page_state != "edit":
+                if not self._run_pipeline("自动编队-打开配置"):
+                    self._fail("not_on_formation_page: 未找到配置变更按钮")
+                    return CustomAction.RunResult(success=False)
+                if not self._wait_for(self._in_formation_edit, 5.0):
+                    self._fail("not_on_formation_page: 点击配置变更后未稳定进入编辑状态")
+                    return CustomAction.RunResult(success=False)
+
+            # 进入编辑页会触发一次界面刷新，必须重新稳定识别并再次确认身份，
+            # 避免拿确认页的旧截图执行拖动。
+            current = self._detect_slots_stable()
+            if current is None or not self._manual_identities_match(current):
+                return CustomAction.RunResult(success=False)
+            if not self._relocate_unexpected_support(current, expected_support_count):
+                return CustomAction.RunResult(success=False)
+            if not self._reorder_existing():
+                return CustomAction.RunResult(success=False)
+
+            current = self._detect_slots_stable()
+            if current is None:
+                return CustomAction.RunResult(success=False)
+            self._log_layout("手动换位复核", current)
+            if not self._manual_identities_match(current):
+                return CustomAction.RunResult(success=False)
+            mismatch = self._first_mismatch(current)
+            if mismatch is not None:
+                self._fail(
+                    f"manual_formation_reorder_failed: 换位后槽位{mismatch + 1}仍不匹配"
+                )
+                return CustomAction.RunResult(success=False)
+            if not self._save_manual_formation():
+                return CustomAction.RunResult(success=False)
+            mfaalog.info("[手动编队] 从者换位完成并已保存编队")
+            return CustomAction.RunResult(success=True)
+        except Exception as exc:
+            mfaalog.error(f"[手动编队] 异常: {exc}\n{traceback.format_exc()}")
+            return CustomAction.RunResult(success=False)
+
+    def _formation_page_state(self):
+        """返回当前编队页状态；模板结果需由调用方连续复核。"""
+        image = self._shot()
+        confirm = self._match_template(image, self.config_marker)
+        if confirm is not None and confirm[0] >= 0.80:
+            return "confirm"
+        edit = self._match_template(image, self.edit_marker)
+        if edit is not None and edit[0] >= 0.75:
+            return "edit"
+        return None
+
+    def _wait_for_formation_page(self):
+        state = None
+
+        def predicate():
+            nonlocal state
+            current = self._formation_page_state()
+            if current is None:
+                state = None
+                return False
+            if state == current:
+                return True
+            state = current
+            return False
+
+        # predicate 自身要求同一状态出现两次，_wait_for 再要求连续两次成立，
+        # 因而至少使用三帧，避免确认页与编辑页切换动画造成误判。
+        return state if self._wait_for(predicate, SLOT_LAYOUT_VERIFY_TIMEOUT_SECONDS) else None
+
+    def _manual_identities_match(self, current):
+        expected_counts = Counter(
+            item["svt_id"] for item in self.expected if item["kind"] == "LOCAL"
+        )
+        current_counts = Counter(
+            item["svt_id"] for item in current if item["kind"] == "LOCAL"
+        )
+        # Chaldea 未指定的槽位沿用自动编队既有语义：不要求为空，也不限制
+        # 其中保留的其他本地从者。这里只验证所有目标本地从者（含重复数量）
+        # 都确实存在于当前六槽，之后再由位置检查决定是否需要换位。
+        missing_counts = expected_counts - current_counts
+        if not missing_counts:
+            return True
+        other_slots = [
+            index + 1 for index, item in enumerate(current) if item["kind"] == "OTHER"
+        ]
+        self._fail(
+            "manual_formation_servant_mismatch: 缺少 Chaldea 指定的从者；"
+            f"当前目标候选={dict(sorted(current_counts.items()))}，"
+            f"Chaldea目标={dict(sorted(expected_counts.items()))}，"
+            f"缺少={dict(sorted(missing_counts.items()))}，"
+            f"其他/未识别槽位={other_slots or '-'}"
+        )
+        return False
+
+    def _save_manual_formation(self):
+        if not self._run_pipeline("自动编队-编队决定"):
+            self._fail("manual_formation_reorder_failed: 未能点击编队决定")
+            return False
+        self._confirm_formation_change_if_present()
+        return True
+
+    def _fail(self, message):
+        mfaalog.error(f"[手动编队] {message}")
         return False
