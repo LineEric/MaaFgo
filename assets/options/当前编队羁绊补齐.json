@@ -3,7 +3,7 @@
     "当前编队补齐从者优先星级": {
       "type": "select",
       "label": "补齐从者优先星级",
-      "description": "仅用于真正的空从者位。先查找所选星级，没有可用对象时再按 5→0 星回退；已有从者不会替换。",
+      "description": "补空位时优先选择该星级；没有合适从者时，再按 5→0 星查找。",
       "default": "5星",
       "cases": [
         {"name": "5星", "label": "5星", "pipeline_override": {"当前编队羁绊补齐": {"attach": {"preferred_rarity": 5}}}},
@@ -16,12 +16,12 @@
     },
     "当前编队羁绊基础值": {
       "type": "input",
-      "label": "羁绊基础值",
-      "description": "用于比较百分比礼装和固定值礼装，必须为正整数。",
+      "label": "关卡基础羁绊",
+      "description": "填写关卡不含加成的羁绊点数（正整数），用于选择收益更高的礼装。",
       "inputs": [
         {
           "name": "current_bond_base",
-          "label": "羁绊基础值",
+          "label": "关卡基础羁绊",
           "default": "1200",
           "verify": "^[1-9][0-9]*$",
           "pipeline_type": "int"
@@ -34,7 +34,7 @@
     "当前编队使用本地从者库": {
       "type": "select",
       "label": "使用本地从者库",
-      "description": "读取个人库存任务生成的 player_servants.json，直接规划需要补入的从者；文件无效时自动回退实时扫描。",
+      "description": "使用“构建个人从者礼装库”保存的从者记录加快补齐；持有从者变化后请重新构建。无有效记录时自动扫描。",
       "default": "否",
       "cases": [
         {"name": "否", "label": "否", "pipeline_override": {"当前编队羁绊补齐": {"attach": {"use_local_servant_inventory": false}}}},
@@ -44,7 +44,7 @@
     "当前编队使用本地礼装库": {
       "type": "select",
       "label": "使用本地礼装库",
-      "description": "读取个人库存任务生成的 player_equips.json，只在已知持有礼装中规划；文件无效时自动回退实时扫描。",
+      "description": "使用“构建个人从者礼装库”保存的礼装记录加快补齐；持有礼装或满破状态变化后请重新构建。无有效记录时自动扫描。",
       "default": "否",
       "cases": [
         {"name": "否", "label": "否", "pipeline_override": {"当前编队羁绊补齐": {"attach": {"use_local_equip_inventory": false}}}},
@@ -53,8 +53,8 @@
     },
     "当前编队是否修改所有礼装": {
       "type": "select",
-      "label": "是否支持修改所有礼装",
-      "description": "选否时保留所有已有礼装，只补空礼装位；选是时所有自有从者的礼装都可卸下并按羁绊最大化重新配置。助战礼装始终不处理。",
+      "label": "允许更换已有礼装",
+      "description": "否：只补空礼装位。是：卸下已有礼装，重新搭配以提高羁绊收益。助战礼装保持不变。",
       "default": "否",
       "cases": [
         {"name": "否", "label": "否", "pipeline_override": {"当前编队羁绊补齐": {"attach": {"modify_all_equips": false}}}},
