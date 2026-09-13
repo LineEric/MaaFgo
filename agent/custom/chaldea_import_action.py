@@ -1,7 +1,7 @@
 """
 Chaldea 队伍导入 Action
 
-从 Chaldea 分享链接/ID 获取队伍数据并转换为 BBC 配置文件
+从 Chaldea 分享链接、ID 或本地 JSON 获取队伍数据并转换为 BBC 配置文件
 """
 
 import os
@@ -25,7 +25,7 @@ class ImportChaldeaTeam(CustomAction):
     Chaldea 队伍导入 Action
     
     功能：
-    1. 读取 chaldea_import_source 参数（链接/ID/压缩数据）
+    1. 读取 chaldea_import_source 参数（链接/ID/压缩数据/本地 JSON）
     2. 调用 chaldea_converter 进行转换
     3. 生成 BBC 配置文件到 settings 目录
     4. 通过 pipeline_override 更新 bbc_team_config 参数

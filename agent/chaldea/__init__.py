@@ -133,18 +133,25 @@ def _load_local_file(source: str) -> Optional[dict]:
     返回加载成功的 dict, 不是文件输入返回 None。
     """
     s = source.strip()
-    if not s or re.match(r'^https?://', s) or s.isdigit() or s.startswith("G") and len(s) < 100 and not s.lower().endswith(".json"):
+    if not s or re.match(r'^https?://', s) or s.isdigit():
         return None
 
     candidates = []
-    if os.sep in s or "/" in s or s.lower().endswith(".json") or s.startswith("."):
+    is_explicit_path = (
+        os.path.isabs(s)
+        or os.sep in s
+        or (os.altsep and os.altsep in s)
+        or s.startswith(".")
+    )
+    if is_explicit_path:
         # 显式路径形式
         candidates.append(s)
         if not s.lower().endswith(".json"):
             candidates.append(s + ".json")
     else:
-        # 纯文件名: 在缓存目录中查找
-        for name in (s, s + ".json"):
+        # 纯文件名（可带 .json）: 在缓存目录中查找
+        names = (s,) if s.lower().endswith(".json") else (s, s + ".json")
+        for name in names:
             candidates.append(os.path.join(CACHE_DIR, name))
 
     for path in candidates:
@@ -167,18 +174,18 @@ def fetch_share_data(source: str):
         - share_data: 解码后的 dict，失败为 None
         - quest_id / team_id: 解析出的展示用标识（str），供命名等使用
     """
+    # 优先尝试本地文件输入（路径 / config/Battle 下的文件名），避免文件路径
+    # 先经过链接/ID 解析器并产生误导性的“无法解析”日志。
+    local = _load_local_file(source)
+    if local:
+        mfaalog.info(f"[Chaldea] 输入识别为本地文件, 直接加载")
+        quest_id = (local.get("quest") or {}).get("id", "0")
+        team_id = "local"
+        return local, quest_id, team_id
+
     quest_id, team_id, direct_data = parse_import_source(source)
     mfaalog.info(f"[Chaldea] parse_import_source: quest_id={quest_id} team_id={team_id} direct_data={'有' if direct_data else '无'}")
     share_data = None
-
-    # 优先尝试本地文件输入（路径 / config/Battle 下的文件名）
-    if quest_id is None and team_id is None and direct_data is None:
-        local = _load_local_file(source)
-        if local:
-            mfaalog.info(f"[Chaldea] 输入识别为本地文件, 直接加载")
-            quest_id = (local.get("quest") or {}).get("id", "0")
-            team_id = "local"
-            return local, quest_id, team_id
 
     if direct_data:
         logger.info("[Chaldea] 匹配到长链接数据特征，开启离线解码...")

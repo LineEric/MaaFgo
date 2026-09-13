@@ -278,6 +278,51 @@
     },
     "自动编队-确认从者选择界面": {},
     "自动编队-确认礼装选择界面": {},
+    "自动编队-卸下当前礼装": {
+        "doc": "仅在自动编队已确认目标礼装被同队错误或未指定槽位占用时调用；先卸回仓库，再走原礼装筛选装入目标槽。若装入失败，Custom Action 会将礼装恢复到原槽。交互与“羁绊补齐-卸下当前礼装”一致。",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    70,
+                    165,
+                    1160,
+                    445
+                ],
+                "template": "从者技能强化/卸下.png",
+                "threshold": 0.9
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 500,
+        "timeout": 6000,
+        "next": [
+            "自动编队-确认卸下礼装"
+        ]
+    },
+    "自动编队-确认卸下礼装": {
+        "doc": "确认卸下后必须返回编队页，并由 Custom Action 复核来源礼装槽已为空。",
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "roi": [
+                    1040,
+                    255,
+                    190,
+                    100
+                ],
+                "template": "EquipFaces/礼装决定.png",
+                "threshold": 0.8
+            }
+        },
+        "action": {
+            "type": "Click"
+        },
+        "post_delay": 1000,
+        "timeout": 6000
+    },
     "自动编队-关闭冠位礼装弹窗": {
         "doc": "冠位礼装弹窗只发送一次 ESC/Android Back，不进入普通礼装仓库。",
         "action": {
