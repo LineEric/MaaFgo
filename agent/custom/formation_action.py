@@ -89,6 +89,9 @@ EQUIP_SWIPE_SETTLE_SECONDS = 0.5
 EQUIP_MATCH_STABILITY_INTERVAL_SECONDS = 0.5
 EQUIP_MATCH_STABILITY_MAX_CHECKS = 3
 EQUIP_MATCH_CENTER_DELTA_PX = 6
+EMPTY_EQUIP_STD_MAX = 35.0
+EMPTY_EQUIP_SATURATED_RATIO_MAX = 0.30
+EQUIP_SLOT_VERIFY_TIMEOUT_SECONDS = 6.0
 SCREENSHOT_SETTLE_SECONDS = 0.2
 SLOT_LAYOUT_VERIFY_TIMEOUT_SECONDS = 5.0
 SLOT_LAYOUT_VERIFY_INTERVAL_SECONDS = 0.4
@@ -1225,6 +1228,135 @@ class AutoFormationFromChaldea(CustomAction):
             time.sleep(EQUIP_MATCH_STABILITY_INTERVAL_SECONDS)
         return False, latest_match
 
+    def _equip_slot_snapshot(self, image, slot_index):
+        if image is None:
+            return np.empty((0, 0, 3), dtype=np.uint8)
+        x, y, width, height = self._scale_roi(EQUIP_TEAM_ROIS[slot_index])
+        # 只取礼装卡片上部，避开 COST/HP 文本。
+        height = max(1, int(height * 0.67))
+        return image[y:y + height, x:x + width].copy()
+
+    def _is_empty_equip_slot(self, image, slot_index):
+        region = self._equip_slot_snapshot(image, slot_index)
+        if region.size == 0:
+            return False
+        gray_std = float(cv2.cvtColor(region, cv2.COLOR_BGR2GRAY).std())
+        hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
+        saturated_ratio = float(np.mean(hsv[:, :, 1] > 60))
+        return (
+            gray_std <= EMPTY_EQUIP_STD_MAX
+            and saturated_ratio <= EMPTY_EQUIP_SATURATED_RATIO_MAX
+        )
+
+    def _wait_for_empty_equip_slot(self, slot_index):
+        return self._wait_for(
+            lambda: self._is_empty_equip_slot(self._shot(), slot_index),
+            EQUIP_SLOT_VERIFY_TIMEOUT_SECONDS,
+        )
+
+    def _unequip_relocatable_equip(self, slot_index):
+        """将同队其他槽位占用的目标礼装卸回仓库。"""
+        if not self._enter_equip_select(slot_index):
+            if getattr(self, "_last_equip_entry_state", None) == "grand":
+                return "grand"
+            self._fail(f"equip_relocation_failed: 槽位{slot_index + 1}未进入礼装选择界面")
+            return "failed"
+        if not self._run_pipeline("自动编队-卸下当前礼装"):
+            self._fail(f"equip_relocation_failed: 槽位{slot_index + 1}未能卸下礼装")
+            return "failed"
+        if not self._wait_for(self._in_formation_edit, 6.0):
+            self._fail(f"equip_relocation_failed: 槽位{slot_index + 1}卸下后未返回编队页")
+            return "failed"
+        if not self._wait_for_empty_equip_slot(slot_index):
+            self._fail(f"equip_relocation_failed: 槽位{slot_index + 1}卸下后未识别为空")
+            return "failed"
+        return "released"
+
+    def _release_equip_held_in_other_slot(
+        self, target_index, equip_id, equip, correct_slots, pending_slots,
+        blocked_grand_slots,
+    ):
+        """释放位于其他可编辑槽位的单个目标礼装，并返回原槽位。"""
+        current = self._detect_slots_stable()
+        if current is None:
+            self._fail("equip_relocation_failed: 无法识别礼装占用槽位")
+            return "failed", None
+        for source_index, actual in enumerate(current):
+            if (
+                source_index == target_index
+                or source_index in correct_slots
+                or source_index in blocked_grand_slots
+                or actual["kind"] in {"EMPTY", "SUPPORT"}
+            ):
+                continue
+            source_expected = self.expected[source_index]
+            if source_expected.get("grand_svt"):
+                continue
+            # 缺少资源而无法核对的 Chaldea 指定礼装仍属于保护内容，不能为了
+            # 释放另一张礼装而擅自改动；已确认待替换的目标槽则可以参与换位。
+            if (
+                source_expected.get("equip_id")
+                and source_index not in pending_slots
+            ):
+                continue
+            matched, match = self._equip_matches_slot_stable(source_index, equip_id)
+            if not matched:
+                continue
+            mfaalog.info(
+                f"[自动编队] 目标礼装 {equip['name']}({equip_id}) "
+                f"当前由槽位{source_index + 1}携带，先卸下再装入槽位{target_index + 1}，"
+                f"score={match[0]:.4f}/{EQUIP_TEAM_THRESHOLD:.2f}"
+            )
+            result = self._unequip_relocatable_equip(source_index)
+            if result == "failed":
+                return "failed", None
+            if result == "grand":
+                blocked_grand_slots.add(source_index)
+                mfaalog.info(
+                    f"[自动编队] 槽位{source_index + 1}为冠位礼装槽，"
+                    "不从该槽释放礼装"
+                )
+                continue
+            return "released", source_index
+        return "none", None
+
+    def _restore_relocated_equip(self, source_index, target_index, equip):
+        """目标槽未能装入时，将刚释放的礼装恢复到原槽。"""
+        if not self._confirmed_now(self._in_formation_edit):
+            if not self._confirmed_now(self._in_equip_select):
+                return self._fail(
+                    "equip_relocation_restore_failed: "
+                    f"无法确认当前页面，原槽位{source_index + 1}"
+                )
+            if not self._leave_equip_select():
+                return self._fail(
+                    "equip_relocation_restore_failed: "
+                    f"无法返回编队页，原槽位{source_index + 1}"
+                )
+        mfaalog.warning(
+            f"[自动编队] 槽位{target_index + 1}未能装入 {equip['name']}({equip['id']})，"
+            f"尝试恢复到原槽位{source_index + 1}"
+        )
+        result = self._select_equip_for_slot(source_index, equip, False)
+        if result != "selected":
+            return self._fail(
+                "equip_relocation_restore_failed: "
+                f"礼装 {equip['name']}({equip['id']}) 未恢复到槽位{source_index + 1}"
+            )
+        verified, score = self._wait_for_equip_replace_verify(
+            source_index, int(equip["id"])
+        )
+        if not verified:
+            return self._fail(
+                "equip_relocation_restore_failed: "
+                f"槽位{source_index + 1}恢复后复核失败"
+            )
+        mfaalog.warning(
+            f"[自动编队] 已恢复原槽位{source_index + 1}礼装 "
+            f"{equip['name']}({equip['id']})，score={score:.4f}/{EQUIP_TEAM_THRESHOLD:.2f}"
+        )
+        return True
+
     def _replace_equips(self):
         """在从者全部完成后逐槽补齐概念礼装。
 
@@ -1237,6 +1369,7 @@ class AutoFormationFromChaldea(CustomAction):
         if self._shot() is None:
             return self._fail("equip_initial_verify_failed: 无法获取编队截图")
         pending = []
+        correct_slots = set()
         for index, expected in enumerate(self.expected):
             equip_id = expected.get("equip_id")
             if expected["kind"] == "SUPPORT":
@@ -1259,6 +1392,7 @@ class AutoFormationFromChaldea(CustomAction):
             equip = self._get_equip_info(equip_id)
             matched, match = self._equip_matches_slot_stable(index, equip_id)
             if matched:
+                correct_slots.add(index)
                 mfaalog.info(
                     f"[自动编队] 礼装起始校验：槽位{index + 1}已匹配 "
                     f"{equip['name']}({equip_id})，"
@@ -1280,6 +1414,8 @@ class AutoFormationFromChaldea(CustomAction):
             "[自动编队] 礼装起始校验完成：仅处理槽位"
             + "、".join(str(index + 1) for index, _expected, _equip_id, _equip in pending)
         )
+        pending_slots = {item[0] for item in pending}
+        blocked_grand_slots = set()
 
         for index, expected, equip_id, equip in pending:
             # 前一槽的返回动画或网络刷新可能影响后续槽位；在实际编辑前再次确认，
@@ -1290,7 +1426,15 @@ class AutoFormationFromChaldea(CustomAction):
                     f"[自动编队] 槽位{index + 1}礼装复查已匹配："
                     f"{equip['name']}({equip_id})，{match[0]:.4f}/{EQUIP_TEAM_THRESHOLD:.2f}"
                 )
+                correct_slots.add(index)
                 continue
+
+            release_state, source_index = self._release_equip_held_in_other_slot(
+                index, equip_id, equip, correct_slots, pending_slots,
+                blocked_grand_slots,
+            )
+            if release_state == "failed":
+                return False
 
             state = "满破" if expected.get("equip_limit_break") else "不限满破"
             mfaalog.info(
@@ -1298,6 +1442,10 @@ class AutoFormationFromChaldea(CustomAction):
             )
             result = self._select_equip_for_slot(index, equip, bool(expected.get("equip_limit_break")))
             if result == "grand":
+                if source_index is not None and not self._restore_relocated_equip(
+                    source_index, index, equip
+                ):
+                    return False
                 expected["grand_svt"] = True
                 mfaalog.info(
                     f"[自动编队] 槽位{index + 1}出现冠位礼装弹窗，"
@@ -1311,12 +1459,15 @@ class AutoFormationFromChaldea(CustomAction):
                         f"[自动编队] 槽位{index + 1}礼装复核通过："
                         f"{score:.4f}/{EQUIP_TEAM_THRESHOLD:.2f}"
                     )
+                    correct_slots.add(index)
                     continue
                 return self._fail(f"equip_replace_verify_failed: 槽位{index + 1}")
 
             # 筛选后找不到指定礼装是可恢复状态：回到编队页，记录原因，并依照
             # 用户选项尝试不限制满破的兜底搜索。
             if result != "not_found":
+                if source_index is not None:
+                    self._restore_relocated_equip(source_index, index, equip)
                 return False
             if expected.get("equip_limit_break") and self.equip_missing_policy == "allow_non_limit_break":
                 mfaalog.warning(
@@ -1325,6 +1476,10 @@ class AutoFormationFromChaldea(CustomAction):
                 )
                 result = self._select_equip_for_slot(index, equip, False)
                 if result == "grand":
+                    if source_index is not None and not self._restore_relocated_equip(
+                        source_index, index, equip
+                    ):
+                        return False
                     expected["grand_svt"] = True
                     mfaalog.info(
                         f"[自动编队] 槽位{index + 1}出现冠位礼装弹窗，"
@@ -1338,12 +1493,20 @@ class AutoFormationFromChaldea(CustomAction):
                             f"[自动编队] 槽位{index + 1}礼装非满破兜底复核通过："
                             f"{score:.4f}/{EQUIP_TEAM_THRESHOLD:.2f}"
                         )
+                        correct_slots.add(index)
                         continue
                     return self._fail(f"equip_replace_verify_failed: 槽位{index + 1}")
                 if result != "not_found":
+                    if source_index is not None:
+                        self._restore_relocated_equip(source_index, index, equip)
                     return False
+            if source_index is not None and not self._restore_relocated_equip(
+                source_index, index, equip
+            ):
+                return False
             mfaalog.warning(
-                f"[自动编队] 槽位{index + 1}仓库未找到礼装 {equip['name']}({equip_id})，已跳过"
+                f"[自动编队] 槽位{index + 1}仓库未找到礼装 "
+                f"{equip['name']}({equip_id})，已跳过"
             )
         return True
 

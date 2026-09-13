@@ -122,6 +122,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         self.grand_equips_by_slot = {}
         self._grand_equip_probe_complete = set()
         self._grand_fixed_applied_slots = set()
+        self.empty_protected_equip_slots = set()
         try:
             node = context.get_node_data(argv.node_name) or {}
             attach = node.get("attach") or {}
@@ -294,6 +295,13 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             )
             if initial_fixed_equips is None:
                 return self._abort_safe("bond_completion_final_mismatch: Chaldea 保护礼装不匹配")
+            if self.empty_protected_equip_slots:
+                mfaalog.warning(
+                    "[羁绊补齐] Chaldea 指定礼装当前为空，按保护槽保留且不参与补齐：槽位"
+                    + "、".join(
+                        str(slot + 1) for slot in sorted(self.empty_protected_equip_slots)
+                    )
+                )
             self.locked_unspecified_equips = {}
             if not self.modify_unspecified_equips:
                 self._remember_locked_unspecified_equips(
@@ -980,9 +988,10 @@ class CompleteBondFormation(AutoFormationFromChaldea):
         previous = None
         stable = None
         stable_image = None
+        stable_empty_protected = set()
 
         def classified_twice():
-            nonlocal previous, stable, stable_image
+            nonlocal previous, stable, stable_image, stable_empty_protected
             image = self._shot()
             current = self._classify_current_equips(
                 image, detected, report_errors=False
@@ -999,16 +1008,26 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                     (slot, str(item.get("id")))
                     for slot, item in by_slot.items()
                 )),
+                tuple(sorted(getattr(
+                    self, "_last_classified_empty_protected_slots", set()
+                ))),
             )
             if signature == previous:
                 stable = current
                 stable_image = image
+                stable_empty_protected = set(
+                    getattr(self, "_last_classified_empty_protected_slots", set())
+                )
                 return True
             previous = signature
             return False
 
         if self._wait_for(classified_twice, STATE_VERIFY_TIMEOUT_SECONDS):
+            self.empty_protected_equip_slots = stable_empty_protected
             return (*stable, stable_image)
+        # 稳定等待期间为避免刷屏关闭了细节日志；失败时再补一次可定位到具体槽位
+        # 的复核，让“错误礼装”和单纯动画不稳定能够区分。
+        self._classify_current_equips(self._shot(), detected, report_errors=True)
         mfaalog.error(
             f"[羁绊补齐] 当前礼装状态在{STATE_VERIFY_TIMEOUT_SECONDS:.0f}秒内"
             "未取得连续一致的识别结果"
@@ -1018,6 +1037,8 @@ class CompleteBondFormation(AutoFormationFromChaldea):
     def _classify_current_equips(self, image, detected, report_errors=True):
         fixed = self._grand_fixed_equips()
         empty, unknown, equip_by_slot = [], [], {}
+        empty_protected = set()
+        self._last_classified_empty_protected_slots = empty_protected
         for slot, state in enumerate(detected):
             if state["kind"] in {"EMPTY", "SUPPORT"}:
                 continue
@@ -1027,6 +1048,12 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             if protected_id:
                 match = self._match_equip_id(image, protected_id, slot)
                 if match is None or match[0] < EQUIP_VERIFY_THRESHOLD:
+                    # 自动编队允许在仓库确实不存在指定礼装时跳过。此时羁绊阶段
+                    # 继续把该位置视为保护槽，但只接受“确实为空”；若装着其他
+                    # 礼装仍按不匹配中止，避免覆盖用户或 Chaldea 的配置。
+                    if self._is_empty_equip_slot(image, slot):
+                        empty_protected.add(slot)
+                        continue
                     score = match[0] if match else 0.0
                     if report_errors:
                         mfaalog.error(
@@ -2190,9 +2217,13 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 and not item.get("grand_svt")
                 and item.get("equip_id")
             ):
-                match = self._match_equip_id(image, item["equip_id"], item["slot"])
-                if match is None or match[0] < EQUIP_VERIFY_THRESHOLD:
-                    return False
+                if item["slot"] in getattr(self, "empty_protected_equip_slots", set()):
+                    if not self._is_empty_equip_slot(image, item["slot"]):
+                        return False
+                else:
+                    match = self._match_equip_id(image, item["equip_id"], item["slot"])
+                    if match is None or match[0] < EQUIP_VERIFY_THRESHOLD:
+                        return False
         for slot, equip in self.added_equips.items():
             match = self._match_equip_id(image, equip["id"], slot)
             if match is None or match[0] < EQUIP_VERIFY_THRESHOLD:
