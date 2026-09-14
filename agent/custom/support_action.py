@@ -65,19 +65,27 @@ BASE_W, BASE_H = 1280, 720
 # ---------------- 框内锚点(坐标系.txt, YOLO 框左上角=0,0) ----------------
 LEVEL_ROI = (62, 15, 118, 27)      # 英灵等级: x62-180 y15-42 -> (x,y,w,h)
 # 英灵头像多边形(相对框顶点), 裁剪区域是 servant_face 大模板(158x158)的子区域:
-# 用该截图在模板上滑动匹配找最高分
-FACE_POLY = [(58, 40), (161, 42), (162, 84), (143, 85), (142, 105), (35, 109), (35, 60)]
-FACE_CUT = 30               # 英灵头像多边形右下角向内收 px: 物理排除特殊覆盖 UI(金星/职介/等级/星级等)
+# 用该截图在模板上滑动匹配找最高分。
+# 多边形本身已把头像上覆盖的特殊 UI(右上角职介/等级、右下角金星/星级)排除在外:
+#   左上斜切(51,39)->(27,57) 让开左上角图标, 右下缺口 x140-166 y84-108 让开金星/星级
+FACE_POLY = [(27, 57), (27, 108), (140, 108), (140, 84), (166, 84), (166, 39), (51, 39)]
 TH_FACE = 0.75
-CE_ANCHOR_NORMAL = (9, 131)        # 普通助战 礼装 左上角(160x50 窗口)
-CE_ANCHOR_GRAND = [(182, 35), (182, 129)]   # 冠位助战 礼装1/礼装2 左上角(160x50 窗口)
-BOND_ROI = (177, 79, 35, 35)          # 冠位助战 羁绊区域: 中心(194,96) 35x35 (相对框, 199,96 左移5px)
-BOND_TEMPLATES = {"50np": "50np.png", "original": "羁绊.png"}   # 羁绊选项 -> skill 模板(带绿幕)
-TH_BOND = 0.70
-SKILL_ACTIVE = [(793, 175), (836, 175), (882, 175)]       # 主动技能 1-3 (数字左下角锚点)
-SKILL_PASSIVE = [(794, 177), (832, 177), (869, 177), (907, 177), (945, 177)]  # 被动技能 1-5 (数字左下角锚点)
+CE_ANCHOR_NORMAL = (6, 134)        # 普通助战 礼装 左上角(166x53 窗口)
+CE_ANCHOR_GRAND = [(179, 35), (179, 129)]   # 冠位助战 礼装1/礼装2 左上角(166x53 窗口)
+BOND_ROI = (180, 84, 29, 29)          # 冠位助战 羁绊区域: 中心(194,99) 29x29 (相对框, 实测图案中心对齐)
+BOND_TEMPLATES = {"50np": "50np.png", "original": "羁绊.png"}   # 羁绊选项 -> 模板(带绿幕), 纯图案多服通用, 固定取 base 包 skill 目录
+SKILL_ACTIVE = [(791, 154, 27, 22), (836, 154, 29, 22), (881, 154, 28, 22)]   # 主动技能 1-3 数字方框 (x,y,w,h)
+SKILL_PASSIVE = [(791, 156, 25, 20), (828, 156, 29, 20), (866, 156, 26, 20),
+                 (903, 156, 24, 20), (941, 156, 25, 20)]        # 被动技能 1-5 数字方框 (x,y,w,h)
 NP_ROI = (200, 74, 580, 94)        # 宝具: x200-780 y74-168 -> (x,y,w,h)
 VIEW_ROI = (782, 102, 138, 39)     # 视图判断: 技能卡 x782-920 y102-141 (相对框, 与 skill/主动|被动.png 匹配)
+
+# ---------------- 框内参照物坐标重新定位 ----------------
+# YOLO 框本身会漂移, 直接用框左上角当原点会让上面所有锚点整体偏移。
+# 每个框先在框内定位参照物 {资源包}/image/support/助战编入确认.png(复用已有资源),
+# 求出它与标定位置的差, 再把框顶点平移过去 —— 平移后图内坐标即等于标定坐标系, 上面锚点常量可直接套用。
+REF_BASE = (1051, 26)   # 参照物左上角在标定坐标系中的位置(上面锚点常量即在该坐标系下量的)
+REF_PAD = 40            # 参照物搜索范围: 以期望位置为中心向外扩 px
 
 # ---------------- 职介筛选 tab(全屏坐标, 助战选择界面顶部职介栏) ----------------
 CLASS_TABS = {
@@ -107,17 +115,16 @@ def _image_dir(package, *parts):
     return os.path.join(_ROOT_DIR, "assets", "resource", relative)
 
 # ---------------- ROI 尺寸 ----------------
-CE_ROI = (160, 50)        # 礼装匹配窗口(w,h): 锚点为中心, 与礼装模板(约153x40)同量级
-DIGIT_OFF = (-2, -22)    # 技能等级数字: ROI 左上角相对数字左下角锚点的偏移(锚点x左移2px, 向上22px)
-DIGIT_SIZE = (30, 20)   # 技能等级数字 ROI 尺寸 (w, h): 30x20, 右上角 (锚点x+30, 锚点y-20)
+CE_ROI = (166, 53)        # 礼装匹配窗口(w,h): 左上角锚点, 与礼装模板(约153x40)同量级(左右各+3, 向下+3)
 
 # ---------------- 匹配阈值 ----------------
 TH_CE = 0.70
 # 礼装右下角形态校验: 满破/非满破等仅右下角不同的礼装, 取卡面右下角约30x30区域与模板右下角匹配
 CE_BR_SIZE = 30
-TH_CE_BR = 0.90              # 右下角形态匹配高阈值(形态不一致时通常 <0.5, 高阈值防误匹配)
-# 礼装模板尺寸可能与卡面实际显示不一致(如非满破模板偏小), 整卡匹配需多尺度放大对齐
-CE_SCALES = tuple(round(0.7 + 0.01 * i, 2) for i in range(int((1.5 - 0.7) / 0.01) + 1))
+TH_CE_BR = 0.90              # 右下角绝对阈值: 仅当另一状态模板缺失时兜底使用
+# 满破/非满破 的差异只是右下角一颗很淡的星(如 迦勒底午茶时光 灰度差仅77),
+# 绝对分数达不到高阈值, 故优先与同名的另一状态模板比"谁更像", 取高者; 该表用于找对应模板
+CE_SUB_SWAP = {"满破": "非满破", "非满破": "满破"}
 TH_NP = 0.70
 # np_level 模板为小图标(约40x40), 需在宝具 ROI 内多尺度滑动匹配
 NP_SCALES = (0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.5, 2.0)
@@ -273,8 +280,8 @@ class SupportAction(CustomAction):
 
     @classmethod
     def _get_face_mask(cls):
-        """构建英灵头像多边形 mask(右下角向内收 FACE_CUT), 缓存复用;
-        用于物理排除覆盖在头像上的特殊 UI(金星/职介/等级/星级)"""
+        """构建英灵头像多边形 mask, 缓存复用;
+        用于物理排除覆盖在头像上的特殊 UI(图标/金星/职介/等级/星级), 形状由 FACE_POLY 决定"""
         if cls._face_mask is None:
             import cv2
             fxs = [p[0] for p in FACE_POLY]; fys = [p[1] for p in FACE_POLY]
@@ -283,8 +290,6 @@ class SupportAction(CustomAction):
             m = np.zeros((bh, bw), np.uint8)
             poly = np.array([(x - xmin, y - ymin) for (x, y) in FACE_POLY], np.int32)
             cv2.fillPoly(m, [poly], 255)
-            cutx, cuty = (xmax - xmin) - FACE_CUT, (ymax - ymin) - FACE_CUT
-            m[cuty + 1:, cutx + 1:] = 0
             cls._face_mask = m
         return cls._face_mask
 
@@ -302,6 +307,30 @@ class SupportAction(CustomAction):
                 data = json.load(fp)
             cls._servant_map = {s["id"]: s for s in data.get("servants", [])}
         return cls._servant_map
+
+    # ---------- 参照物定位(消除 YOLO 框偏移) ----------
+    def _ref_shift(self, img, bx, by):
+        """在框内定位参照物 {资源包}/image/support/助战编入确认.png, 返回框顶点所需的平移 (dx,dy);
+        平移后参照物回到标定位置 REF_BASE, 框内坐标即等于标定坐标系"""
+        import cv2
+        tpl = _imread(os.path.join(self._ref_dir, self._ref_name), gray=True)
+        if tpl is None:
+            mfaalog.error(f"[SupportAction] 参照模板缺失: {self._ref_name} ({self._ref_dir})")
+            return 0, 0
+        th, tw = tpl.shape[:2]
+        ex, ey = bx + REF_BASE[0], by + REF_BASE[1]      # 参照物期望左上角(全屏)
+        x0, y0 = max(0, ex - REF_PAD), max(0, ey - REF_PAD)
+        x1, y1 = min(img.shape[1], ex + tw + REF_PAD), min(img.shape[0], ey + th + REF_PAD)
+        roi = img[y0:y1, x0:x1]
+        if roi.shape[0] < th or roi.shape[1] < tw:
+            mfaalog.error("[SupportAction] 参照物搜索区小于模板, 无法定位")
+            return 0, 0
+        res = cv2.matchTemplate(cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY), tpl, cv2.TM_CCOEFF_NORMED)
+        _, score, _, (mx, my) = cv2.minMaxLoc(res)
+        dx, dy = x0 + mx - ex, y0 + my - ey
+        mfaalog.info(f"[SupportAction] 参照物 {self._ref_name}: 实测=({x0 + mx},{y0 + my}) "
+                     f"期望=({ex},{ey}) score={score:.3f} -> 框顶点平移=({dx},{dy})")
+        return dx, dy
 
     # ---------- 英灵匹配 ----------
     def _match_servant(self, img, face_dir, bx, by, images, support_type):
@@ -331,7 +360,7 @@ class SupportAction(CustomAction):
         return False
 
     # ---------- 礼装匹配 ----------
-    def _match_ce(self, img, ce_dir, bx, by, ce_name, anchor, ce_sub=""):
+    def _match_ce(self, img, ce_dir, bx, by, ce_name, anchor, ce_sub="", ce_size=CE_ROI):
         import cv2
         bx, by = int(bx), int(by)
         if ce_name in EMPTY_CE:
@@ -343,73 +372,87 @@ class SupportAction(CustomAction):
             mfaalog.warning(f"[SupportAction] 礼装模板不存在: {ce_name} (目录 {os.path.dirname(tpl_path)})")
             return False
         # 锚点是礼装框左上角: 直接以锚点为左上角取 160x50 窗口(与礼装模板同量级),
-        # 多尺度整卡匹配: 模板尺寸可能与卡面实际显示不一致(如非满破模板偏小), 缩放对齐后滑动匹配
-        roi = _roi(img, bx, by, anchor[0], anchor[1], CE_ROI[0], CE_ROI[1])
+        # 固定尺度整卡匹配: 模板与卡面显示同尺寸, 不做缩放搜索
+        roi = _roi(img, bx, by, anchor[0], anchor[1], ce_size[0], ce_size[1])
         if roi is None:
             return False
         roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-        hw, ww = roi_gray.shape[:2]
-        best = (-1.0, None, None)
-        for sc in CE_SCALES:
-            tw = max(1, round(tpl.shape[1] * sc))
-            th = max(1, round(tpl.shape[0] * sc))
-            if th > hw or tw > ww:
-                continue
-            t = (cv2.resize(tpl, (tw, th), interpolation=cv2.INTER_AREA)
-                 if (tw, th) != (tpl.shape[1], tpl.shape[0]) else tpl)
-            res = cv2.matchTemplate(roi_gray, t, cv2.TM_CCOEFF_NORMED)
-            _, s, _, loc = cv2.minMaxLoc(res)
-            if s > best[0]:
-                best = (s, t, loc)
-        score, t, (mx, my) = best
+        if tpl.shape[0] > roi_gray.shape[0] or tpl.shape[1] > roi_gray.shape[1]:
+            mfaalog.warning(f"[SupportAction] 礼装模板大于匹配窗口: {ce_name} "
+                            f"{tpl.shape[1]}x{tpl.shape[0]} > {ce_size[0]}x{ce_size[1]}")
+            return False
+        _, score, _, (mx, my) = cv2.minMaxLoc(
+            cv2.matchTemplate(roi_gray, tpl, cv2.TM_CCOEFF_NORMED))
         if score < TH_CE:
             mfaalog.info(f"[SupportAction] 礼装 {ce_name}: 整卡={score:.3f}(未过)")
             return False
         # 右下角形态校验: 满破/非满破等仅右下角不同的礼装整卡主体相同得分均高,
-        # 在最佳匹配位置取卡面右下角约30x30区域与模板右下角匹配, 高阈值确认形态一致
-        h, w = t.shape[:2]
+        # 在最佳匹配位置取卡面右下角约30x30区域与模板右下角匹配。
+        # 该标记很淡, 绝对分数不可靠, 故与同名的另一状态模板(满破<->非满破)比谁更像, 取高者定状态
+        h, w = tpl.shape[:2]
         s2 = min(CE_BR_SIZE, h, w)
         card_br = roi_gray[my + h - s2: my + h, mx + w - s2: mx + w]
-        tpl_br = t[h - s2: h, w - s2: w]
+        tpl_br = tpl[h - s2: h, w - s2: w]
         score_br = float(cv2.matchTemplate(card_br, tpl_br, cv2.TM_CCOEFF_NORMED).max())
+        other_sub = CE_SUB_SWAP.get(ce_sub)
+        other = (_imread(os.path.join(ce_dir, other_sub, ce_name), gray=True)
+                 if other_sub else None)
+        if other is not None:
+            if (other.shape[1], other.shape[0]) != (w, h):
+                other = cv2.resize(other, (w, h), interpolation=cv2.INTER_AREA)
+            score_other = float(cv2.matchTemplate(card_br, other[h - s2: h, w - s2: w],
+                                                  cv2.TM_CCOEFF_NORMED).max())
+            mfaalog.info(f"[SupportAction] 礼装 {ce_name}: 整卡={score:.3f} "
+                         f"{ce_sub}右下角={score_br:.3f} vs {other_sub}={score_other:.3f}")
+            return score_br > score_other
         mfaalog.info(f"[SupportAction] 礼装 {ce_name}: 整卡={score:.3f} 右下角={score_br:.3f}")
         return score_br >= TH_CE_BR
 
     # ---------- 冠位羁绊判断 ----------
-    def _match_bond(self, img, skill_dir, bx, by, bond_opt):
-        """羁绊区域(中心(194,96) 35x35)与 skill/{50np,羁绊}.png 匹配
-        模板带绿幕, 先抠掉绿幕背景再与截图区域灰度滑动匹配"""
+    def _match_bond(self, img, bx, by, bond_opt):
+        """羁绊区域(中心(194,99) 29x29)与 base/image/skill/{50np,羁绊}.png 匹配
+        模板带绿幕, 先抠掉绿幕背景再与截图区域灰度滑动匹配
+        模板是纯图案(不含文字), 多服通用, 故固定取 base 包而非当前 pkg
+        两张模板本身形似、绝对分数偏低且受卡面立绘干扰, 故不设绝对阈值:
+        对两张模板分别打分, 取分高者作为识别结果"""
         import cv2
         if bond_opt not in BOND_TEMPLATES:
             return True
-        t_bgr = _imread(os.path.join(skill_dir, BOND_TEMPLATES[bond_opt]))
         crop = _roi(img, bx, by, BOND_ROI[0], BOND_ROI[1], BOND_ROI[2], BOND_ROI[3])
-        if t_bgr is None or crop is None:
+        if crop is None:
             return False
-        # 抠绿幕: 绿色像素置白(模板背景为绿幕, 截图区域为正常图案)
-        b = t_bgr[:, :, 0].astype(int)
-        g = t_bgr[:, :, 1].astype(int)
-        r = t_bgr[:, :, 2].astype(int)
-        green = (g > 100) & (g > b + 30) & (g > r + 30)
-        t = cv2.cvtColor(t_bgr, cv2.COLOR_BGR2GRAY)
-        t[green] = 255
         g_roi = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
-        score = float(cv2.matchTemplate(g_roi, t, cv2.TM_CCOEFF_NORMED).max())
-        mfaalog.info(f"[SupportAction] 羁绊({bond_opt}): score={score:.3f}")
-        return score >= TH_BOND
+        scores = {}
+        for opt, name in BOND_TEMPLATES.items():
+            t_bgr = _imread(os.path.join(_image_dir("base", "skill"), name))
+            if t_bgr is None:
+                return False
+            # 抠绿幕: 绿色像素置白(模板背景为绿幕, 截图区域为正常图案)
+            b = t_bgr[:, :, 0].astype(int)
+            g = t_bgr[:, :, 1].astype(int)
+            r = t_bgr[:, :, 2].astype(int)
+            green = (g > 100) & (g > b + 30) & (g > r + 30)
+            t = cv2.cvtColor(t_bgr, cv2.COLOR_BGR2GRAY)
+            t[green] = 255
+            scores[opt] = float(cv2.matchTemplate(g_roi, t, cv2.TM_CCOEFF_NORMED).max())
+        best = max(scores, key=scores.get)
+        mfaalog.info(f"[SupportAction] 羁绊: " +
+                     " ".join(f"{k}={v:.3f}" for k, v in scores.items()) +
+                     f" -> {best} (期望 {bond_opt})")
+        return bond_opt == best
 
     # ---------- 技能等级匹配 ----------
-    def _match_skill(self, img, bx, by, anchor, expect):
-        """expect>0 时用 OCR 识别技能数字, 识别等级 >= 期望视为匹配; expect=0(不要求)直接通过"""
+    def _match_skill(self, img, bx, by, box, expect):
+        """expect>0 时用 OCR 识别技能数字, 识别等级 >= 期望视为匹配; expect=0(不要求)直接通过
+        box = 数字方框 (x,y,w,h), 相对 YOLO 框左上角"""
         if expect <= 0:
             return True
-        roi = _roi(img, bx, by, anchor[0] + DIGIT_OFF[0], anchor[1] + DIGIT_OFF[1],
-                   DIGIT_SIZE[0], DIGIT_SIZE[1])
+        roi = _roi(img, bx, by, box[0], box[1], box[2], box[3])
         if roi is None:
             return False
         got = SupportAction._ocr_skill_text(roi)
         ok = got is not None and int(got) >= expect
-        mfaalog.info(f"[SupportAction] 技能({anchor}) 期望>={expect} "
+        mfaalog.info(f"[SupportAction] 技能({box}) 期望>={expect} "
                      f"OCR识别={got or '(无数字)'} -> {'OK' if ok else 'NO'}")
         return ok
 
@@ -697,6 +740,9 @@ class SupportAction(CustomAction):
             np_dir = os.path.join(base_dir, "nplevel")   # 宝具模板按 pkg 动态选择(base/cn)
             skill_dir = os.path.join(base_dir, "skill")   # 视图判断模板(主动/被动), 按 pkg 动态选择
             mfaalog.info(f"[SupportAction] 素材根: {base_dir} 宝具目录: {np_dir}")
+            # 参照物: {资源包}/image/support/助战编入确认.png, 复用已有资源做框内坐标重新定位
+            self._ref_dir = _image_dir(pkg, "support")
+            self._ref_name = "助战编入确认.png"
 
             if not servant_id:
                 mfaalog.error("[SupportAction] 未选择英灵")
@@ -738,13 +784,17 @@ class SupportAction(CustomAction):
 
                 for (bx, by, bx2, by2, conf) in boxes:
                     mfaalog.info(f"[SupportAction] === 判定条目 框=({bx},{by})-({bx2},{by2}) conf={conf:.2f} ===")
+                    # 框内参照物重定位: 平移框顶点到标定坐标系, 消除 YOLO 框偏移
+                    dx, dy = self._ref_shift(img, bx, by)
+                    bx, by, bx2, by2 = bx + dx, by + dy, bx2 + dx, by2 + dy
+                    mfaalog.info(f"[SupportAction] 重定位后 框=({bx},{by})-({bx2},{by2})")
                     if not self._match_servant(img, face_dir, bx, by, srv["images"], support_type):
                         continue
                     if not all(self._match_ce(img, ce_dir, bx, by, name, anc, sub)
                                for name, anc, sub in ce_targets):
                         continue
                     # 冠位助战羁绊判断(50np/original/any)
-                    if support_type == "grand" and not self._match_bond(img, skill_dir, bx, by, ce_bond):
+                    if support_type == "grand" and not self._match_bond(img, bx, by, ce_bond):
                         continue
                     # 主动视图(主动技能+宝具+英灵等级): 单帧判定, 失败跳过该条目
                     if not self._check_active_view(img, bx, by, active, np_dir, np_level, level):
