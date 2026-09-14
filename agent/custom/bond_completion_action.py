@@ -84,6 +84,16 @@ EMPTY_EQUIP_STD_MAX = 35.0
 # 仍同时要求灰度标准差不超过 35，避免把正常礼装仅凭颜色偏淡判为空槽。
 EMPTY_EQUIP_SATURATED_RATIO_MAX = 0.30
 SUPPORT_TYPES = {"friend", "fixed", "npc"}
+STANDARD_SERVANT_CLASSES = frozenset({
+    "saber",
+    "archer",
+    "lancer",
+    "rider",
+    "caster",
+    "assassin",
+    "berserker",
+})
+GRAND_QUEST_CLASSES = STANDARD_SERVANT_CLASSES | {"ex1", "ex2"}
 SHORT_PARTY_CONFIRM_ROI = (650, 540, 350, 120)
 SHORT_PARTY_POLL_SECONDS = 5.0
 SERVANT_SLOT_VERIFY_TIMEOUT_SECONDS = 6.0
@@ -159,6 +169,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 self.use_support_substitution = _truthy(
                     attach.get("use_support_substitution", False)
                 )
+                self.quest_type, self.grand_class = self._parse_quest_context(attach)
             except (TypeError, ValueError) as exc:
                 return self._result_fail(f"bond_completion_option_invalid: {exc}")
             if self.bond_base <= 0:
@@ -197,7 +208,9 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 f"本地从者库={self.local_servant_inventory_active}，"
                 f"本地礼装库={self.local_equip_inventory_active}，"
                 f"修改其他从者={self.modify_unspecified_servants}，"
-                f"修改其他礼装={self.modify_unspecified_equips}"
+                f"修改其他礼装={self.modify_unspecified_equips}，"
+                f"任务类型={self.quest_type or '普通'}，"
+                f"戴冠战职介={self.grand_class or '无限制'}"
             )
             if not self._resolve_short_party_prompt():
                 return self._result_fail("bond_completion_slot_invalid: 人数不足弹窗确认后未回到编队页")
@@ -412,6 +425,14 @@ class CompleteBondFormation(AutoFormationFromChaldea):
             return CustomAction.RunResult(success=False)
 
     # ---------- 数据与资源 ----------
+
+    @staticmethod
+    def _parse_quest_context(attach):
+        quest_type = str(attach.get("quest_type") or "").strip().lower()
+        grand_class = str(attach.get("grand_class") or "").strip().lower()
+        if quest_type == "grand" and grand_class not in GRAND_QUEST_CLASSES:
+            raise ValueError(f"戴冠战职介无效: {grand_class or '未提供'}")
+        return quest_type, grand_class
 
     def _load_databases(self):
         with open(os.path.join(_CUSTOM_DIR, "servant_list.json"), encoding="utf-8-sig") as file:
@@ -690,6 +711,7 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 int(item.get("rarity", -1)) != rarity
                 or item_id in selected
                 or item_id in self.unavailable_servants
+                or not self._servant_matches_quest_class(item)
             ):
                 continue
             if "cost" not in item or not (item.get("bond") or {}).get("tags"):
@@ -698,6 +720,16 @@ class CompleteBondFormation(AutoFormationFromChaldea):
                 continue
             result.append(item)
         return result
+
+    def _servant_matches_quest_class(self, servant):
+        """戴冠战只允许与副本职介组匹配的补齐候选。"""
+        if getattr(self, "quest_type", "") != "grand":
+            return True
+        servant_class = str(servant.get("class") or "").strip()
+        grand_class = getattr(self, "grand_class", "")
+        if grand_class in {"ex1", "ex2"}:
+            return bool(servant_class) and servant_class not in STANDARD_SERVANT_CLASSES
+        return servant_class == grand_class
 
     # ---------- COST 与编队状态 ----------
 
