@@ -14,6 +14,8 @@
             "modify_unspecified_equips": true,
             "modify_unspecified_servants": true,
             "preferred_rarity": 5,
+            "quest_type": "",
+            "grand_class": "",
             "use_local_equip_inventory": false,
             "use_local_servant_inventory": false,
             "use_support_substitution": false

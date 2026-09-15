@@ -15,6 +15,11 @@
                   ]
                 }
               }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "saber"
+              }
             }
           }
         },
@@ -29,6 +34,11 @@
                     "grand/grand_archer.png"
                   ]
                 }
+              }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "archer"
               }
             }
           }
@@ -45,6 +55,11 @@
                   ]
                 }
               }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "lancer"
+              }
             }
           }
         },
@@ -59,6 +74,11 @@
                     "grand/grand_rider.png"
                   ]
                 }
+              }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "rider"
               }
             }
           }
@@ -75,6 +95,11 @@
                   ]
                 }
               }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "caster"
+              }
             }
           }
         },
@@ -90,6 +115,11 @@
                   ]
                 }
               }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "assassin"
+              }
             }
           }
         },
@@ -104,6 +134,11 @@
                     "grand/grand_berserker.png"
                   ]
                 }
+              }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "berserker"
               }
             }
           }
@@ -129,6 +164,11 @@
                   ]
                 }
               }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "ex1"
+              }
             }
           }
         },
@@ -152,6 +192,11 @@
                     0.85
                   ]
                 }
+              }
+            },
+            "执行羁绊补齐自动编队": {
+              "attach": {
+                "grand_class": "ex2"
               }
             }
           }
