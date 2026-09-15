@@ -35,13 +35,11 @@
     ]
   },
   "原生自动战斗_多次入口": {
+    "doc": "battle_count 不在此硬编码：默认值由 auto_battle_repeat 的 _parse_battle_count 提供（默认 1），用户配置通过「原生自动战斗次数」option 以节点 attach 注入，attach 优先级低于 custom_action_param，若此处写死会永久屏蔽用户设置。",
     "action": {
       "type": "Custom",
       "param": {
-        "custom_action": "auto_battle_repeat",
-        "custom_action_param": {
-          "battle_count": 1
-        }
+        "custom_action": "auto_battle_repeat"
       }
     }
   }
